@@ -1,5 +1,5 @@
 # cloud-config
-cloud-config is a multi-tenant-aware configuaration center based on Zookeeper and tightly integrated with Spring framework. 
+cloud-config is a multi-tenant-aware configuaration center based on Zookeeper and tightly integrated with Spring framework which is inspired by [Centralized Application Configuration with Spring and Apache ZooKeeper](http://www.infoq.com/presentations/spring-apache-zookeeper).
 
 ## How to start
 1. Run following scripts to build entire project after sync the latest code  
