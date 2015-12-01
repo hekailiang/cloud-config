@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+
+    <cc:zk-property-placeholder path="/mail, /query" location="classpath:query-server.properties"/>
+    <bean id="mailBean" class="org.squirrelframework.cloud.spring.ZkPropertyPlaceholderConfigurerTest$SampleBean">
+        <property name="host" value="${mail.host}"/>
+        <property name="port" value="${mail.port}"/>
+    </bean>
+
+    <bean id="queryBean" class="org.squirrelframework.cloud.spring.ZkPropertyPlaceholderConfigurerTest$SampleBean" lazy-init="true">
+        <property name="host" value="${query.host}"/>
+        <property name="port" value="${query.port}"/>
+    </bean>
+</beans>

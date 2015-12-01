@@ -1,0 +1,50 @@
+@import "~semantic-ui-components/site";
+@import "~semantic-ui-components/reset";
+@import '~semantic-ui-components/breadcrumb';
+@import '~semantic-ui-components/grid';
+@import '~semantic-ui-components/menu';
+@import '~semantic-ui-components/image';
+@import '~semantic-ui-components/icon';
+@import '~semantic-ui-components/list';
+@import '~semantic-ui-components/grid';
+@import '~semantic-ui-components/form';
+@import '~semantic-ui-components/input';
+@import '~semantic-ui-components/label';
+@import '~semantic-ui-components/header';
+@import '~semantic-ui-components/divider';
+@import '~semantic-ui-components/container';
+@import '~semantic-ui-components/segment';
+@import '~semantic-ui-components/button';
+@import '~semantic-ui-components/checkbox';
+@import '~semantic-ui-components/dropdown';
+@import '~semantic-ui-components/transition';
+@import '~semantic-ui-components/message';
+@import '~semantic-ui-components/rail';
+
+body {
+  background-color: #F8F8F9;
+  height: 100%;
+}
+
+.fullheight {
+  height: 100%;
+}
+
+.fullwidth {
+  width: 100%;
+}
+
+.logo {
+  width: 35px;
+  margin-right: 1em;
+}
+
+.main {
+  margin-top: 5em;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.rightborder {
+  border-right: 1px solid rgba(34,36,38,.15);
+}

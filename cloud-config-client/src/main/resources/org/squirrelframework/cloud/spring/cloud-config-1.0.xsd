@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.squirrelframework.org/schema/config"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:context="http://www.springframework.org/schema/context"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            targetNamespace="http://www.squirrelframework.org/schema/config"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+    <xsd:import namespace="http://www.springframework.org/schema/context"
+                schemaLocation="http://www.springframework.org/schema/context/spring-context-3.2.xsd"/>
+
+    <xsd:element name="zk-client">
+        <xsd:complexType>
+            <xsd:attribute type="xsd:integer" name="max-retries"/>
+            <xsd:attribute type="xsd:integer" name="base-sleep-time"/>
+            <xsd:attribute type="xsd:boolean" name="read-only" default="true"/>
+            <xsd:attribute type="xsd:string" name="connection-string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="zk-property-placeholder">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="context:propertyPlaceholder">
+                    <xsd:attribute type="xsd:string" name="path" use="required"/>
+                    <xsd:attribute type="xsd:integer" name="max-depth"/>
+                    <xsd:attribute type="xsd:string" name="client-ref"/>
+                    <xsd:attribute type="xsd:string" name="json-flatten-converter-ref"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="zk-jdbc-datasource">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute type="xsd:string" name="path" use="required"/>
+                    <xsd:attribute name="resource-type" default="BoneCP">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:NMTOKEN">
+                                <xsd:enumeration value="BoneCP"/>
+                                <xsd:enumeration value="C3P0"/>
+                                <xsd:enumeration value="Druid"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                    <xsd:attribute type="xsd:boolean" name="multi-tenancy-aware" default="false"/>
+                    <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
+                    <xsd:attribute type="xsd:string" name="validator-ref" default="zk-default-validator"/>
+                    <xsd:attribute type="xsd:string" name="fallback" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="zk-resource-config">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute type="xsd:string" name="path" use="required"/>
+                    <xsd:attribute type="xsd:string" name="resource-type" use="required"/>
+                    <xsd:attribute type="xsd:boolean" name="multi-tenancy-aware" default="false"/>
+                    <xsd:attribute type="xsd:string" name="validator-ref" default="zk-default-validator"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
