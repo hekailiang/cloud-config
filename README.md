@@ -23,12 +23,12 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
-    <!-- config zookeeper client -->
-    <cc:zk-client connection-string="127.0.0.1:1234"/>
-	<!-- config as property place holder -->
-	<cc:zk-property-placeholder path="/mail, /query" location="classpath:query-server.properties"/>
-    <!-- config as jdbc dataSource -->
-    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" resource-type="C3P0"/>
+    	<!-- config zookeeper client -->
+    	<cc:zk-client connection-string="127.0.0.1:1234"/>
+		<!-- config as property place holder -->
+		<cc:zk-property-placeholder path="/mail, /query" location="classpath:query-server.properties"/>
+    	<!-- config as jdbc dataSource -->
+    	<cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" resource-type="C3P0"/>
 	</beans>
 	```
 

@@ -1,6 +1,7 @@
 package org.squirrelframework.cloud.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.framework.CuratorFramework;
 
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
@@ -59,5 +60,18 @@ public abstract class CloudConfigCommon {
 
     public static String bytes2String(byte[] content) throws UnsupportedEncodingException {
         return new String(content, "UTF-8");
+    }
+
+    public static void safeCreateZkNodeIfNotExists(CuratorFramework zkClient, String targetPath) throws Exception {
+        safeCreateZkNodeIfNotExists(zkClient, targetPath, "".getBytes());
+    }
+
+    public static void safeCreateZkNodeIfNotExists(CuratorFramework zkClient, String targetPath, byte[] data) throws Exception {
+        if(targetPath!=null && targetPath.length()>0 && targetPath.charAt(0)!='/') {
+            targetPath = "/"+targetPath;
+        }
+        if(zkClient.checkExists().forPath(targetPath) == null) {
+            zkClient.create().creatingParentsIfNeeded().forPath(targetPath, data);
+        }
     }
 }
