@@ -1,6 +1,5 @@
 package org.squirrelframework.cloud;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.squirrelframework.cloud.conf.ZkPath;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -25,19 +23,14 @@ import java.util.Properties;
 @RequestMapping("/api")
 public class CloudConfigController {
 
-    private ObjectMapper mapper = new ObjectMapper().
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private CuratorFramework zkClient;
 
+    @Autowired
     private JsonFlattenConverter jsonFlattenConverter;
-
-    @PostConstruct
-    public void init() {
-        jsonFlattenConverter = new JsonFlattenConverter();
-        jsonFlattenConverter.setAllowOverride(false);
-    }
 
     @PreDestroy
     public void destroy() {

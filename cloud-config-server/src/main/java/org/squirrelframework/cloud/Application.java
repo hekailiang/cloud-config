@@ -1,5 +1,7 @@
 package org.squirrelframework.cloud;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -9,6 +11,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.squirrelframework.cloud.conf.JsonFlattenConverter;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import static org.squirrelframework.cloud.utils.CloudConfigCommon.ZK_CONNECT_STRING_KEY;
@@ -34,6 +37,18 @@ public class Application {
                 .build();
         client.start();
         return client;
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
+    @Bean
+    public JsonFlattenConverter jsonFlattenConverter() {
+        JsonFlattenConverter jsonFlattenConverter = new JsonFlattenConverter();
+        jsonFlattenConverter.setAllowOverride(false);
+        return jsonFlattenConverter;
     }
 
     private String resolveConnectionString() {
