@@ -24,7 +24,7 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
     	<!-- config zookeeper client -->
-    	<cc:zk-client connection-string="127.0.0.1:1234"/>
+    	<cc:zk-client connection-string="127.0.0.1:2181"/>
 		<!-- config as property place holder -->
 		<cc:zk-property-placeholder path="/mail, /query" location="classpath:query-server.properties"/>
     	<!-- config as jdbc dataSource -->
