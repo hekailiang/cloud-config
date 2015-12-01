@@ -10,27 +10,35 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
 4. Go to http://localhost:8001/ in browser
 
 ## How to Use
-1. import cloud-config-client as your project maven dependency  
-2. simple usage configuration:  
+1. import cloud-config-client as your project maven dependency, e.g.  
 
-	```xml
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:cc="http://www.squirrelframework.org/schema/config"
-       xsi:schemaLocation="
-            http://www.springframework.org/schema/beans
-            http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.squirrelframework.org/schema/config
-            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+    ```xml
+    <dependency>
+        <groupId>org.squirrelframework</groupId>
+        <artifactId>cloud-config-client</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    ```
+2. simple usage configuration, e.g.  
+
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:cc="http://www.squirrelframework.org/schema/config"
+        xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.squirrelframework.org/schema/config
+        http://www.squirrelframework.org/schema/config/cloud-config.xsd">
     	<!-- config zookeeper client -->
     	<cc:zk-client connection-string="127.0.0.1:2181"/>
 		<!-- config as property place holder -->
 		<cc:zk-property-placeholder path="/mail, /query" location="classpath:query-server.properties"/>
     	<!-- config as jdbc dataSource -->
     	<cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" resource-type="C3P0"/>
-	</beans>
-	```
+    </beans>
+    ```
 
 ## Features  
 1. System properties config and lookup    
