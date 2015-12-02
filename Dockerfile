@@ -9,6 +9,9 @@ RUN curl http://nodejs.org/dist/v5.0.0/node-v5.0.0-linux-x64.tar.gz > nodejs.tar
 RUN tar xvzf nodejs.tar.gz && mv /node-v5.0.0-linux-x64 /nodejs && rm -rf nodejs.tar.gz
 ENV PATH $PATH:/nodejs/bin
 
+# install nodejs global modules
+RUN npm install -g webpack
+
 # clone the cloud-config project
 RUN git clone https://github.com/hekailiang/cloud-config.git
 
