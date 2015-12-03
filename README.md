@@ -40,6 +40,19 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
     </beans>
     ```
 
+## Docker Support
+1. Build cloud config docker container  
+   docker build -t hekailiang/cloud-config .   
+2. Run docker container for cloud config  
+   docker run -it -p 8001:8001 --name cc -e ZK_URL={zkserver} hekailiang/cloud-config
+3. For MacOS users, use following command to simplify docker machine access  
+   echo $(docker-machine ip default) dockerhost | sudo tee -a /etc/hosts
+4. Go to http://dockerhost:8001 in browser  
+
+## Dock Compose Support
+TBD
+   
+
 ## Features  
 1. System properties config and lookup    
 2. Single or Multi-tenant-aware DataSource config and lookup    
