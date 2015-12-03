@@ -3,10 +3,16 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
 
 ## How to Start
 1. Run following scripts to build entire project after sync the latest code  
+   
+   ```bash
    cd cloud-config-ui && npm install && cd .. && mvn clean install
+   ```
 2. Install & Start Zookeeper server
 3. Start cloud-config-server application  
+
+   ```bash
    java -Dnamespace={namespace} -Dconfig.center.url={zk.url} -jar cloud-config-server/target/cloud-config-server-1.0.0-SNAPSHOT.jar  
+   ```
 4. Go to http://localhost:8001/ in browser
 
 ## How to Use
@@ -41,16 +47,30 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
     ```
 
 ## Docker Support
-1. Build cloud config docker container  
+1. Build cloud config docker container   
+   
+   ```bash
+   cd ${cloud-config-prj-folder}
    docker build -t hekailiang/cloud-config .   
-2. Run docker container for cloud config  
+   ```
+2. Run docker container for cloud config 
+   
+   ```bash
    docker run -it -p 8001:8001 --name cc -e ZK_URL={zkserver} hekailiang/cloud-config
+   ```
 3. For MacOS users, use following command to simplify docker machine access  
+   
+   ```bash
    echo $(docker-machine ip default) dockerhost | sudo tee -a /etc/hosts
+   ```
 4. Go to http://dockerhost:8001 in browser  
 
-## Dock Compose Support
-TBD
+## Dock Compose Support  
+
+   ```bash
+   cd ${cloud-config-prj-folder}
+   docker-compose up
+   ```
    
 
 ## Features  
