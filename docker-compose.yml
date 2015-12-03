@@ -1,0 +1,13 @@
+zookeeper:
+  image: jplock/zookeeper
+  ports:
+    - "2181:2181"
+
+ccserver:
+  build: .
+  ports:
+    - "8001:8001"
+  links:
+    - zookeeper:zk
+  environment:
+    ZK_URL: zk:2181
