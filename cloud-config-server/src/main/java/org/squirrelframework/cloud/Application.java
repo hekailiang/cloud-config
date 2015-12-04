@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.squirrelframework.cloud.conf.JsonFlattenConverter;
-import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import static org.squirrelframework.cloud.utils.CloudConfigCommon.ZK_CONNECT_STRING_KEY;
 
@@ -20,7 +19,28 @@ import static org.squirrelframework.cloud.utils.CloudConfigCommon.ZK_CONNECT_STR
 public class Application {
 
     public static void main(String[] args) {
+        processArguments(args);
         SpringApplication.run(Application.class, args);
+    }
+
+    private static void processArguments(String[] args) {
+        for (String arg : args) {
+            if (arg.startsWith("--")) {
+                String optionText = arg.substring(2, arg.length());
+                String optionName;
+                String optionValue = null;
+                if (optionText.contains("=")) {
+                    optionName = optionText.substring(0, optionText.indexOf("="));
+                    optionValue = optionText.substring(optionText.indexOf("=")+1, optionText.length());
+                } else {
+                    optionName = optionText;
+                }
+                if (optionName.isEmpty() || (optionValue != null && optionValue.isEmpty())) {
+                    throw new IllegalArgumentException("Invalid argument syntax: " + arg);
+                }
+                System.setProperty(optionName, optionValue);
+            }
+        }
     }
 
     @Autowired
