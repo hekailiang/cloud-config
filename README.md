@@ -56,7 +56,7 @@ cloud-config is a multi-tenant-aware configuaration center based on Zookeeper an
 2. Run docker container for cloud config 
    
    ```bash
-   docker run -it -p 8001:8001 --name cc -e ZK_URL={zkserver} hekailiang/cloud-config
+   docker run -d -p 8001:8001 --name cc -e ZK_URL={zkserver} hekailiang/cloud-config
    ```
 3. For MacOS users, use following command to simplify docker machine access  
    
