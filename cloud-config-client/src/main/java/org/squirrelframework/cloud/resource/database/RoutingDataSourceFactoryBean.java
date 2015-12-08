@@ -11,6 +11,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
 
 import javax.sql.DataSource;
 import java.util.Collections;
@@ -53,13 +54,31 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         if(beanFactory.containsBeanDefinition(dsBeanId)) {
             return;
         }
+
         // build datasource bean based on config bean
-        BeanDefinitionBuilder dsBuilder = BeanDefinitionBuilder.rootBeanDefinition(dataSourceFactoryBeanClass);
-        dsBuilder.addPropertyValue("configPath", dsPath);
+        final BeanDefinitionBuilder dsBuilder;
+        if( isNestedRoutingNeeded(dsPath) ) {
+            dsBuilder = BeanDefinitionBuilder.rootBeanDefinition(RoutingDataSourceFactoryBean.class);
+            dsBuilder.addPropertyValue("path", dsPath);
+            dsBuilder.addPropertyValue("client", this.client);
+            dsBuilder.addPropertyValue("fallbackResource", this.fallbackResource);
+            dsBuilder.addPropertyValue("fallbackResourcePath", this.fallbackResourcePath);
+            dsBuilder.addPropertyValue("dataSourceFactoryBeanClass", this.dataSourceFactoryBeanClass);
+            dsBuilder.addPropertyValue("resolver", ((NestedRoutingKeyResolver)this.resolver).next());
+        } else {
+            dsBuilder = BeanDefinitionBuilder.rootBeanDefinition(dataSourceFactoryBeanClass);
+            dsBuilder.addPropertyValue("configPath", dsPath);
+        }
         dsBuilder.addPropertyValue("validator", validator);
         dsBuilder.setLazyInit(true);
         beanFactory.registerBeanDefinition(dsBeanId, dsBuilder.getBeanDefinition());
         myLogger.info("Bean definition of resource '{}' is created as '{}'.", dsPath, dsBeanId);
+    }
+
+    private boolean isNestedRoutingNeeded(String dsPath) throws Exception {
+        return resolver instanceof NestedRoutingKeyResolver &&
+                ((NestedRoutingKeyResolver)resolver).hasNext() &&
+                client.getChildren().forPath(dsPath).size() > 0;
     }
 
     @Override

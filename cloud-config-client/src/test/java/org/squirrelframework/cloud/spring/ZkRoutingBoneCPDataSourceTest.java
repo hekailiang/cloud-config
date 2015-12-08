@@ -1,12 +1,10 @@
 package org.squirrelframework.cloud.spring;
 
-import com.google.common.base.Optional;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.squirrelframework.cloud.BaseTestClass;
-import org.squirrelframework.cloud.resource.RoutingKeyResolver;
 
 import javax.sql.DataSource;
 
@@ -93,15 +91,5 @@ public class ZkRoutingBoneCPDataSourceTest extends BaseTestClass {
         assertThat((String) result.get(0).get("DATABASE()"), is("D"));
         result = jdbcTemplate.queryForList(SELECT_DB);
         assertThat((String) result.get(0).get("DATABASE()"), is("B"));
-    }
-
-    public static class TestRoutingKeyResolver implements RoutingKeyResolver {
-        int invokeTimes=0;
-        String[] routingKeys = {"a", "b"};
-
-        @Override
-        public Optional<String> get() {
-            return Optional.of(routingKeys[invokeTimes++%2]);
-        }
     }
 }

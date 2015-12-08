@@ -151,14 +151,14 @@ public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig>
     protected <M extends CloudResourceConfig> M createConfig(byte[] value, M baseConfig) throws Exception {
         M config;
         if(value!=null && value.length>0) {
-            String strValue = stringValueResolver==null ?  CloudConfigCommon.bytes2String(value) :
-                    stringValueResolver.resolveStringValue(CloudConfigCommon.bytes2String(value));
+            byte[] bValue = stringValueResolver==null ?  value :
+                    stringValueResolver.resolveStringValue(CloudConfigCommon.bytes2String(value)).getBytes();
             if(baseConfig!=null) {
                 Object overrideConfig = resourceType.newInstance();
                 BeanUtils.copyProperties(baseConfig, overrideConfig);
-                config = mapper.readerForUpdating(overrideConfig).readValue(strValue.getBytes());
+                config = mapper.readerForUpdating(overrideConfig).readValue(bValue);
             } else {
-                config = (M) mapper.readValue(strValue.getBytes(), resourceType);
+                config = (M) mapper.readValue(bValue, resourceType);
             }
         } else {
             config = baseConfig;

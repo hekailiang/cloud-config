@@ -8,7 +8,16 @@
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
-    <bean id="zk-default-resolver" class="org.squirrelframework.cloud.TestRoutingKeyResolver"/>
+    <bean id="r1" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
+    <bean id="r2" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
+    <bean id="zk-default-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
+        <property name="resolvers">
+            <list>
+                <ref bean="r1"/>
+                <ref bean="r2"/>
+            </list>
+        </property>
+    </bean>
 
     <cc:zk-client connection-string="127.0.0.1:1234"/>
     <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" multi-tenancy-aware="true" fallback="/database/mydb/unknown"/>

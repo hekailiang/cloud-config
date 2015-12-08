@@ -8,7 +8,7 @@
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
-    <bean id="zk-default-resolver" class="org.squirrelframework.cloud.TestRoutingKeyResolver"/>
+    <bean id="zk-default-resolver" class="org.squirrelframework.cloud.spring.ZkRoutingBoneCPDataSourceTest$TestRoutingKeyResolver"/>
 
     <cc:zk-client connection-string="127.0.0.1:1234"/>
     <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" multi-tenancy-aware="true" fallback="/database/mydb/unknown"/>

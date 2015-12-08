@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by kailianghe on 9/6/15.
  */
-@JsonIgnoreProperties({"__type__", "__name__", "__description__", "__order__"})
+@JsonIgnoreProperties({"__type__", "__name__", "__description__", "__order__", "__link__"})
 public abstract class CloudResourceConfig {
 
     private Map<String, Object> attributes;

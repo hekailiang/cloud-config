@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource;
+package org.squirrelframework.cloud.routing;
 
 import com.google.common.base.Optional;
 import org.slf4j.Logger;

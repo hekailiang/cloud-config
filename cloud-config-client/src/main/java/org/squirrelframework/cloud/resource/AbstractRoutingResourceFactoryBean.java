@@ -1,6 +1,7 @@
 package org.squirrelframework.cloud.resource;
 
 import org.springframework.validation.Validator;
+import org.squirrelframework.cloud.routing.RoutingKeyResolver;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
@@ -71,7 +72,7 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
             }
         });
         if(fallbackResourcePath!=null && fallbackResource==null) {
-            String dsBeanName = getResourceBeanIdFromPath(fallbackResourcePath.replace('/', '_'));
+            String dsBeanName = getResourceBeanIdFromPath(fallbackResourcePath);
             if( !applicationContext.containsBeanDefinition(dsBeanName) ) {
                 buildResourceBeanDefinition(fallbackResourcePath, dsBeanName);
             }
