@@ -140,21 +140,21 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         }
 
         @Override
-        public DataSource get(String tenantId) {
-            DataSource dataSource = localDataSources.get(tenantId);
+        public DataSource get(String routingKey) {
+            DataSource dataSource = localDataSources.get(routingKey);
             if(dataSource==null) {
                 try {
-                    String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ tenantId);
+                    String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ routingKey);
                     dataSource = applicationContext.getBean(expectedBeanId, DataSource.class);
-                    localDataSources.put(tenantId, dataSource);
-                    myLogger.info("DataSource for tenant '{}' is resolved as '{}'.", tenantId, dataSource.toString());
+                    localDataSources.put(routingKey, dataSource);
+                    myLogger.info("DataSource for tenant '{}' is resolved as '{}'.", routingKey, dataSource.toString());
                 } catch (NoSuchBeanDefinitionException e) {
                     // find fallback datasource - "unknown"
                     if(fallbackResource!=null) {
                         dataSource = fallbackResource;
-                        myLogger.warn("Cannot find proper data source for tenant '{}'. Use fallback data source instead.", tenantId);
+                        myLogger.warn("Cannot find proper data source for tenant '{}'. Use fallback data source instead.", routingKey);
                     } else {
-                        throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + tenantId + "]", e);
+                        throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + routingKey + "]", e);
                     }
                 }
             }
