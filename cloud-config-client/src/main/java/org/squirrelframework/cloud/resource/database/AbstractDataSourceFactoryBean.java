@@ -1,5 +1,7 @@
 package org.squirrelframework.cloud.resource.database;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.CloudResourceFactoryBean;
@@ -20,7 +22,7 @@ import javax.validation.Validator;
  * Created by kailianghe on 9/11/15.
  */
 public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfig> extends AbstractFactoryBean<DataSource>
-        implements CloudResourceFactoryBean<DataSource, T>, ApplicationContextAware {
+        implements CloudResourceFactoryBean<DataSource, T>, ApplicationContextAware, BeanFactoryAware {
 
     protected T config;
 
@@ -30,8 +32,14 @@ public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfi
 
     protected Validator validator;
 
+    private DefaultListableBeanFactory beanFactory;
+
     protected DefaultListableBeanFactory getBeanFactory() {
-        return (DefaultListableBeanFactory)((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+        return beanFactory;
+    }
+
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
     }
 
     public static String getResourceConfigBeanIdFromPath(String configPath) {

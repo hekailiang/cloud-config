@@ -1,5 +1,8 @@
 package org.squirrelframework.cloud.resource;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.validation.Validator;
 import org.squirrelframework.cloud.routing.RoutingKeyResolver;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
@@ -19,7 +22,7 @@ import org.springframework.context.ApplicationContextAware;
 /**
  * Created by kailianghe on 9/14/15.
  */
-public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFactoryBean<T> implements ApplicationContextAware {
+public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFactoryBean<T> implements ApplicationContextAware, BeanFactoryAware {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRoutingResourceFactoryBean.class);
 
@@ -38,6 +41,8 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
     protected String fallbackResourcePath;
 
     protected Validator validator;
+
+    private DefaultListableBeanFactory beanFactory;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -122,5 +127,13 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
 
     public void setValidator(Validator validator) {
         this.validator = validator;
+    }
+
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+    }
+
+    protected DefaultListableBeanFactory getBeanFactory() {
+        return beanFactory;
     }
 }

@@ -49,9 +49,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
 
     @Override
     protected void buildResourceBeanDefinition(String dsPath, String dsBeanId) throws Exception {
-        DefaultListableBeanFactory beanFactory =
-                (DefaultListableBeanFactory)((ConfigurableApplicationContext) applicationContext).getBeanFactory();
-        if(beanFactory.containsBeanDefinition(dsBeanId)) {
+        if(getBeanFactory().containsBeanDefinition(dsBeanId)) {
             return;
         }
 
@@ -71,7 +69,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         }
         dsBuilder.addPropertyValue("validator", validator);
         dsBuilder.setLazyInit(true);
-        beanFactory.registerBeanDefinition(dsBeanId, dsBuilder.getBeanDefinition());
+        getBeanFactory().registerBeanDefinition(dsBeanId, dsBuilder.getBeanDefinition());
         myLogger.info("Bean definition of resource '{}' is created as '{}'.", dsPath, dsBeanId);
     }
 
@@ -83,14 +81,12 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
 
     @Override
     protected void removeResourceBeanDefinition(String resPath, String beanId) throws Exception {
-        DefaultListableBeanFactory beanFactory =
-                (DefaultListableBeanFactory)((ConfigurableApplicationContext) applicationContext).getBeanFactory();
-        if(beanFactory.containsBeanDefinition(beanId)) {
-            beanFactory.removeBeanDefinition(beanId);
+        if(getBeanFactory().containsBeanDefinition(beanId)) {
+            getBeanFactory().removeBeanDefinition(beanId);
         }
         String confBeanId = AbstractDataSourceFactoryBean.getResourceConfigBeanIdFromPath(resPath);
-        if(beanFactory.containsBeanDefinition(confBeanId)) {
-            beanFactory.removeBeanDefinition(confBeanId);
+        if(getBeanFactory().containsBeanDefinition(confBeanId)) {
+            getBeanFactory().removeBeanDefinition(confBeanId);
         }
 
         // TODO-hhe: clean local cached data sources as we cannot get tenant id here
