@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
@@ -117,8 +117,8 @@ public class NestedRoutingKeyResolverTest extends BaseTestClass {
         Set<String> nowCnfBeans = applicationContext.getBeansOfType(BoneCPDataSourceConfig.class).keySet();
         dsBeans.removeAll(nowDsBeans);
         cnfBeans.removeAll(nowCnfBeans);
-        assertThat(dsBeans, is((Set<String>) Sets.newHashSet("__database_mydb_aDS", "__database_mydb_a_1DS", "__database_mydb_a_2DS")));
-        assertThat(cnfBeans, is((Set<String>) Sets.newHashSet("__database_mydb_a_1CNF", "__database_mydb_a_2CNF")));
+        assertThat(dsBeans, hasItems("__database_mydb_aDS", "__database_mydb_a_1DS", "__database_mydb_a_2DS"));
+        assertThat(cnfBeans, hasItems("__database_mydb_a_1CNF", "__database_mydb_a_2CNF"));
     }
 
 }
