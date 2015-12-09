@@ -1,61 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="
-      http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans.xsd">
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
-        <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
-        <!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->
-        <!--<property name="validationMessageSource" ref="messageSource"/>-->
-    </bean>
-
-    <bean id="zkClient" class="org.squirrelframework.cloud.conf.ZkClientFactoryBean">
-        <property name="baseSleepTime" value="3000"/>
-        <property name="maxRetries" value="3"/>
-        <property name="canReadOnly" value="true"/>
-    </bean>
-
-    <bean id="jsonFlattenConverter" class="org.squirrelframework.cloud.conf.JsonFlattenConverter">
-        <property name="allowOverride" value="true"/>
-        <property name="ignoreInvalidJson" value="false"/>
-    </bean>
-
-    <bean id="abstractPropertyConfigurer" class="org.squirrelframework.cloud.conf.ZkPropertyPlaceholderConfigurer" abstract="true">
-        <property name="ignoreResourceNotFound" value="true" />
-        <property name="client" ref="zkClient"/>
-        <property name="jsonFlattenConverter" ref="jsonFlattenConverter"/>
-        <property name="maxDepth" value="1000"/>
-    </bean>
-
-    <bean id="abstractSimpleResourceConfig" class="org.squirrelframework.cloud.resource.SimpleResourceConfigFactoryBean" abstract="true">
-        <property name="client" ref="zkClient"/>
-        <property name="validator" ref="validator"/>
-    </bean>
-
-    <bean id="abstractTenantAwareResourceConfig" class="org.squirrelframework.cloud.resource.TenantAwareResourceConfigFactoryBean" abstract="true">
-        <property name="client" ref="zkClient"/>
-        <property name="validator" ref="validator"/>
-    </bean>
-
-    <bean id="abstractBoneCPDataSourceConfig" parent="abstractSimpleResourceConfig" abstract="true">
-        <property name="resourceType" value="org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig"/>
-    </bean>
-
-    <bean id="abstractTenantConfig" parent="abstractTenantAwareResourceConfig" abstract="true">
-        <property name="resourceType" value="org.squirrelframework.cloud.resource.tenant.TenantConfig"/>
-    </bean>
-
-    <bean id="abstractRoutingDataSource" class="org.squirrelframework.cloud.resource.database.RoutingDataSourceFactoryBean" abstract="true">
-        <property name="client" ref="zkClient"/>
-        <property name="dataSourceFactoryBeanClass" value="org.squirrelframework.cloud.resource.database.BoneCPDataSourceFactoryBean"/>
-    </bean>
-
-    <bean id="genericPropertyConfigurer" parent="abstractPropertyConfigurer">
-        <property name="path" value="/generic" />
-        <property name="order" value="10000" />
-        <property name="ignoreUnresolvablePlaceholders" value="true"/>
-    </bean>
+    <aop:aspectj-autoproxy/>
+    <bean id="declarativeRoutingKeyAspect" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyAspect"/>
 
 </beans>
