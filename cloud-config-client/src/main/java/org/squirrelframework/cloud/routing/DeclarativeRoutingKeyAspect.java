@@ -19,19 +19,14 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
     @Around(value = "@annotation(routingKey)")
     public Object process(ProceedingJoinPoint jp, RoutingKey routingKey) throws Throwable {
         try {
-            DeclarativeRoutingKeyHolder.setRoutingKey(routingKey.value());
+            DeclarativeRoutingKeyHolder.putRoutingKey(routingKey.value());
             return jp.proceed();
         } finally {
-            DeclarativeRoutingKeyHolder.resetRoutingKey();
+            DeclarativeRoutingKeyHolder.removeRoutingKey();
         }
 
     }
 
-    /**
-     * 在 目标对象（例如 service 中的方法中）使用 @DataSource 和 @Transactional
-     * 注解时，默认标注 @Transactional 的切面的通知方法会优先执行，切换数据源操作将失效，通过order将
-     * DataSourceAspect 切面设置为-1 , 保证 @Transactional 切面类执行前先决定数据源。
-     */
     @Override
     public int getOrder() {
         return -1;

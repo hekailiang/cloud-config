@@ -9,6 +9,7 @@
             http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <aop:aspectj-autoproxy/>
-    <bean id="declarativeRoutingKeyAspect" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyAspect"/>
+    <bean id="__declarative_routing_key_aspect"
+          class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyAspect"/>
 
 </beans>
