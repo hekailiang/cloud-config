@@ -31,6 +31,7 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
         assertThat(outer.toA2(), is("A2"));
         assertThat(outer.toB1(), is("B1"));
         assertThat(outer.toB2(), is("B2"));
+        assertThat(outer.toUnknown(), is("UNKNOWN"));
     }
 
 
@@ -60,6 +61,11 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
         @RoutingKey("b")
         public String toB2() {
             return inner.two();
+        }
+
+        @RoutingKey("whatever")
+        public String toUnknown() {
+            return inner.one();
         }
     }
 
