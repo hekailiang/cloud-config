@@ -10,7 +10,7 @@ import org.squirrelframework.cloud.resource.TenantAwareResourceConfig;
 
 import javax.validation.constraints.Min;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**

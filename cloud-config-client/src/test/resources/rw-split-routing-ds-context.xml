@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <aop:aspectj-autoproxy/>
+
+    <bean id="advice" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyAspect"/>
+
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver">
+        <property name="key" value="a"/>
+    </bean>
+
+    <bean id="profileResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver">
+        <property name="key" value="prod"/>
+    </bean>
+
+    <bean id="transactionResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <bean id="my-default-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
+        <property name="resolvers">
+            <list>
+                <ref bean="tenantResolver"/>
+                <ref bean="profileResolver"/>
+                <ref bean="transactionResolver"/>
+            </list>
+        </property>
+    </bean>
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" multi-tenancy-aware="true" resolver-ref="my-default-resolver"/>
+
+    <context:component-scan base-package="org.squirrelframework.cloud.sample" />
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="org.squirrelframework.cloud.sample"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.archive.autodetection" />
+                <!--<prop key="hibernate.hbm2ddl.auto">create</prop>-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by kailianghe on 11/9/15.

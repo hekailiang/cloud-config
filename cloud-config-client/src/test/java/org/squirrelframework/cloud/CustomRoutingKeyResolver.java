@@ -14,4 +14,8 @@ public class CustomRoutingKeyResolver implements RoutingKeyResolver {
     public Optional<String> get() {
         return Optional.of(key);
     }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
 }
