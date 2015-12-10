@@ -18,7 +18,7 @@ public class ZookeeperInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // check minimum requirement for zookeeper environment
-        safeCreateZkNodeIfNotExists(zkClient, PROPERTY_ROOT);
-        safeCreateZkNodeIfNotExists(zkClient, CONFIG_ROOT);
+        ZkUtils.safeCreateZkNodeIfNotExists(zkClient, PROPERTY_ROOT);
+        ZkUtils.safeCreateZkNodeIfNotExists(zkClient, CONFIG_ROOT);
     }
 }

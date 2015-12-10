@@ -9,6 +9,6 @@ public class DeclarativeRoutingKeyResolver implements RoutingKeyResolver {
 
     @Override
     public Optional<String> get() {
-        return Optional.of(DeclarativeRoutingKeyHolder.getRoutingKey());
+        return Optional.of(RoutingKeyHolder.getDeclarativeRoutingKey());
     }
 }

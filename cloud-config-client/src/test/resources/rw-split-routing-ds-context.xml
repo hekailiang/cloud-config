@@ -16,21 +16,20 @@
 
     <import resource="classpath*:cloud-config.xml"/>
 
-    <bean id="tenantResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver">
-        <property name="key" value="a"/>
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
+    <bean id="profileResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
+    <bean id="rwSplitResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver">
+        <property name="path" value="/database/mydb"/>
     </bean>
 
-    <bean id="profileResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver">
-        <property name="key" value="prod"/>
-    </bean>
-
-    <bean id="transactionResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
     <bean id="my-default-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
         <property name="resolvers">
             <list>
                 <ref bean="tenantResolver"/>
                 <ref bean="profileResolver"/>
-                <ref bean="transactionResolver"/>
+                <ref bean="rwSplitResolver"/>
+                <ref bean="dispatchResolver"/>
             </list>
         </property>
     </bean>

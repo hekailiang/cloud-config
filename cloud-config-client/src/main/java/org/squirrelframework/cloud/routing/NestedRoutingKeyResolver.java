@@ -13,13 +13,14 @@ public class NestedRoutingKeyResolver implements RoutingKeyResolver {
 
     @Override
     public Optional<String> get() {
-        return resolvers.get(0).get();
+        RoutingKeyResolver resolver = new TraceableRoutingKeyResolver(resolvers.get(0));
+        return resolver.get();
     }
 
     public RoutingKeyResolver next() {
         NestedRoutingKeyResolver subRoutingKeyResolver = new NestedRoutingKeyResolver();
         subRoutingKeyResolver.setResolvers(resolvers.subList(1, resolvers.size()));
-        return  subRoutingKeyResolver;
+        return subRoutingKeyResolver;
     }
 
     public boolean hasNext() {

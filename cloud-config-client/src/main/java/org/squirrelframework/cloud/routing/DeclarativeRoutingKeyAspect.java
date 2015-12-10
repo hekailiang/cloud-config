@@ -6,25 +6,36 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.core.Ordered;
 import org.squirrelframework.cloud.annotation.RoutingKey;
 
+import static org.squirrelframework.cloud.routing.RoutingKeyHolder.*;
+
 /**
  * Created by kailianghe on 15/12/9.
  */
 @Aspect
 public class DeclarativeRoutingKeyAspect implements Ordered {
-    /**
-     * cut point: method annotated with @RoutingKey
-     *
-     * @param routingKey
-     */
+
     @Around(value = "@annotation(routingKey)")
     public Object process(ProceedingJoinPoint jp, RoutingKey routingKey) throws Throwable {
+        boolean newEntryFlag = isNewEntry();
         try {
-            DeclarativeRoutingKeyHolder.putRoutingKey(routingKey.value());
+            if(newEntryFlag) {
+                setNewEntry(false);
+                if(routingKey.recordRoutingKeys()) {
+                    setRoutingKeyTraceEnabled(true);
+                }
+            }
+            putDeclarativeRoutingKey(routingKey.value());
             return jp.proceed();
         } finally {
-            DeclarativeRoutingKeyHolder.removeRoutingKey();
+            if(newEntryFlag) {
+                removeNewEntry();
+                if(routingKey.recordRoutingKeys()) {
+                    removeRoutingKeyTraceEnabled();
+                    removeRoutingKeys();
+                }
+                removeDeclarativeRoutingKeys();
+            }
         }
-
     }
 
     @Override

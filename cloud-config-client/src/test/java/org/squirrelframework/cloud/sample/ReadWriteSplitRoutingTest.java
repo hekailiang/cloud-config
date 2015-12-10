@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.squirrelframework.cloud.BaseTestClass;
+import org.squirrelframework.cloud.CustomRoutingKeyResolver;
 
 import java.util.List;
 
@@ -66,9 +67,9 @@ public class ReadWriteSplitRoutingTest extends BaseTestClass {
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a", common.getBytes());
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/dev", aDev.getBytes());
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/write", aProdW.getBytes());
-        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/read-1", aProdR1.getBytes());
-        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/read-2", aProdR2.getBytes());
-        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/read-3", aProdR3.getBytes());
+        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/read/01", aProdR1.getBytes());
+        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/read/02", aProdR2.getBytes());
+        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/prod/read/03", aProdR3.getBytes());
 
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/c", common.getBytes());
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/c/dev", cDev.getBytes());
@@ -82,6 +83,10 @@ public class ReadWriteSplitRoutingTest extends BaseTestClass {
     @Test
     public void testReadWriteSplit() {
         UserService userService = applicationContext.getBean(UserService.class);
+        CustomRoutingKeyResolver tr = applicationContext.getBean("tenantResolver", CustomRoutingKeyResolver.class);
+        CustomRoutingKeyResolver pr = applicationContext.getBean("profileResolver", CustomRoutingKeyResolver.class);
+        tr.key="a"; pr.key = "prod";
+
         List<User> users = userService.findAllUsers();
         assertThat(users.size(), is(0));
 
@@ -95,5 +100,67 @@ public class ReadWriteSplitRoutingTest extends BaseTestClass {
 
         users = userService.findAllUsersAsWrite();
         assertThat(users.size(), is(1));
+        assertThat(users.get(0), hasProperty("username", is("hekailiang")));
+    }
+
+    @Test
+    public void testReadWriteTogether() {
+        UserService userService = applicationContext.getBean(UserService.class);
+        CustomRoutingKeyResolver tr = applicationContext.getBean("tenantResolver", CustomRoutingKeyResolver.class);
+        CustomRoutingKeyResolver pr = applicationContext.getBean("profileResolver", CustomRoutingKeyResolver.class);
+        tr.key="a"; pr.key = "dev";
+
+        List<User> users = userService.findAllUsers();
+        assertThat(users.size(), is(0));
+
+        User user = new User();
+        user.setUsername("hekailiang");
+        user.setName("Henry He");
+        userService.insertUser(user);
+
+        users = userService.findAllUsers();
+        assertThat(users.size(), is(1));
+        assertThat(users.get(0), hasProperty("username", is("hekailiang")));
+    }
+
+    @Test
+    public void testReadDispatch() {
+        UserService userService = applicationContext.getBean(UserService.class);
+        CustomRoutingKeyResolver tr = applicationContext.getBean("tenantResolver", CustomRoutingKeyResolver.class);
+        CustomRoutingKeyResolver pr = applicationContext.getBean("profileResolver", CustomRoutingKeyResolver.class);
+        tr.key="a"; pr.key = "prod";
+
+        User user = new User();
+        user.setUsername("1");
+        user.setName("one");
+        userService.insertUserAsRead(user);
+
+        user = new User();
+        user.setUsername("2");
+        user.setName("two");
+        userService.insertUserAsRead(user);
+
+        user = new User();
+        user.setUsername("3");
+        user.setName("three");
+        userService.insertUserAsRead(user);
+
+        user = new User();
+        user.setUsername("4");
+        user.setName("four");
+        userService.insertUserAsRead(user);
+
+        List<User> users = userService.findAllUsers();
+        assertThat(users.size(), is(1));
+        assertThat(users.get(0), hasProperty("username", is("2")));
+
+        users = userService.findAllUsers();
+        assertThat(users.size(), is(1));
+        assertThat(users.get(0), hasProperty("username", is("3")));
+
+        users = userService.findAllUsers();
+        assertThat(users.size(), is(2));
+        assertThat(users.get(0), hasProperty("username", is("1")));
+        assertThat(users.get(1), hasProperty("username", is("4")));
     }
 }

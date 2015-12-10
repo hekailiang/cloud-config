@@ -143,12 +143,12 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
                     String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ routingKey);
                     dataSource = applicationContext.getBean(expectedBeanId, DataSource.class);
                     localDataSources.put(routingKey, dataSource);
-                    myLogger.info("DataSource for tenant '{}' is resolved as '{}'.", routingKey, dataSource.toString());
+                    myLogger.info("DataSource for '{}' is resolved as '{}'.", routingKey, dataSource.toString());
                 } catch (NoSuchBeanDefinitionException e) {
                     // find fallback datasource - "unknown"
                     if(fallbackResource!=null) {
                         dataSource = fallbackResource;
-                        myLogger.warn("Cannot find proper data source for tenant '{}'. Use fallback data source instead.", routingKey);
+                        myLogger.warn("Cannot find proper data source for '{}'. Use fallback data source instead.", routingKey);
                     } else {
                         throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + routingKey + "]", e);
                     }

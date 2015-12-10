@@ -11,4 +11,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface RoutingKey {
     String value();
+    boolean recordRoutingKeys() default false;
 }
