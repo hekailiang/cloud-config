@@ -98,7 +98,7 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
             return getDatabase();
         }
 
-        @RoutingKey("2")
+        @RoutingKey(value = "2", recordRoutingKeys = true)
         public String two() {
             return getDatabase();
         }
