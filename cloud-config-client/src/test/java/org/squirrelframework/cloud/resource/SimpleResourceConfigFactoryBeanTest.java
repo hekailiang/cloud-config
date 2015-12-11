@@ -186,15 +186,23 @@ public class SimpleResourceConfigFactoryBeanTest extends BaseTestClass {
     }
 
     @Test(timeout = 10000L)
-    public void testMachineSpecificDataSourceConfigWithReload() throws Exception {
+    public void testMachineSpecificDataSourceConfigWithReloadAndRemove() throws Exception {
         BoneCPDataSourceConfig result = createBean();
         final AtomicBoolean reloadInvoked = new AtomicBoolean(false);
-        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicBoolean removeInvoked = new AtomicBoolean(false);
+        final CountDownLatch reLoadLatch = new CountDownLatch(1);
+        final CountDownLatch removeLatch = new CountDownLatch(1);
+
         result.setReloadCallback(new ReloadCallback() {
             @Override
             public void reload() throws Exception {
-                reloadInvoked.set(true);
-                latch.countDown();
+                if(reLoadLatch.getCount()==1) {
+                    reloadInvoked.set(true);
+                    reLoadLatch.countDown();
+                } else if(reLoadLatch.getCount()==0) {
+                    removeInvoked.set(true);
+                    removeLatch.countDown();
+                }
             }
         });
         basicVerifyResult(result, true);
@@ -203,12 +211,19 @@ public class SimpleResourceConfigFactoryBeanTest extends BaseTestClass {
         String newDevConfig = "{\n" +
                 "    \"jdbcUrl\" : \"jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true\"\n" +
                 "}";
-        zkConfigClient.create().forPath("/database/bcp/&"+ InetAddressHelper.localIpAddress.get(0)+":255", newDevConfig.getBytes());
+        String newNodeName = "/database/bcp/&"+ InetAddressHelper.localIpAddress.get(0)+":255";
+        zkConfigClient.create().forPath(newNodeName, newDevConfig.getBytes());
 
-        latch.await();
+        reLoadLatch.await();
         assertThat(reloadInvoked.get(), is(Boolean.TRUE));
         basicVerifyResult(result, true);
         assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true"));
+
+        zkConfigClient.delete().deletingChildrenIfNeeded().forPath(newNodeName);
+        removeLatch.await();
+        assertThat(removeInvoked.get(), is(Boolean.TRUE));
+        basicVerifyResult(result, true);
+        assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp01?useUnicode=true"));
     }
 
     @Test(timeout = 10000L)
