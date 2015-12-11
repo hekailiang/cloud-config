@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
+import org.squirrelframework.cloud.utils.InetAddressHelper;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -187,5 +188,10 @@ public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig>
 
     public void setEmbeddedValueResolver(StringValueResolver stringValueResolver) {
         this.stringValueResolver = stringValueResolver;
+    }
+
+    protected boolean canApplyForLocalMachine(String nodeName) {
+        return nodeName.charAt(0)=='&' &&
+                InetAddressHelper.isLocalMachineIpAddressInRange(nodeName.substring(1));
     }
 }

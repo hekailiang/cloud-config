@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.squirrelframework.cloud.BaseTestClass;
 import org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
+import org.squirrelframework.cloud.utils.InetAddressHelper;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -168,6 +169,64 @@ public class SimpleResourceConfigFactoryBeanTest extends BaseTestClass {
                 "    \"jdbcUrl\" : \"jdbc:mysql://127.0.0.1:3306/prod_bcp02?useUnicode=true\"\n" +
                 "}";
         zkConfigClient.setData().forPath("/database/bcp/prod", newDevConfig.getBytes());
+
+        basicVerifyResult(result, true);
+        assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp01?useUnicode=true"));
+    }
+
+    @Test
+    public void testMachineSpecificDataSourceConfig() throws Exception {
+        String newDevConfig = "{\n" +
+                "    \"jdbcUrl\" : \"jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true\"\n" +
+                "}";
+        zkConfigClient.create().forPath("/database/bcp/&"+ InetAddressHelper.localIpAddress.get(0), newDevConfig.getBytes());
+        BoneCPDataSourceConfig result = createBean();
+        basicVerifyResult(result, true);
+        assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true"));
+    }
+
+    @Test(timeout = 10000L)
+    public void testMachineSpecificDataSourceConfigWithReload() throws Exception {
+        BoneCPDataSourceConfig result = createBean();
+        final AtomicBoolean reloadInvoked = new AtomicBoolean(false);
+        final CountDownLatch latch = new CountDownLatch(1);
+        result.setReloadCallback(new ReloadCallback() {
+            @Override
+            public void reload() throws Exception {
+                reloadInvoked.set(true);
+                latch.countDown();
+            }
+        });
+        basicVerifyResult(result, true);
+        assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp01?useUnicode=true"));
+
+        String newDevConfig = "{\n" +
+                "    \"jdbcUrl\" : \"jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true\"\n" +
+                "}";
+        zkConfigClient.create().forPath("/database/bcp/&"+ InetAddressHelper.localIpAddress.get(0)+":255", newDevConfig.getBytes());
+
+        latch.await();
+        assertThat(reloadInvoked.get(), is(Boolean.TRUE));
+        basicVerifyResult(result, true);
+        assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true"));
+    }
+
+    @Test(timeout = 10000L)
+    public void testMachineSpecificDataSourceConfigWithNoReload() throws Exception {
+        BoneCPDataSourceConfig result = createBean();
+        result.setReloadCallback(new ReloadCallback() {
+            @Override
+            public void reload() throws Exception {
+                throw new RuntimeException("Should not be invoked.");
+            }
+        });
+        basicVerifyResult(result, true);
+        assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp01?useUnicode=true"));
+
+        String newDevConfig = "{\n" +
+                "    \"jdbcUrl\" : \"jdbc:mysql://127.0.0.1:3306/dev_bcp02?useUnicode=true\"\n" +
+                "}";
+        zkConfigClient.create().forPath("/database/bcp/&1.1.1.1:255", newDevConfig.getBytes());
 
         basicVerifyResult(result, true);
         assertThat(result.getJdbcUrl(), is("jdbc:mysql://127.0.0.1:3306/dev_bcp01?useUnicode=true"));

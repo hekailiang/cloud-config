@@ -29,11 +29,12 @@ public class TenantAwareResourceConfigFactoryBean extends AbstractResourceFactor
     private void buildResourceConfig(String tenantId) throws Exception {
         String cnfPath = path+"/"+ tenantId;
         Object configObject = createConfig( client.getData().forPath(cnfPath) );
+
+        List<String> profileNodes = client.getChildren().forPath(path);
         for(String configProfile : configProfiles) {
-            if(client.checkExists().forPath(path+"/"+configProfile)!=null) {
-                configObject = createConfig (
-                        client.getData().forPath(path+"/"+configProfile), resourceType.cast(configObject)
-                );
+            if(profileNodes.contains(configProfile)) {
+                byte[] data = client.getData().forPath(path+"/"+configProfile);
+                configObject = createConfig(data, resourceType.cast(configObject));
             }
         }
         configHolder.putIfAbsent(tenantId, configObject);

@@ -3,8 +3,7 @@ package org.squirrelframework.cloud.utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by kailianghe on 9/17/15.
