@@ -1,22 +1,22 @@
 package org.squirrelframework.cloud.resource.database;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.squirrelframework.cloud.resource.AbstractRoutingResourceFactoryBean;
 import org.squirrelframework.cloud.resource.TenantSupport;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
 
 import javax.sql.DataSource;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by kailianghe on 9/7/15.
@@ -91,7 +91,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
 
         // TODO-hhe: clean local cached data sources as we cannot get tenant id here
         if( getObject()!=null ) {
-            ((RoutingDataSource)getObject()).localDataSources.clear();
+            ((RoutingDataSource)getObject()).localDataSourceStore.invalidateAll();
         }
         myLogger.info("Bean definition of resource '{}' is removed as '{}'.", resPath, beanId);
     }
@@ -109,9 +109,18 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         this.fallbackResource = fallbackDataSource;
     }
 
-    public class RoutingDataSource extends AbstractRoutingDataSource implements TenantSupport<DataSource> {
+    private CacheLoader<String, DataSource> dataSourceCacheLoader = new CacheLoader<String, DataSource>() {
+        @Override
+        public DataSource load(String routingKey) throws Exception {
+            String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ routingKey);
+            DataSource dataSource = applicationContext.getBean(expectedBeanId, DataSource.class);
+            myLogger.info("DataSource for '{}' is resolved as '{}'.", routingKey, dataSource.toString());
+            return dataSource;
+        }
+    };
 
-        private ConcurrentMap<String, DataSource> localDataSources = Maps.newConcurrentMap();
+    public class RoutingDataSource extends AbstractRoutingDataSource implements TenantSupport<DataSource> {
+        private LoadingCache<String, DataSource> localDataSourceStore = CacheBuilder.newBuilder().build(dataSourceCacheLoader);
 
         public RoutingDataSource() {
             setTargetDataSources(Collections.emptyMap());
@@ -137,24 +146,16 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
 
         @Override
         public DataSource get(String routingKey) {
-            DataSource dataSource = localDataSources.get(routingKey);
-            if(dataSource==null) {
-                try {
-                    String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ routingKey);
-                    dataSource = applicationContext.getBean(expectedBeanId, DataSource.class);
-                    localDataSources.put(routingKey, dataSource);
-                    myLogger.info("DataSource for '{}' is resolved as '{}'.", routingKey, dataSource.toString());
-                } catch (NoSuchBeanDefinitionException e) {
-                    // find fallback datasource - "unknown"
-                    if(fallbackResource!=null) {
-                        dataSource = fallbackResource;
-                        myLogger.warn("Cannot find proper data source for '{}'. Use fallback data source instead.", routingKey);
-                    } else {
-                        throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + routingKey + "]", e);
-                    }
+            try {
+                return localDataSourceStore.getUnchecked(routingKey);
+            } catch (UncheckedExecutionException e) {
+                Throwable cause = e.getCause();
+                if(cause instanceof NoSuchBeanDefinitionException && fallbackResource!=null) {
+                    myLogger.warn("Cannot find proper data source for '{}'. Use fallback data source instead.", routingKey);
+                    return fallbackResource;
                 }
+                throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + routingKey + "]", cause);
             }
-            return dataSource;
         }
     }
 }
