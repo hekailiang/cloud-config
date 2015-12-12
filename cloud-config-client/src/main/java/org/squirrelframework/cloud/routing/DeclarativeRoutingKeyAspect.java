@@ -1,10 +1,24 @@
 package org.squirrelframework.cloud.routing;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.Ordered;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.squirrelframework.cloud.annotation.RoutingKey;
+import org.squirrelframework.cloud.annotation.RoutingVariable;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.squirrelframework.cloud.routing.RoutingKeyHolder.*;
 
@@ -14,21 +28,63 @@ import static org.squirrelframework.cloud.routing.RoutingKeyHolder.*;
 @Aspect
 public class DeclarativeRoutingKeyAspect implements Ordered {
 
+    private static Pattern pattern = Pattern.compile("^#\\s*\\{\\s*(.+?)\\s*\\}$");
+
+    CacheLoader<String, Expression> loader = new CacheLoader<String, Expression>() {
+        @Override
+        public Expression load(String elExpr) throws Exception {
+            ExpressionParser parser = new SpelExpressionParser();
+            Expression expression = parser.parseExpression(elExpr);
+            return expression;
+        }
+    };
+
+    LoadingCache<String, Expression> expressionCache = CacheBuilder.newBuilder()
+            .weakKeys()
+            .build(loader);
+
     @Around(value = "@annotation(routingKey)")
     public Object process(ProceedingJoinPoint jp, RoutingKey routingKey) throws Throwable {
-        boolean newEntryFlag = isNewEntry();
+        boolean routingEntryFlag = isRoutingEntry();
         try {
-            if(newEntryFlag) {
-                setNewEntry(false);
+            if(routingEntryFlag) {
+                setRoutingEntry(false);
                 if(routingKey.recordRoutingKeys()) {
                     setRoutingKeyTraceEnabled(true);
                 }
             }
-            putDeclarativeRoutingKey(routingKey.value());
+            String routingValue = routingKey.value();
+            Matcher matcher = pattern.matcher(routingValue.trim());
+            if(matcher.find()) {
+                // prepare execution context
+                StandardEvaluationContext simpleContext = new StandardEvaluationContext();
+                simpleContext.setRootObject(jp.getTarget()); // or getThis?
+                simpleContext.setVariable("args", jp.getArgs());
+
+                MethodSignature signature = (MethodSignature) jp.getSignature();
+                Method method = signature.getMethod();
+                Annotation[][] annotations = method.getParameterAnnotations();
+                for(int i=0; i<annotations.length; i++) {
+                    if(annotations[i]==null || annotations[i].length==0) continue;
+                    RoutingVariable routingParam = null;
+                    for(Annotation annotation : annotations[i]) {
+                        if(annotation.annotationType() == RoutingVariable.class) {
+                            routingParam = (RoutingVariable) annotation;
+                            break;
+                        }
+                    }
+                    if(routingParam!=null) {
+                        simpleContext.setVariable(routingParam.value(), jp.getArgs()[i]);
+                    }
+                }
+                String elExpr = matcher.group(1);
+                routingValue = expressionCache.get(elExpr).getValue(simpleContext, String.class);
+            }
+            putDeclarativeRoutingKey(routingValue);
             return jp.proceed();
         } finally {
-            if(newEntryFlag) {
-                removeNewEntry();
+            if(routingEntryFlag) {
+                removeRoutingEntry();
                 if(routingKey.recordRoutingKeys()) {
                     removeRoutingKeyTraceEnabled();
                     removeRoutingKeys();

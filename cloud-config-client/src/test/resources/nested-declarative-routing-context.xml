@@ -10,15 +10,13 @@
 
     <import resource="classpath*:cloud-config.xml"/>
 
-    <bean id="level1" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
-
-    <bean id="level2" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <bean id="declarativeRoutingKeyResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
 
     <bean id="zk-default-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
         <property name="resolvers">
             <list>
-                <ref bean="level1"/>
-                <ref bean="level2"/>
+                <ref bean="declarativeRoutingKeyResolver"/>
+                <ref bean="declarativeRoutingKeyResolver"/>
             </list>
         </property>
     </bean>

@@ -7,23 +7,23 @@ import java.util.*;
  */
 public class RoutingKeyHolder {
 
-    private static final ThreadLocal<Boolean> newEntryFlag = new ThreadLocal<Boolean>() {
+    private static final ThreadLocal<Boolean> routingEntryFlag = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {
             return Boolean.TRUE;
         }
     };
 
-    public static final boolean isNewEntry() {
-        return newEntryFlag.get();
+    public static final boolean isRoutingEntry() {
+        return routingEntryFlag.get();
     }
 
-    public static void setNewEntry(boolean isNewEntry) {
-        newEntryFlag.set(isNewEntry);
+    public static void setRoutingEntry(boolean isRoutingEntry) {
+        routingEntryFlag.set(isRoutingEntry);
     }
 
-    public static void removeNewEntry() {
-        newEntryFlag.remove();
+    public static void removeRoutingEntry() {
+        routingEntryFlag.remove();
     }
 
     private static final ThreadLocal<Queue<String>> declarativeRoutingKeyHolder = new ThreadLocal<Queue<String>>() {
