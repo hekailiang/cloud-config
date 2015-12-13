@@ -84,6 +84,7 @@ public class SimpleResourceConfigFactoryBeanTest extends BaseTestClass {
         factoryBean.setClient(zkRootClient);
         factoryBean.setPath("/database/bcp");
         factoryBean.setResourceType(BoneCPDataSourceConfig.class);
+        factoryBean.setAutoReload(true);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();

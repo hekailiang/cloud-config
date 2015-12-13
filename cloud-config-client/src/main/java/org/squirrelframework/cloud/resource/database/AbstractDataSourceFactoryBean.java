@@ -34,6 +34,8 @@ public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfi
 
     private DefaultListableBeanFactory beanFactory;
 
+    private boolean autoReload = false;
+
     protected DefaultListableBeanFactory getBeanFactory() {
         return beanFactory;
     }
@@ -58,6 +60,7 @@ public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfi
                 cnfBuilder.addPropertyValue("path", configPath);
                 cnfBuilder.addPropertyValue("resourceType", baseDataSourceConfigType());
                 cnfBuilder.addPropertyValue("validator", validator);
+                cnfBuilder.addPropertyValue("autoReload", autoReload);
                 cnfBuilder.setLazyInit(true);
                 beanFactory.registerBeanDefinition(configBeanId, cnfBuilder.getBeanDefinition());
             }
@@ -105,5 +108,13 @@ public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfi
                 }
             }
         };
+    }
+
+    public boolean isAutoReload() {
+        return autoReload;
+    }
+
+    public void setAutoReload(boolean autoReload) {
+        this.autoReload = autoReload;
     }
 }

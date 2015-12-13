@@ -67,6 +67,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
             dsBuilder = BeanDefinitionBuilder.rootBeanDefinition(dataSourceFactoryBeanClass);
             dsBuilder.addPropertyValue("configPath", dsPath);
         }
+        dsBuilder.addPropertyValue("autoReload", isAutoReload());
         dsBuilder.addPropertyValue("validator", validator);
         dsBuilder.setLazyInit(true);
         getBeanFactory().registerBeanDefinition(dsBeanId, dsBuilder.getBeanDefinition());

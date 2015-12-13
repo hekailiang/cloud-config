@@ -50,6 +50,7 @@ public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
         factoryBean.setClient(zkRootClient);
         factoryBean.setPath(path);
         factoryBean.setResourceType(TenantConfig.class);
+        factoryBean.setAutoReload(true);
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
@@ -76,7 +77,7 @@ public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
         assertThat(((TenantConfig) result.get("ebao")).getDomain(), is("ebao.dev.ebaocloud.com.cn"));
     }
 
-    @Test
+    @Test(timeout = 10000L)
     public void testUpdateTenantAwareConfig() throws Exception {
         TenantAwareResourceConfig result = createBean();
         final AtomicBoolean reloadInvoked = new AtomicBoolean(false);

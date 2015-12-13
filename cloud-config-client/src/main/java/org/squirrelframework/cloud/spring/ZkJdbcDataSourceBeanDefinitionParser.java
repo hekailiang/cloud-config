@@ -38,6 +38,7 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         String path = element.getAttribute("path");
         String resourceType = element.getAttribute("resource-type");
+        Boolean autoReload = getSafeBoolean(element.getAttribute("auto-reload"));
         Boolean multiTenancyAware = getSafeBoolean(element.getAttribute("multi-tenancy-aware"));
         String validatorBeanName = element.getAttribute("validator-ref");
         String fallbackDsPath = element.getAttribute("fallback");
@@ -72,5 +73,6 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
         if(StringUtils.hasLength(validatorBeanName)) {
             builder.addPropertyReference("validator", validatorBeanName);
         }
+        builder.addPropertyValue("autoReload", autoReload);
     }
 }

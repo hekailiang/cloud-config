@@ -1,6 +1,5 @@
 package org.squirrelframework.cloud.resource;
 
-import com.google.common.collect.Lists;
 import org.squirrelframework.cloud.conf.ZkPath;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -8,7 +7,6 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.squirrelframework.cloud.utils.InetAddressHelper;
 
 import java.util.Arrays;
 import java.util.List;

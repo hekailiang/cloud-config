@@ -44,38 +44,42 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
 
     private DefaultListableBeanFactory beanFactory;
 
+    private boolean autoReload = false;
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        childNodeCache = new PathChildrenCache(client, path, true);
-        childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
-        childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
-            @Override
-            public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-                String nodeName = event.getData()!=null ?
-                        ZKPaths.getNodeFromPath(event.getData().getPath()) : "";
-                String resPath = path+"/"+nodeName;
-                switch (event.getType()) {
-                    case CHILD_ADDED: {
-                        logger.info("ChildNode added: {}", nodeName);
-                        buildResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
-                        break;
-                    }
+        if(autoReload) {
+            childNodeCache = new PathChildrenCache(client, path, true);
+            childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+            childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
+                @Override
+                public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+                    String nodeName = event.getData()!=null ?
+                            ZKPaths.getNodeFromPath(event.getData().getPath()) : "";
+                    String resPath = path+"/"+nodeName;
+                    switch (event.getType()) {
+                        case CHILD_ADDED: {
+                            logger.info("ChildNode added: {}", nodeName);
+                            buildResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
+                            break;
+                        }
 
-                    case CHILD_UPDATED: {
-                        logger.info("ChildNode changed: {}", nodeName);
-                        break;
-                    }
+                        case CHILD_UPDATED: {
+                            logger.info("ChildNode changed: {}", nodeName);
+                            break;
+                        }
 
-                    case CHILD_REMOVED: {
-                        logger.info("ChildNode removed: {}", nodeName);
-                        removeResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
-                        break;
+                        case CHILD_REMOVED: {
+                            logger.info("ChildNode removed: {}", nodeName);
+                            removeResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
+                            break;
+                        }
+                        default:
+                            break;
                     }
-                    default:
-                        break;
                 }
-            }
-        });
+            });
+        }
         if(fallbackResourcePath!=null && fallbackResource==null) {
             String dsBeanName = getResourceBeanIdFromPath(fallbackResourcePath);
             if( !applicationContext.containsBeanDefinition(dsBeanName) ) {
@@ -135,5 +139,13 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
 
     protected DefaultListableBeanFactory getBeanFactory() {
         return beanFactory;
+    }
+
+    public void setAutoReload(boolean autoReload) {
+        this.autoReload = autoReload;
+    }
+
+    public boolean isAutoReload() {
+        return autoReload;
     }
 }

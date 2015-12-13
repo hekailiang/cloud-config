@@ -73,37 +73,40 @@ public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig>
 
     private StringValueResolver stringValueResolver;
 
+    private boolean autoReload = false;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         configProfiles = CloudConfigCommon.getProfiles();
 
-        // attach listeners
-        childNodeCache = new PathChildrenCache(client, path, true);
-        childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
-        childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
-            @Override
-            public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-                switch (event.getType()) {
-                    case CHILD_ADDED: {
-                        handleChildAdded(client, event);
-                        break;
-                    }
+        if(autoReload) {
+            // attach listeners
+            childNodeCache = new PathChildrenCache(client, path, true);
+            childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+            childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
+                @Override
+                public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+                    switch (event.getType()) {
+                        case CHILD_ADDED: {
+                            handleChildAdded(client, event);
+                            break;
+                        }
 
-                    case CHILD_UPDATED: {
-                        handleChildUpdated(client, event);
-                        break;
-                    }
+                        case CHILD_UPDATED: {
+                            handleChildUpdated(client, event);
+                            break;
+                        }
 
-                    case CHILD_REMOVED: {
-                        handleChildRemoved(client, event);
-                        break;
+                        case CHILD_REMOVED: {
+                            handleChildRemoved(client, event);
+                            break;
+                        }
+                        default:
+                            break;
                     }
-                    default:
-                        break;
                 }
-            }
-        });
-
+            });
+        }
         // create instances
         super.afterPropertiesSet();
 
@@ -193,5 +196,13 @@ public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig>
     protected boolean canApplyForLocalMachine(String nodeName) {
         return nodeName.charAt(0)=='&' &&
                 InetAddressHelper.isLocalMachineIpAddressInRange(nodeName.substring(1));
+    }
+
+    public void setAutoReload(boolean autoReload) {
+        this.autoReload = autoReload;
+    }
+
+    public boolean isAutoReload() {
+        return autoReload;
     }
 }
