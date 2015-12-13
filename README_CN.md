@@ -21,8 +21,8 @@ root
 |---|--|--/dev  
 |---|--|--/prod    
 |---|--/mail  
-|---|--|--/dev  
-|---|--|--/prod  
+|------|--/dev  
+|------|--/prod  
 
 `/root`：namespace节点，在系统启动时通过-Dnamesapce=root指定  
 `/root/properties`: 系统属性配置根节点，所有系统属性相关配置都定义在这个节点下  
@@ -87,9 +87,9 @@ mail.password=dev1234
 root  
 |---/config    
 |---|--/database  
-|---|--|--/mail  
-|---|--|--|--/dev  
-|---|--|--|--/prod
+|------|--/mail  
+|---------|--/dev  
+|---------|--/prod
 
 `/root/config`: 系统资源配置根节点，所有系统资源相关配置都定义在这个节点下  
 `/root/config/database`：数据库资源配置节点  
@@ -156,6 +156,89 @@ root
 **注意：** Cloud-Config创建数据源时会合并当前路径(/database/mail)与其路径父节点(/database)及其profile子节点(/database/mail/dev)的内容，合并优先级dev>mail>database。当auto-reload为true，并且dev节点中配置内容发生变化时，对应数据源将自动重新创建。
 
 #### 多租户数据源配置  
+对于多租户数据源配置，Zookeeper中节点配置如下：  
+root  
+|---/config    
+|------/database  
+|------|--/mail  
+|---------|--/tenant1  
+|---------|--|--/dev  
+|---------|--|--/prod  
+|---------|--/tenant2  
+|---------|--|--/dev  
+|---------|--|--/prod  
+|---------|--/unknown  
+
+`/root/database/mail`: mail模块数据库资源配置节点  
+`/root/database/mail/tenant1`: 租户ID为tenant1的mail模块数据库资源配置节点  
+`/root/database/mail/tenant1/dev`: dev profile配置节点  
+
+`/root/config/database/mail`中配置内容如下：  
+```json
+{
+    "driverClassName" : "com.mysql.jdbc.Driver",
+    
+    "idleMaxAgeInMinutes" : 240,
+    "idleConnectionTestPeriodInMinutes" : 60,
+    "maxConnectionsPerPartition" : 10,
+    "minConnectionsPerPartition" : 1,
+    "partitionCount" : 2,
+    "acquireIncrement" : 5,
+    "statementsCacheSize" : 100
+}
+```
+
+`/root/config/database/mail/tenant1`中配置内容如下：  
+```json
+{
+    "userName" : "root",
+    "password" : "root"
+}
+```
+
+`/root/config/database/mail/tenant1/dev`中配置内容如下：  
+```json
+{
+  "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/mail-t1-dev?useUnicode=true"
+}
+```
+
+`/root/config/database/mail/tenant1/prod`中配置内容如下：  
+```json
+{
+  "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/mail-t1-prod?useUnicode=true"
+}
+```
+
+在Spring中使用时需配置如下：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <!-- 配置默认数据库路由键值解析器 -->
+	<bean id="zk-default-resolver" class="org.squirrelframework.cloud.TestRoutingKeyResolver"/>
+    <!-- path指定相对于/{namespace}/config的数据源配置路径 -->
+    <!-- resource-type指定Pool DataSource类型（BoneCP，C3P0，Druid）-->
+    <!-- auto-reload指定当当前profile中配置内容发生变化时，是否重新创建数据源 -->
+    <!-- multi-tenancy-aware指定该路径下的数据库资源是多租户数据源 -->
+    <!-- fallback指定当解析出来的数据库路由键值无法匹配租户ID时，回退数据源的配置路径 -->
+    <cc:zk-jdbc-datasource id="dataSource"
+                           path="/database/mail"
+                           multi-tenancy-aware="true"
+                           fallback="/database/mail/unknown"
+                           auto-reload="true"
+    />
+</beans>
+```
+**注意：** 默认数据库路由键值解析器的id必须是zk-default-resolver，否则就需要在zk-jdbc-datasource中通过resolver-ref指定对应的resolver。RoutingKeyResolver用于获取当前的数据库路由键值，用户需要实现对应的routing key resolver（e.g. TenantIdResolver）返回对应租户ID，且模块路径下的配置节点名为对应租户ID，才能保证数据源的正确路由。
 
 ### 数据库路由器配置
 
