@@ -14,7 +14,7 @@
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
-    <import resource="classpath*:cloud-config.xml"/>
+    <cc:zk-declarative-routing/>
 
     <bean id="tenantResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
     <bean id="profileResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>

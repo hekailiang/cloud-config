@@ -71,4 +71,7 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="zk-declarative-routing">
+    </xsd:element>
+
 </xsd:schema>
