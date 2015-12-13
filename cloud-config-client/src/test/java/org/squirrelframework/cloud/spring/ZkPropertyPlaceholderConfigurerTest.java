@@ -17,10 +17,10 @@ public class ZkPropertyPlaceholderConfigurerTest extends BaseTestClass {
 
     @Override
     protected void prepare() throws Exception {
-        String mailConfig = "{\"mail.host\": \"smtp.sina.com\", \"mail.port\": 25}";
+        String mailConfig = "{\"mail.host\": \"smtp.sina.com\", \"mail.port\": 25, \"host\": \"a\"}";
         zkPropsClient.create().creatingParentsIfNeeded().forPath("/mail", mailConfig.getBytes());
 
-        String queryConfig = "{\"query.host\": \"query.yahoo.com\", \"query.port\": 2331}";
+        String queryConfig = "{\"query.host\": \"query.yahoo.com\", \"query.port\": 2331, \"host\": \"b\"}";
         zkPropsClient.create().creatingParentsIfNeeded().forPath("/query", queryConfig.getBytes());
     }
 
@@ -37,6 +37,18 @@ public class ZkPropertyPlaceholderConfigurerTest extends BaseTestClass {
         applicationContext = new ClassPathXmlApplicationContext("classpath:zkprops-context.xml");
         SampleBean queryBean = applicationContext.getBean("queryBean", SampleBean.class);
         assertThat(queryBean.getHost(), equalTo("query.yahoo.com"));
+        assertThat(queryBean.getPort(), equalTo(2331));
+    }
+
+    @Test
+    public void testMultipleRemotePropertyPathWithLocalOverride() {
+        applicationContext = new ClassPathXmlApplicationContext("classpath:zkprops3-context.xml");
+        SampleBean mailBean = applicationContext.getBean("mailBean", SampleBean.class);
+        assertThat(mailBean.getHost(), equalTo("a"));
+        assertThat(mailBean.getPort(), equalTo(25));
+
+        SampleBean queryBean = applicationContext.getBean("queryBean", SampleBean.class);
+        assertThat(queryBean.getHost(), equalTo("a"));
         assertThat(queryBean.getPort(), equalTo(4321));
     }
 
@@ -44,12 +56,12 @@ public class ZkPropertyPlaceholderConfigurerTest extends BaseTestClass {
     public void testMultipleRemotePropertyPath() {
         applicationContext = new ClassPathXmlApplicationContext("classpath:zkprops2-context.xml");
         SampleBean mailBean = applicationContext.getBean("mailBean", SampleBean.class);
-        assertThat(mailBean.getHost(), equalTo("smtp.sina.com"));
+        assertThat(mailBean.getHost(), equalTo("a"));
         assertThat(mailBean.getPort(), equalTo(25));
 
         SampleBean queryBean = applicationContext.getBean("queryBean", SampleBean.class);
-        assertThat(queryBean.getHost(), equalTo("query.yahoo.com"));
-        assertThat(queryBean.getPort(), equalTo(4321));
+        assertThat(queryBean.getHost(), equalTo("a"));
+        assertThat(queryBean.getPort(), equalTo(2331));
     }
 
     public static class SampleBean {

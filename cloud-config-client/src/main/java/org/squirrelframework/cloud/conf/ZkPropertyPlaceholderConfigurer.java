@@ -1,5 +1,6 @@
 package org.squirrelframework.cloud.conf;
 
+import com.google.common.collect.Lists;
 import org.springframework.util.StringUtils;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.apache.curator.framework.CuratorFramework;
@@ -16,6 +17,7 @@ import org.springframework.core.env.PropertySource;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -86,12 +88,23 @@ public class ZkPropertyPlaceholderConfigurer extends PropertySourcesPlaceholderC
             // add zk properties
             try {
                 if(client!=null) {
+                    List<PropertySource<?>> remotePropertySources = Lists.newArrayList();
                     for(String path : pathArray) {
                         PropertySource<?> remotePropertySource = new PropertiesPropertySource(
                                 REMOTE_PROPERTIES_PROPERTY_SOURCE_NAME+path,
                                 fetchRemoteProperties(path, CloudConfigCommon.getProfiles())
                         );
-                        this.propertySources.addLast(remotePropertySource);
+                        remotePropertySources.add(remotePropertySource);
+                    }
+                    if(!localOverride) {
+                        Collections.reverse(remotePropertySources);
+                    }
+                    for(PropertySource<?> remotePropertySource : remotePropertySources) {
+                        if(localOverride) {
+                            this.propertySources.addLast(remotePropertySource);
+                        } else {
+                            this.propertySources.addFirst(remotePropertySource);
+                        }
                     }
                 }
             } catch (Exception e) {
