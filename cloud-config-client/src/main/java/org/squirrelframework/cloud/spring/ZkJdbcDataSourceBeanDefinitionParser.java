@@ -21,8 +21,8 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
     @Override
     protected Class getBeanClass(Element element) {
         String resourceType = element.getAttribute("resource-type");
-        Boolean multiTenancyAware = getSafeBoolean(element.getAttribute("multi-tenancy-aware"));
-        if (multiTenancyAware) {
+        Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
+        if (routingSupport) {
             return RoutingDataSourceFactoryBean.class;
         } else if ("BoneCP".equals(resourceType)) {
             return BoneCPDataSourceFactoryBean.class;
@@ -39,13 +39,13 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
         String path = element.getAttribute("path");
         String resourceType = element.getAttribute("resource-type");
         Boolean autoReload = getSafeBoolean(element.getAttribute("auto-reload"));
-        Boolean multiTenancyAware = getSafeBoolean(element.getAttribute("multi-tenancy-aware"));
+        Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
         String validatorBeanName = element.getAttribute("validator-ref");
         String fallbackDsPath = element.getAttribute("fallback");
         if(!parserContext.getRegistry().containsBeanDefinition(validatorBeanName)) {
             validatorBeanName = null;
         }
-        if (multiTenancyAware) {
+        if (routingSupport) {
             if ("BoneCP".equals(resourceType)) {
                 builder.addPropertyValue("dataSourceFactoryBeanClass", BoneCPDataSourceFactoryBean.class.getName());
             } else if ("C3P0".equals(resourceType)) {

@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Created by kailianghe on 9/10/15.
  */
-public class TenantAwareResourceConfig extends CloudResourceConfig implements Map<String, Object>, TenantSupport<Object> {
+public class TenantAwareResourceConfig extends CloudResourceConfig implements Map<String, Object>, RoutingSupport<Object> {
 
     @NotEmpty
     private Map<String, Object> configHolder;

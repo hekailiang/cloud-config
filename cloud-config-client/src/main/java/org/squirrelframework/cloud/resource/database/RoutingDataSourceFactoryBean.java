@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.squirrelframework.cloud.resource.AbstractRoutingResourceFactoryBean;
-import org.squirrelframework.cloud.resource.TenantSupport;
+import org.squirrelframework.cloud.resource.RoutingSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -120,7 +120,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         }
     };
 
-    public class RoutingDataSource extends AbstractRoutingDataSource implements TenantSupport<DataSource> {
+    public class RoutingDataSource extends AbstractRoutingDataSource implements RoutingSupport<DataSource> {
         private LoadingCache<String, DataSource> localDataSourceStore = CacheBuilder.newBuilder().build(dataSourceCacheLoader);
 
         public RoutingDataSource() {

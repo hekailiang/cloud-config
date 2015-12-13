@@ -22,7 +22,7 @@
     </bean>
 
     <cc:zk-client connection-string="127.0.0.1:1234"/>
-    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" multi-tenancy-aware="true" fallback="/database/mydb/unknown"/>
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" fallback="/database/mydb/unknown"/>
 
     <bean id="inner" class="org.squirrelframework.cloud.routing.MultipleDeclarativeRoutingKeyTest$Inner">
         <constructor-arg name="ds" ref="dataSource"/>

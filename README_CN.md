@@ -228,17 +228,17 @@ root
     <!-- path指定相对于/{namespace}/config的数据源配置路径 -->
     <!-- resource-type指定Pool DataSource类型（BoneCP，C3P0，Druid）-->
     <!-- auto-reload指定当当前profile中配置内容发生变化时，是否重新创建数据源 -->
-    <!-- multi-tenancy-aware指定该路径下的数据库资源是多租户数据源 -->
+    <!-- routing-support指定该路径下的数据库资源是支持路由的 -->
     <!-- fallback指定当解析出来的数据库路由键值无法匹配租户ID时，回退数据源的配置路径 -->
     <cc:zk-jdbc-datasource id="dataSource"
                            path="/database/mail"
-                           multi-tenancy-aware="true"
+                           routing-support="true"
                            fallback="/database/mail/unknown"
                            auto-reload="true"
     />
 </beans>
 ```
-**注意：** 默认数据库路由键值解析器的id必须是zk-default-resolver，否则就需要在zk-jdbc-datasource中通过resolver-ref指定对应的resolver。RoutingKeyResolver用于获取当前的数据库路由键值，用户需要实现对应的routing key resolver（e.g. TenantIdResolver）返回对应租户ID，且模块路径下的配置节点名为对应租户ID，才能保证数据源的正确路由。
+**注意：** 默认数据库路由键值解析器的id必须是zk-default-resolver，否则就需要在zk-jdbc-datasource中通过resolver-ref指定对应的resolver。RoutingKeyResolver用于获取当前的数据库路由键值，用户需要实现对应的routing key resolver（e.g. TenantIdThreadLocalResolver）返回对应租户ID，且模块路径下的配置节点名为对应租户ID，才能保证数据源的正确路由。
 
 ### 数据库路由器配置
 

@@ -16,8 +16,8 @@ import static org.squirrelframework.cloud.utils.CloudConfigCommon.getSafeBoolean
 public class ZkResourceConfigBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
     protected Class<?> getBeanClass(Element element) {
-        Boolean multiTenancyAware = getSafeBoolean(element.getAttribute("multi-tenancy-aware"));
-        return multiTenancyAware ? TenantAwareResourceConfigFactoryBean.class : SimpleResourceConfigFactoryBean.class;
+        Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
+        return routingSupport ? TenantAwareResourceConfigFactoryBean.class : SimpleResourceConfigFactoryBean.class;
     }
 
     @Override

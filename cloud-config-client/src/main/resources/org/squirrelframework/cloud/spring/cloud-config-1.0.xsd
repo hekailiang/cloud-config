@@ -50,7 +50,7 @@
                         </xsd:simpleType>
                     </xsd:attribute>
                     <xsd:attribute type="xsd:boolean" name="auto-reload" default="false"/>
-                    <xsd:attribute type="xsd:boolean" name="multi-tenancy-aware" default="false"/>
+                    <xsd:attribute type="xsd:boolean" name="routing-support" default="false"/>
                     <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
                     <xsd:attribute type="xsd:string" name="validator-ref" default="zk-default-validator"/>
                     <xsd:attribute type="xsd:string" name="fallback" use="optional"/>
@@ -65,7 +65,7 @@
                 <xsd:extension base="beans:identifiedType">
                     <xsd:attribute type="xsd:string" name="path" use="required"/>
                     <xsd:attribute type="xsd:string" name="resource-type" use="required"/>
-                    <xsd:attribute type="xsd:boolean" name="multi-tenancy-aware" default="false"/>
+                    <xsd:attribute type="xsd:boolean" name="routing-support" default="false"/>
                     <xsd:attribute type="xsd:string" name="validator-ref" default="zk-default-validator"/>
                 </xsd:extension>
             </xsd:complexContent>
