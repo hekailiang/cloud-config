@@ -180,7 +180,7 @@ root
 `/root/config/database/mail`中配置内容如下：  
 ```json
 {
-    "driverClassName" : "com.mysql.jdbc.Driver",
+    "driverClassName" : "${mysql.driver.name}",
     
     "idleMaxAgeInMinutes" : 240,
     "idleConnectionTestPeriodInMinutes" : 60,
@@ -191,6 +191,7 @@ root
     "statementsCacheSize" : 100
 }
 ```
+注：系统属性可以在资源配置中引用，例如在/{namespace}/properties/variables中定义了"{"mysql.driver.name":"com.mysql.jdbc.Driver"}"
 
 `/root/config/database/mail/tenant1`中配置内容如下：  
 ```json
@@ -248,6 +249,11 @@ root
 2. 当auto-reload为true，并且dev节点及其兄弟节点中配置内容发生变化，增加或删除profile节点，对应数据源将自动重新创建。
 
 ### 数据库路由器配置
+
+#### 读写分离数据库路由配置
+cloud-config通过在应用层做多数据源路由（嵌套路由）来支持读写分离，一写多读等应用场景。
+
+#### 水平分库路由配置
 
 ## 未来计划
 * 生产环境配置的权限控制及监管  
