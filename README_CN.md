@@ -153,9 +153,13 @@ root
     <cc:zk-jdbc-datasource id="dataSource" path="/database/mail" resource-type="BoneCP" auto-reload="true"/>
 </beans>
 ```
-**注意：** Cloud-Config创建数据源时会合并当前路径(/database/mail)与其路径父节点(/database)及其profile子节点(/database/mail/dev)的内容，合并优先级dev>mail>database。当auto-reload为true，并且dev节点中配置内容发生变化时，对应数据源将自动重新创建。
+**注意：**   
+1. Cloud-Config创建数据源时会合并当前路径(/database/mail)与其父节点(/database)及其profile子节点(/database/mail/dev)的内容，合并优先级dev>mail>database。  
+2. 当auto-reload为true，并且dev节点中配置内容发生变化时，对应数据源将自动重新创建。
 
 #### 多租户数据源配置  
+支持多租户数据源需要使用到org.squirrelframework.cloud.resource.database.RoutingDataSourceFactoryBean来创建对应数据源。这里需要用户指定RoutingKeyResolver，需要配置与RoutingKey对应的目录结构。
+
 对于多租户数据源配置，Zookeeper中节点配置如下：  
 root  
 |---/config    
@@ -238,7 +242,10 @@ root
     />
 </beans>
 ```
-**注意：** 默认数据库路由键值解析器的id必须是zk-default-resolver，否则就需要在zk-jdbc-datasource中通过resolver-ref指定对应的resolver。RoutingKeyResolver用于获取当前的数据库路由键值，用户需要实现对应的routing key resolver（e.g. TenantIdThreadLocalResolver）返回对应租户ID，且模块路径下的配置节点名为对应租户ID，才能保证数据源的正确路由。
+**注意：**   
+1. 默认数据库路由键值解析器的id必须是zk-default-resolver，否则就需要在zk-jdbc-datasource中通过resolver-ref指定对应的resolver。RoutingKeyResolver用于获取当前的数据库路由键值，用户需要实现对应的routing key resolver（e.g. TenantIdThreadLocalResolver）返回对应租户ID，且模块路径下的配置节点名为对应租户ID，才能保证数据源的正确路由。   
+2. Cloud-Config创建数据源时会合并当前租户路径（/database/mail/tenant1）与父节点(/database/mail/)及其profile子节点(/database/mail/tenant1/dev)的内容，合并优先级dev>mail>tenant1。  
+2. 当auto-reload为true，并且dev节点及其兄弟节点中配置内容发生变化，增加或删除profile节点，对应数据源将自动重新创建。
 
 ### 数据库路由器配置
 
