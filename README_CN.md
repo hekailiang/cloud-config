@@ -168,6 +168,7 @@ root
 |------|--/mail  
 |---------|--/tenant1  
 |---------|--|--/dev  
+|---------|--|--/&172.31.201.0-99@dev  
 |---------|--|--/prod  
 |---------|--/tenant2  
 |---------|--|--/dev  
@@ -177,6 +178,7 @@ root
 `/root/database/mail`: mail模块数据库资源配置节点  
 `/root/database/mail/tenant1`: 租户ID为tenant1的mail模块数据库资源配置节点  
 `/root/database/mail/tenant1/dev`: dev profile配置节点  
+`/root/database/mail/tenant1/dev/&172.31.201.0-99@dev`:  条件节点，当本机IP地址在172.31.201.0-99之间，并且系统运行在dev profile上时生效，条件节点的配置会覆盖dev节点的配置。条件节点可以应用于针对某几台server启用某些配置项。条件节点必须同时指明IP地址范围(&)和生效Profile名称(@)。   
 
 `/root/config/database/mail`中配置内容如下：  
 ```json

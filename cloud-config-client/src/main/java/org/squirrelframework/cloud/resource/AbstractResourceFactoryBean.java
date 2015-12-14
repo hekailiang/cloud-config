@@ -18,6 +18,7 @@ import org.squirrelframework.cloud.utils.InetAddressHelper;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -194,8 +195,10 @@ public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig>
     }
 
     protected boolean canApplyForLocalMachine(String nodeName) {
-        return nodeName.charAt(0)=='&' &&
-                InetAddressHelper.isLocalMachineIpAddressInRange(nodeName.substring(1));
+        int idx = nodeName.lastIndexOf('@');
+        return idx>0 && nodeName.charAt(0)=='&' &&
+                InetAddressHelper.isLocalMachineIpAddressInRange(nodeName.substring(1, idx)) &&
+                Arrays.asList(configProfiles).contains( nodeName.substring(idx+1) );
     }
 
     public void setAutoReload(boolean autoReload) {
