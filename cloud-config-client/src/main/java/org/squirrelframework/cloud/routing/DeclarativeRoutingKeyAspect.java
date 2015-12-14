@@ -53,34 +53,8 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
                     setRoutingKeyTraceEnabled(true);
                 }
             }
-            String routingValue = routingKey.value();
-            Matcher matcher = pattern.matcher(routingValue.trim());
-            if(matcher.find()) {
-                // prepare execution context
-                StandardEvaluationContext simpleContext = new StandardEvaluationContext();
-                simpleContext.setRootObject(jp.getTarget()); // or getThis?
-                simpleContext.setVariable("args", jp.getArgs());
-
-                MethodSignature signature = (MethodSignature) jp.getSignature();
-                Method method = signature.getMethod();
-                Annotation[][] annotations = method.getParameterAnnotations();
-                for(int i=0; i<annotations.length; i++) {
-                    if(annotations[i]==null || annotations[i].length==0) continue;
-                    RoutingVariable routingParam = null;
-                    for(Annotation annotation : annotations[i]) {
-                        if(annotation.annotationType() == RoutingVariable.class) {
-                            routingParam = (RoutingVariable) annotation;
-                            break;
-                        }
-                    }
-                    if(routingParam!=null) {
-                        simpleContext.setVariable(routingParam.value(), jp.getArgs()[i]);
-                    }
-                }
-                String elExpr = matcher.group(1);
-                routingValue = expressionCache.get(elExpr).getValue(simpleContext, String.class);
-            }
-            putDeclarativeRoutingKey(routingValue);
+            String resolvedValue = resolveRoutingValue(jp, routingKey.value());
+            putDeclarativeRoutingKey(resolvedValue);
             return jp.proceed();
         } finally {
             if(routingEntryFlag) {
@@ -92,6 +66,37 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
                 removeDeclarativeRoutingKeys();
             }
         }
+    }
+
+    private String resolveRoutingValue(ProceedingJoinPoint jp, String routingValue) throws Exception {
+        String resolvedValue = routingValue.trim();
+        Matcher matcher = pattern.matcher(resolvedValue);
+        if(matcher.find()) {
+            // prepare execution context
+            StandardEvaluationContext simpleContext = new StandardEvaluationContext();
+            simpleContext.setRootObject(jp.getTarget()); // or getThis?
+            simpleContext.setVariable("args", jp.getArgs());
+
+            MethodSignature signature = (MethodSignature) jp.getSignature();
+            Method method = signature.getMethod();
+            Annotation[][] annotations = method.getParameterAnnotations();
+            for(int i=0; i<annotations.length; i++) {
+                if(annotations[i]==null || annotations[i].length==0) continue;
+                RoutingVariable routingParam = null;
+                for(Annotation annotation : annotations[i]) {
+                    if(annotation.annotationType() == RoutingVariable.class) {
+                        routingParam = (RoutingVariable) annotation;
+                        break;
+                    }
+                }
+                if(routingParam!=null) {
+                    simpleContext.setVariable(routingParam.value(), jp.getArgs()[i]);
+                }
+            }
+            String elExpr = matcher.group(1);
+            resolvedValue = expressionCache.get(elExpr).getValue(simpleContext, String.class);
+        }
+        return resolvedValue;
     }
 
     @Override
