@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>cloud-config by hekailiang</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">cloud-config</h1>
+      <h2 class="project-tagline">configure once – use everywhere</h2>
+      <a href="https://github.com/hekailiang/cloud-config" class="btn">View on GitHub</a>
+      <a href="https://github.com/hekailiang/cloud-config/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/hekailiang/cloud-config/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="cloud-config简介" class="anchor" href="#cloud-config%E7%AE%80%E4%BB%8B" aria-hidden="true"><span class="octicon octicon-link"></span></a>cloud-config简介</h2>
+
+<p>cloud-config是一个基于Zookeeper的集中式应用配置中心，并与Spring框架紧密集。cloud-config解决了分布式应用或者集群环境中，以硬编码、配置文件、环境变量管理应用配置所造成的应用开发、系统运维工作的繁琐，支持<code>配置一次，处处使用</code>。<br>
+cloud-confg在开发过程中受到 <a href="http://www.infoq.com/presentations/spring-apache-zookeeper">Centralized Application Configuration with Spring and Apache ZooKeeper</a> 的启发。</p>
+
+<h2>
+<a id="cloud-config-client主要功能介绍" class="anchor" href="#cloud-config-client%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D" aria-hidden="true"><span class="octicon octicon-link"></span></a>cloud-config-client主要功能介绍</h2>
+
+<ul>
+<li><a href="#%E7%B3%BB%E7%BB%9F%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE">系统属性配置</a></li>
+<li>
+<a href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE">数据库资源配置</a>
+
+<ul>
+<li><a href="#%E5%8D%95%E4%B8%80%E6%95%B0%E6%8D%AE%E6%BA%90%E9%85%8D%E7%BD%AE">单一数据源配置</a></li>
+<li><a href="#%E5%A4%9A%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E6%BA%90%E9%85%8D%E7%BD%AE">多租户数据源配置</a></li>
+</ul>
+</li>
+<li>
+<a href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B7%AF%E7%94%B1%E5%99%A8%E9%85%8D%E7%BD%AE">数据库路由器配置</a>
+
+<ul>
+<li><a href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE">读写分离数据库路由配置</a></li>
+<li><a href="#%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE">水平分库路由配置</a></li>
+</ul>
+</li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE">自定义资源配置</a></li>
+</ul>
+
+<h2>
+<a id="cloud-config-server主要功能介绍" class="anchor" href="#cloud-config-server%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D" aria-hidden="true"><span class="octicon octicon-link"></span></a>cloud-config-server主要功能介绍</h2>
+
+<h3>
+<a id="系统属性配置" class="anchor" href="#%E7%B3%BB%E7%BB%9F%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>系统属性配置</h3>
+
+<p>cloud-config扩展了Spring的<em>PropertySourcesPlaceholderConfigurer</em>, 用户在开发过程中可以很方便的引用Zookeeper中配置的键值。具体在使用时，cloud-config要求用户将所有全局系统属性置于Zookeeper的/{namespace}/properties节点下。例如，在Zookeeper中节点配置如下：<br>
+root<br>
+|---/properties<br>
+|---|--/query<br>
+|---|--|--/dev<br>
+|---|--|--/prod<br>
+|---|--/mail<br>
+|------|--/dev<br>
+|------|--/prod  </p>
+
+<p><code>/root</code>：namespace节点，在系统启动时通过-Dnamesapce=root指定<br>
+<code>/root/properties</code>: 系统属性配置根节点，所有系统属性相关配置都定义在这个节点下<br>
+<code>/root/properties/query</code>: query模块属性配置节点，与query模块相关的属性定义以json格式在这个节点中<br>
+<code>/root/properties/query/dev</code>: profile节点，在系统启动时通过-Dconfig.profile=dev指定。当系统的config profile是dev时，dev节点中定义的属性会与父节点属性<strong>打平</strong>合并，并且覆盖掉与父节点属性键相同的配置值。</p>
+
+<p><code>/root/property/mail</code>中配置内容如下：</p>
+
+<div class="highlight highlight-source-json"><pre><span class="pl-s"><span class="pl-pds">"</span>mail<span class="pl-pds">"</span></span>: {
+    <span class="pl-s"><span class="pl-pds">"</span>host<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>smtp.sina.com<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>port<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>25<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p><code>/root/property/mail/dev</code>中配置内容如下：</p>
+
+<div class="highlight highlight-source-json"><pre><span class="pl-s"><span class="pl-pds">"</span>mail<span class="pl-pds">"</span></span>: {
+    <span class="pl-s"><span class="pl-pds">"</span>username<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>dev_mail<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>dev1234<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p>合并后得到的属性键值为：</p>
+
+<pre><code>mail.host=smtp.sina.com
+mail.port=25
+mail.username=dev_mail@sina.cn
+mail.password=dev1234
+</code></pre>
+
+<p>效果等同于将以上内容定义在mail-config.properties中。</p>
+
+<p>在Spring中使用时需配置如下：</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;?<span class="pl-ent">xml</span><span class="pl-e"> version</span>=<span class="pl-s"><span class="pl-pds">"</span>1.0<span class="pl-pds">"</span></span><span class="pl-e"> encoding</span>=<span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>?&gt;
+<span class="pl-c">&lt;!--指定cloud-config namesapce和schema--&gt;</span>
+&lt;<span class="pl-ent">beans</span> <span class="pl-e">xmlns</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/beans<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">xsi</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">cc</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.squirrelframework.org/schema/config<span class="pl-pds">"</span></span>
+       <span class="pl-e">xsi</span><span class="pl-e">:</span><span class="pl-e">schemaLocation</span>=<span class="pl-s"><span class="pl-pds">"</span></span>
+<span class="pl-s">            http://www.springframework.org/schema/beans</span>
+<span class="pl-s">            http://www.springframework.org/schema/beans/spring-beans.xsd</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config/cloud-config.xsd<span class="pl-pds">"</span></span>&gt;
+
+    <span class="pl-c">&lt;!--配置用于读取配置信息的zookeeper client，connection string在系统启动时，可通过指定-Dconfig.center.url覆盖--&gt;</span>    
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
+
+    <span class="pl-c">&lt;!--zk-property-placeholder中可以在path属性上同时指定多个配置路径（相对于{namesapce}/properties)，路径在前者优先--&gt;</span>
+    <span class="pl-c">&lt;!--zk-property-placeholder中可以在location中引入本地配置文件，local-override为true时本地配置将覆盖zk中的配置--&gt;</span>    
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-property-placeholder</span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/mail, /query<span class="pl-pds">"</span></span> <span class="pl-e">location</span>=<span class="pl-s"><span class="pl-pds">"</span>classpath:query-server.properties<span class="pl-pds">"</span></span> <span class="pl-e">local-override</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;
+
+    <span class="pl-c">&lt;!--使用时与Spring原生property相同--&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>mailBean<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.spring.ZkPropertyPlaceholderConfigurerTest$SampleBean<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>host<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>${mal.host}<span class="pl-pds">"</span></span>/&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>port<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>${mail.port}<span class="pl-pds">"</span></span>/&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;</pre></div>
+
+<h3>
+<a id="数据库资源配置" class="anchor" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>数据库资源配置</h3>
+
+<p>不同于属性配置，系统资源配置均定义在/{namespace}/config节点下。目前对于数据库资源抽象仅支持JDBC数据源。</p>
+
+<h4>
+<a id="单一数据源配置" class="anchor" href="#%E5%8D%95%E4%B8%80%E6%95%B0%E6%8D%AE%E6%BA%90%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>单一数据源配置</h4>
+
+<p>对于单一数据源配置，Zookeeper中节点配置如下：<br>
+root<br>
+|---/config<br>
+|---|--/database<br>
+|------|--/mail<br>
+|---------|--/dev<br>
+|---------|--/prod</p>
+
+<p><code>/root/config</code>: 系统资源配置根节点，所有系统资源相关配置都定义在这个节点下<br>
+<code>/root/config/database</code>：数据库资源配置节点<br>
+<code>/root/config/database/mail</code>: mail模块数据库资源配置节点，资源定义以json格式在这个节点中 
+<code>/root/config/database/mail/dev</code>: mail模块数据库资源dev profile配置节点</p>
+
+<p><code>/root/config/database</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>driverClassName<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>com.mysql.jdbc.Driver<span class="pl-pds">"</span></span>,
+
+    <span class="pl-s"><span class="pl-pds">"</span>idleMaxAgeInMinutes<span class="pl-pds">"</span></span> : <span class="pl-c1">240</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>idleConnectionTestPeriodInMinutes<span class="pl-pds">"</span></span> : <span class="pl-c1">60</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>maxConnectionsPerPartition<span class="pl-pds">"</span></span> : <span class="pl-c1">10</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>minConnectionsPerPartition<span class="pl-pds">"</span></span> : <span class="pl-c1">1</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>partitionCount<span class="pl-pds">"</span></span> : <span class="pl-c1">2</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>acquireIncrement<span class="pl-pds">"</span></span> : <span class="pl-c1">5</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>statementsCacheSize<span class="pl-pds">"</span></span> : <span class="pl-c1">100</span>
+}</pre></div>
+
+<p><code>/root/config/database/mail</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>userName<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p><code>/root/config/database/mail/dev</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>jdbcUrl<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>jdbc:mysql://127.0.0.1:3306/mail-dev?useUnicode=true<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p><code>/root/config/database/mail/prod</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>jdbcUrl<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>jdbc:mysql://127.0.0.1:3306/mail-prod?useUnicode=true<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p>以上配置内容基于BoneCP Datasource配置（参见org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig)</p>
+
+<p>在Spring中使用时需配置如下：</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;?<span class="pl-ent">xml</span><span class="pl-e"> version</span>=<span class="pl-s"><span class="pl-pds">"</span>1.0<span class="pl-pds">"</span></span><span class="pl-e"> encoding</span>=<span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>?&gt;
+&lt;<span class="pl-ent">beans</span> <span class="pl-e">xmlns</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/beans<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">xsi</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">cc</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.squirrelframework.org/schema/config<span class="pl-pds">"</span></span>
+       <span class="pl-e">xsi</span><span class="pl-e">:</span><span class="pl-e">schemaLocation</span>=<span class="pl-s"><span class="pl-pds">"</span></span>
+<span class="pl-s">            http://www.springframework.org/schema/beans</span>
+<span class="pl-s">            http://www.springframework.org/schema/beans/spring-beans.xsd</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config/cloud-config.xsd<span class="pl-pds">"</span></span>&gt;
+
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- path指定相对于/{namespace}/config的数据源配置路径 --&gt;</span>
+    <span class="pl-c">&lt;!-- resource-type指定Pool DataSource类型（BoneCP，C3P0，Druid）--&gt;</span>
+    <span class="pl-c">&lt;!-- auto-reload指定当当前profile中配置内容发生变化时，是否重新创建数据源 --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-jdbc-datasource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail<span class="pl-pds">"</span></span> <span class="pl-e">resource-type</span>=<span class="pl-s"><span class="pl-pds">"</span>BoneCP<span class="pl-pds">"</span></span> <span class="pl-e">auto-reload</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;
+&lt;/<span class="pl-ent">beans</span>&gt;</pre></div>
+
+<p><strong>注意：</strong><br>
+1. Cloud-Config创建数据源时会合并当前路径(/database/mail)与其父节点(/database)及其profile子节点(/database/mail/dev)的内容，合并优先级dev&gt;mail&gt;database。<br>
+2. 当auto-reload为true，并且dev节点中配置内容发生变化时，对应数据源将自动重新创建。</p>
+
+<h4>
+<a id="多租户数据源配置" class="anchor" href="#%E5%A4%9A%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E6%BA%90%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>多租户数据源配置</h4>
+
+<p>支持多租户数据源需要使用到org.squirrelframework.cloud.resource.database.RoutingDataSourceFactoryBean来创建对应数据源。这里需要用户指定RoutingKeyResolver，需要配置与RoutingKey对应的目录结构。</p>
+
+<p>对于多租户数据源配置，Zookeeper中节点配置如下：<br>
+root<br>
+|---/config<br>
+|------/database<br>
+|------|--/mail<br>
+|---------|--/tenant1<br>
+|---------|--|--/dev<br>
+|---------|--|--/prod<br>
+|---------|--/tenant2<br>
+|---------|--|--/dev<br>
+|---------|--|--/prod<br>
+|---------|--/unknown  </p>
+
+<p><code>/root/database/mail</code>: mail模块数据库资源配置节点<br>
+<code>/root/database/mail/tenant1</code>: 租户ID为tenant1的mail模块数据库资源配置节点<br>
+<code>/root/database/mail/tenant1/dev</code>: dev profile配置节点  </p>
+
+<p><code>/root/config/database/mail</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>driverClassName<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>${mysql.driver.name}<span class="pl-pds">"</span></span>,
+
+    <span class="pl-s"><span class="pl-pds">"</span>idleMaxAgeInMinutes<span class="pl-pds">"</span></span> : <span class="pl-c1">240</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>idleConnectionTestPeriodInMinutes<span class="pl-pds">"</span></span> : <span class="pl-c1">60</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>maxConnectionsPerPartition<span class="pl-pds">"</span></span> : <span class="pl-c1">10</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>minConnectionsPerPartition<span class="pl-pds">"</span></span> : <span class="pl-c1">1</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>partitionCount<span class="pl-pds">"</span></span> : <span class="pl-c1">2</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>acquireIncrement<span class="pl-pds">"</span></span> : <span class="pl-c1">5</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>statementsCacheSize<span class="pl-pds">"</span></span> : <span class="pl-c1">100</span>
+}</pre></div>
+
+<p>注：系统属性可以在资源配置中引用，例如在/{namespace}/properties/variables中定义了"{"mysql.driver.name":"com.mysql.jdbc.Driver"}"</p>
+
+<p><code>/root/config/database/mail/tenant1</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>userName<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p><code>/root/config/database/mail/tenant1/dev</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>jdbcUrl<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>jdbc:mysql://127.0.0.1:3306/mail-t1-dev?useUnicode=true<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p><code>/root/config/database/mail/tenant1/prod</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>jdbcUrl<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>jdbc:mysql://127.0.0.1:3306/mail-t1-prod?useUnicode=true<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p>在Spring中使用时需配置如下：</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;?<span class="pl-ent">xml</span><span class="pl-e"> version</span>=<span class="pl-s"><span class="pl-pds">"</span>1.0<span class="pl-pds">"</span></span><span class="pl-e"> encoding</span>=<span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>?&gt;
+&lt;<span class="pl-ent">beans</span> <span class="pl-e">xmlns</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/beans<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">xsi</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">cc</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.squirrelframework.org/schema/config<span class="pl-pds">"</span></span>
+       <span class="pl-e">xsi</span><span class="pl-e">:</span><span class="pl-e">schemaLocation</span>=<span class="pl-s"><span class="pl-pds">"</span></span>
+<span class="pl-s">            http://www.springframework.org/schema/beans</span>
+<span class="pl-s">            http://www.springframework.org/schema/beans/spring-beans.xsd</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config/cloud-config.xsd<span class="pl-pds">"</span></span>&gt;
+
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 配置默认数据库路由键值解析器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>zk-default-resolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.TestRoutingKeyResolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- path指定相对于/{namespace}/config的数据源配置路径 --&gt;</span>
+    <span class="pl-c">&lt;!-- resource-type指定Pool DataSource类型（BoneCP，C3P0，Druid）--&gt;</span>
+    <span class="pl-c">&lt;!-- auto-reload指定当当前profile中配置内容发生变化时，是否重新创建数据源 --&gt;</span>
+    <span class="pl-c">&lt;!-- routing-support指定该路径下的数据库资源是支持路由的 --&gt;</span>
+    <span class="pl-c">&lt;!-- fallback指定当解析出来的数据库路由键值无法匹配租户ID时，回退数据源的配置路径 --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-jdbc-datasource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span>
+                           <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail<span class="pl-pds">"</span></span>
+                           <span class="pl-e">routing-support</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>
+                           <span class="pl-e">fallback</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail/unknown<span class="pl-pds">"</span></span>
+                           <span class="pl-e">auto-reload</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>
+    /&gt;
+&lt;/<span class="pl-ent">beans</span>&gt;</pre></div>
+
+<p><strong>注意：</strong><br>
+1. 默认数据库路由键值解析器的id必须是zk-default-resolver，否则就需要在zk-jdbc-datasource中通过resolver-ref指定对应的resolver。RoutingKeyResolver用于获取当前的数据库路由键值，用户需要实现对应的routing key resolver（e.g. TenantIdThreadLocalResolver）返回对应租户ID，且模块路径下的配置节点名为对应租户ID，才能保证数据源的正确路由。<br>
+2. Cloud-Config创建数据源时会合并当前租户路径（/database/mail/tenant1）与父节点(/database/mail/)及其profile子节点(/database/mail/tenant1/dev)的内容，合并优先级dev&gt;mail&gt;tenant1。<br>
+2. 当auto-reload为true，并且dev节点及其兄弟节点中配置内容发生变化，增加或删除profile节点，对应数据源将自动重新创建。</p>
+
+<h3>
+<a id="数据库路由器配置" class="anchor" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B7%AF%E7%94%B1%E5%99%A8%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>数据库路由器配置</h3>
+
+<h4>
+<a id="读写分离数据库路由配置" class="anchor" href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>读写分离数据库路由配置</h4>
+
+<p>cloud-config通过在应用层做多数据源路由（嵌套路由）来支持读写分离，一写多读等应用场景。</p>
+
+<p>对于读写分离数据源配置，Zookeeper中节点配置如下：
+root<br>
+|---/config<br>
+|------/database<br>
+|------|--/mail.................................... <em>TenantIdThreadLocalResolver</em><br>
+|------------/tenant1........................... <em>MajorProfileRoutingKeyResolver</em><br>
+|------------|--/dev<br>
+|------------|--/prod............................ <em>DeclarativeRoutingKeyResolver</em><br>
+|------------|--|--/write<br>
+|------------|--|--/read........................ <em>DispatchableRoutingKeyResolver</em><br>
+|------------|--|--|--/01<br>
+|------------|--|--|--/02<br>
+|------------|--|--|--/03<br>
+|------------/tenant2<br>
+|------------|--/dev<br>
+|------------|--/prod<br>
+注：mail模块目录结构展现了四层数据源嵌套路由。  </p>
+
+<ul>
+<li>第一层是在模块节点(/database/mail)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。<br>
+</li>
+<li>第二层是在租户节点(/database/mail/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。<br>
+</li>
+<li>第三层是在profile节点(/database/mail/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。<br>
+</li>
+<li>第四层是在读节点(/database/mail/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。<br>
+</li>
+<li>如果对应节点无子节点，则路由到该节点结束。例如，在/database/mail/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 </li>
+<li>当路由到对应叶子节点时，例如/database/mail/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/mail/tenant1/prod)上的配置信息创建数据源。<br>
+</li>
+</ul>
+
+<p>在Spring中使用时需配置如下： </p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;?<span class="pl-ent">xml</span><span class="pl-e"> version</span>=<span class="pl-s"><span class="pl-pds">"</span>1.0<span class="pl-pds">"</span></span><span class="pl-e"> encoding</span>=<span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>?&gt;
+&lt;<span class="pl-ent">beans</span> <span class="pl-e">xmlns</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/beans<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">xsi</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">cc</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.squirrelframework.org/schema/config<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">tx</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/tx<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">context</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/context<span class="pl-pds">"</span></span>
+       <span class="pl-e">xsi</span><span class="pl-e">:</span><span class="pl-e">schemaLocation</span>=<span class="pl-s"><span class="pl-pds">"</span></span>
+<span class="pl-s">            http://www.springframework.org/schema/beans</span>
+<span class="pl-s">            http://www.springframework.org/schema/beans/spring-beans.xsd</span>
+<span class="pl-s">            http://www.springframework.org/schema/tx</span>
+<span class="pl-s">            http://www.springframework.org/schema/tx/spring-tx.xsd</span>
+<span class="pl-s">            http://www.springframework.org/schema/context</span>
+<span class="pl-s">            http://www.springframework.org/schema/context/spring-context.xsd</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config/cloud-config.xsd<span class="pl-pds">"</span></span>&gt;
+
+    <span class="pl-c">&lt;!-- 支持声明式路由 --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-declarative-routing</span>/&gt;
+
+    <span class="pl-c">&lt;!--  创建租户ID路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 创建主Profile路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>profileResolver<span class="pl-pds">"</span></span>  <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.MajorProfileRoutingKeyResolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 创建声明式路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>rwSplitResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 创建循环派发路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dispatchResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>path<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail<span class="pl-pds">"</span></span>/&gt;
+        <span class="pl-c">&lt;!-- 启用自动刷新功能 --&gt;</span>
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>autoRefresh<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;
+        <span class="pl-c">&lt;!-- 每隔5分钟自动刷新可路由列表 (read节点下的01，02，03节点) --&gt;</span>
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>refreshInterval<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>5<span class="pl-pds">"</span></span>/&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+    <span class="pl-c">&lt;!-- 创建mail模块数据源路由器，id指定为my-default-resolver，通过NestedRoutingKeyResolver组装之前创建的路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>my-default-resolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.NestedRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>resolvers<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">list</span>&gt;
+                <span class="pl-c">&lt;!-- 路由器引用顺序与mail模块目录结构对应 --&gt;</span>
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span>/&gt;
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>profileResolver<span class="pl-pds">"</span></span>/&gt;
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>rwSplitResolver<span class="pl-pds">"</span></span>/&gt;
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>dispatchResolver<span class="pl-pds">"</span></span>/&gt;
+            &lt;/<span class="pl-ent">list</span>&gt;
+        &lt;/<span class="pl-ent">property</span>&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- routing-support设为true启用数据库路由，并将routing resolver指定为my-default-resolver --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-jdbc-datasource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail<span class="pl-pds">"</span></span> <span class="pl-e">routing-support</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span> <span class="pl-e">resolver-ref</span>=<span class="pl-s"><span class="pl-pds">"</span>my-default-resolver<span class="pl-pds">"</span></span>/&gt;
+
+    &lt;<span class="pl-ent">context</span><span class="pl-ent">:</span><span class="pl-ent">component-scan</span> <span class="pl-e">base-package</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.sample<span class="pl-pds">"</span></span> /&gt;
+    &lt;<span class="pl-ent">tx</span><span class="pl-ent">:</span><span class="pl-ent">annotation-driven</span> <span class="pl-e">transaction-manager</span>=<span class="pl-s"><span class="pl-pds">"</span>transactionManager<span class="pl-pds">"</span></span> /&gt;
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>transactionManager<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.springframework.orm.jpa.JpaTransactionManager<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>entityManagerFactory<span class="pl-pds">"</span></span> <span class="pl-e">ref</span>=<span class="pl-s"><span class="pl-pds">"</span>entityManagerFactory<span class="pl-pds">"</span></span> /&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>entityManagerFactory<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">ref</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> /&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>packagesToScan<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.sample<span class="pl-pds">"</span></span>/&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>jpaVendorAdapter<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">bean</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter<span class="pl-pds">"</span></span> /&gt;
+        &lt;/<span class="pl-ent">property</span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>jpaPropertyMap<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">props</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.show_sql<span class="pl-pds">"</span></span>&gt;false&lt;/<span class="pl-ent">prop</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.archive.autodetection<span class="pl-pds">"</span></span> /&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.dialect<span class="pl-pds">"</span></span>&gt;org.hibernate.dialect.MySQLDialect&lt;/<span class="pl-ent">prop</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.format_sql<span class="pl-pds">"</span></span>&gt;true&lt;/<span class="pl-ent">prop</span>&gt;
+                <span class="pl-c">&lt;!-- 在数据源启用routing-support后，自动创建、更新表功能必须屏蔽 --&gt;</span>
+                <span class="pl-c">&lt;!--&lt;prop key="hibernate.hbm2ddl.auto"&gt;create&lt;/prop&gt;--&gt;</span>
+                <span class="pl-c">&lt;!-- 在数据源启用routing-support后，该属性必须设为false --&gt;</span>
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.temp.use_jdbc_metadata_defaults<span class="pl-pds">"</span></span>&gt;false&lt;/<span class="pl-ent">prop</span>&gt;
+            &lt;/<span class="pl-ent">props</span>&gt;
+        &lt;/<span class="pl-ent">property</span>&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+&lt;/<span class="pl-ent">beans</span>&gt;</pre></div>
+
+<p><strong>注</strong>：在启用数据源路由功能后，所有在应用启动时访问数据源动作都必须屏蔽掉，例如hibernate.hbm2ddl.auto，hibernate.temp.use_jdbc_metadata_defaults。因为在系统启动时，无法获取任何数据源路由信息，无法确定该如何路由。</p>
+
+<p>java代码中通过@RoutingKey进行声明式路由：</p>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">Service</span>
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">UserService</span> {
+    <span class="pl-k">@Autowired</span>
+    <span class="pl-k">private</span> <span class="pl-smi">UserDAO</span> userDAO;
+
+    <span class="pl-k">@Transactional</span>
+    <span class="pl-k">@RoutingKey</span>(<span class="pl-s"><span class="pl-pds">"</span>write<span class="pl-pds">"</span></span>)
+    <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">insertUser</span>(<span class="pl-smi">User</span> <span class="pl-v">user</span>) {
+        userDAO<span class="pl-k">.</span>insertUser(user);
+    }
+
+    <span class="pl-c">// 如果使用了DispatchableRoutingKeyResolver，则recordRoutingKeys需设置为true</span>
+    <span class="pl-k">@RoutingKey</span>(<span class="pl-c1">value</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>read<span class="pl-pds">"</span></span>, <span class="pl-c1">recordRoutingKeys</span> <span class="pl-k">=</span> <span class="pl-c1">true</span>)
+    <span class="pl-k">public</span> <span class="pl-k">List&lt;<span class="pl-smi">User</span>&gt;</span> <span class="pl-en">findAllUsers</span>() {
+        <span class="pl-k">return</span> userDAO<span class="pl-k">.</span>findAllUsers();
+    }
+}</pre></div>
+
+<h4>
+<a id="水平分库路由配置" class="anchor" href="#%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>水平分库路由配置</h4>
+
+<p>cloud-config通过支持复杂路由规则设置，来支持数据库水平拆分。</p>
+
+<h2>
+<a id="开发计划" class="anchor" href="#%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92" aria-hidden="true"><span class="octicon octicon-link"></span></a>开发计划</h2>
+
+<ul>
+<li>生产环境配置的权限控制及监管<br>
+</li>
+<li>敏感数据加密</li>
+<li>完善cloud-config-server展现<br>
+</li>
+<li>支持Routing Sequence</li>
+<li>支持更多的资源配置<br>
+
+<ul>
+<li>Mongo connection pools</li>
+<li>Redis connections</li>
+<li>FTP and SFTP connections</li>
+<li>RabbitMQ</li>
+<li>SOLR</li>
+<li>ElasticSearch</li>
+<li>Executor services</li>
+</ul>
+</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/hekailiang/cloud-config">cloud-config</a> is maintained by <a href="https://github.com/hekailiang">hekailiang</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
