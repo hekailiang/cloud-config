@@ -1,5 +1,5 @@
 ## cloud-config简介
-cloud-config是一个基于Zookeeper的集中式应用配置中心，并与Spring框架紧密集。cloud-config解决了分布式应用或者集群环境中，以硬编码/配置文件/环境变量管理应用配置所造成的应用开发、系统运维工作的繁琐，支持`配置一次，处处使用`。     
+cloud-config是一个基于Zookeeper的集中式应用配置中心，并与Spring框架紧密集。cloud-config解决了分布式应用或者集群环境中，以硬编码、配置文件、环境变量管理应用配置所造成的应用开发、系统运维工作的繁琐，支持`配置一次，处处使用`。     
 cloud-confg在开发过程中受到 [Centralized Application Configuration with Spring and Apache ZooKeeper](http://www.infoq.com/presentations/spring-apache-zookeeper) 的启发。
 
 ## cloud-config-client主要功能介绍  
@@ -254,12 +254,143 @@ root
 #### 读写分离数据库路由配置
 cloud-config通过在应用层做多数据源路由（嵌套路由）来支持读写分离，一写多读等应用场景。
 
+对于读写分离数据源配置，Zookeeper中节点配置如下：
+root  
+|---/config    
+|------/database  
+|------|--/mail.................................... _TenantIdThreadLocalResolver_    
+|------------/tenant1........................... _MajorProfileRoutingKeyResolver_   
+|------------|--/dev  
+|------------|--/prod............................ _DeclarativeRoutingKeyResolver_  
+|------------|--|--/write  
+|------------|--|--/read........................ _DispatchableRoutingKeyResolver_       
+|------------|--|--|--/01  
+|------------|--|--|--/02    
+|------------|--|--|--/03      
+|------------/tenant2  
+|------------|--/dev  
+|------------|--/prod  
+注：mail模块目录结构展现了四层数据源嵌套路由。  
+* 第一层是在模块节点(/database/mail)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。   
+* 第二层是在租户节点(/database/mail/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。  
+* 第三层是在profile节点(/database/mail/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。  
+* 第四层是在读节点(/database/mail/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。   
+* 如果对应节点无子节点，则路由到该节点结束。例如，在/database/mail/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 
+* 当路由到对应叶子节点时，例如/database/mail/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/mail/tenant1/prod)上的配置信息创建数据源。  
+
+在Spring中使用时需配置如下： 
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <!-- 支持声明式路由 -->
+    <cc:zk-declarative-routing/>
+
+    <!--  创建租户ID路由器 -->
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
+    <!-- 创建主Profile路由器 -->
+    <bean id="profileResolver"  class="org.squirrelframework.cloud.routing.MajorProfileRoutingKeyResolver"/>
+    <!-- 支持声明式路由器 -->
+    <bean id="rwSplitResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <!-- 支持循环派发路由器 -->
+    <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver">
+        <property name="path" value="/database/mail"/>
+        <!-- 启用自动刷新功能 -->
+        <property name="autoRefresh" value="true"/>
+        <!-- 每隔5分钟自动刷新可路由列表 -->
+        <property name="refreshInterval" value="5"/>
+    </bean>
+
+    <!-- 创建mail模块数据源路由器，id指定为my-default-resolver，通过NestedRoutingKeyResolver组装之前创建的路由器 -->
+    <bean id="my-default-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
+        <property name="resolvers">
+            <list>
+                <!-- 路由器引用顺序与mail模块目录结构对应 -->
+                <ref bean="tenantResolver"/>
+                <ref bean="profileResolver"/>
+                <ref bean="rwSplitResolver"/>
+                <ref bean="dispatchResolver"/>
+            </list>
+        </property>
+    </bean>
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <!-- routing-support设为true启用数据库路由，并将routing resolver指定为my-default-resolver -->
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mail" routing-support="true" resolver-ref="my-default-resolver"/>
+
+    <context:component-scan base-package="org.squirrelframework.cloud.sample" />
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="org.squirrelframework.cloud.sample"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.archive.autodetection" />
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <!-- 在数据源启用routing-support后，自动创建、更新表功能必须屏蔽 -->
+                <!--<prop key="hibernate.hbm2ddl.auto">create</prop>-->
+                <!-- 在数据源启用routing-support后，该属性必须设为false -->
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
+```
+**注**：在启用数据源路由功能后，所有在应用启动时访问数据源动作都必须屏蔽掉，例如hibernate.hbm2ddl.auto，hibernate.temp.use\_jdbc\_metadata\_defaults。因为在系统启动时，无法获取任何数据源路由信息，无法确定该如何路由。
+
+
+java代码中通过@RoutingKey进行声明式路由：
+```java
+@Service
+public class UserService {
+    @Autowired
+    private UserDAO userDAO;
+
+    @Transactional
+    @RoutingKey("write")
+    public void insertUser(User user) {
+        userDAO.insertUser(user);
+    }
+    
+    // 如果使用了DispatchableRoutingKeyResolver，则recordRoutingKeys需设置为true
+    @RoutingKey(value = "read", recordRoutingKeys = true)
+    public List<User> findAllUsers() {
+        return userDAO.findAllUsers();
+    }
+}
+```
+
 #### 水平分库路由配置
+cloud-config通过支持复杂路由规则设置，来支持数据库水平拆分。
 
 ## 开发计划
 * 生产环境配置的权限控制及监管  
 * 敏感数据加密
 * 完善cloud-config-server展现  
+* 支持Routing Sequence
 * 支持更多的资源配置  
 	* Mongo connection pools
 	* Redis connections
