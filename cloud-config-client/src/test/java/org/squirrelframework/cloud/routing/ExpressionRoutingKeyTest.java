@@ -16,7 +16,7 @@ public class ExpressionRoutingKeyTest {
 
     public static final String TEST_ROUTING_KEY = " # { #args[0] + separator + #args[1] } ";
 
-    public static final String PROD_ID_ROUTING_KEY = "#{ \"prod\" + separator + #productId % 4 }";
+    public static final String PROD_ID_ROUTING_KEY = "#{ \"${name}\" + separator + #productId % 4 }";
 
     @Test
     public void testELExpressionRoutingKey() {

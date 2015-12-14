@@ -2,14 +2,18 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
             http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+             http://www.springframework.org/schema/context/spring-context.xsd
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
     <cc:zk-declarative-routing/>
 
+    <context:property-placeholder location="classpath:query-server.properties"/>
     <bean class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
     <bean id="testRoutingKey" class="org.squirrelframework.cloud.routing.ExpressionRoutingKeyTest$TestRoutingKey">
         <property name="separator" value="-"/>

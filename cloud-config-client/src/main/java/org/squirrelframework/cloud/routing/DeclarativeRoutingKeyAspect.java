@@ -7,11 +7,13 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.Ordered;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.StringValueResolver;
 import org.squirrelframework.cloud.annotation.RoutingKey;
 import org.squirrelframework.cloud.annotation.RoutingVariable;
 
@@ -26,11 +28,11 @@ import static org.squirrelframework.cloud.routing.RoutingKeyHolder.*;
  * Created by kailianghe on 15/12/9.
  */
 @Aspect
-public class DeclarativeRoutingKeyAspect implements Ordered {
+public class DeclarativeRoutingKeyAspect implements Ordered, EmbeddedValueResolverAware {
 
     private static Pattern pattern = Pattern.compile("^#\\s*\\{\\s*(.+?)\\s*\\}$");
 
-    CacheLoader<String, Expression> loader = new CacheLoader<String, Expression>() {
+    private CacheLoader<String, Expression> loader = new CacheLoader<String, Expression>() {
         @Override
         public Expression load(String elExpr) throws Exception {
             ExpressionParser parser = new SpelExpressionParser();
@@ -39,9 +41,11 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
         }
     };
 
-    LoadingCache<String, Expression> expressionCache = CacheBuilder.newBuilder()
+    private LoadingCache<String, Expression> expressionCache = CacheBuilder.newBuilder()
             .weakKeys()
             .build(loader);
+
+    private StringValueResolver stringValueResolver;
 
     @Around(value = "@annotation(routingKey)")
     public Object process(ProceedingJoinPoint jp, RoutingKey routingKey) throws Throwable {
@@ -71,7 +75,7 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
     }
 
     private String resolveRoutingValue(ProceedingJoinPoint jp, String routingValue) throws Exception {
-        String resolvedValue = routingValue.trim();
+        String resolvedValue = stringValueResolver.resolveStringValue(routingValue).trim();
         Matcher matcher = pattern.matcher(resolvedValue);
         if(matcher.find()) {
             // prepare execution context
@@ -104,5 +108,10 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
     @Override
     public int getOrder() {
         return -1;
+    }
+
+    @Override
+    public void setEmbeddedValueResolver(StringValueResolver resolver) {
+        this.stringValueResolver = resolver;
     }
 }
