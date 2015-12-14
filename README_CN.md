@@ -1,5 +1,6 @@
 ## cloud-config简介
-cloud-config是一个基于Zookeeper的集中化管理的应用配置中心，并与Spring框架紧密集成，支持多租户配置。cloud-config解决了分布式应用或者集群环境下，以硬编码/配置文件/环境变量管理应用配置所造成的应用开发/运维的繁琐工作。  
+cloud-config是一个基于Zookeeper的集中式应用配置中心，并与Spring框架紧密集。cloud-config解决了分布式应用或者集群环境中，以硬编码/配置文件/环境变量管理应用配置所造成的应用开发、系统运维工作的繁琐，支持`配置一次，处处使用`。     
+cloud-confg在开发过程中受到 [Centralized Application Configuration with Spring and Apache ZooKeeper](http://www.infoq.com/presentations/spring-apache-zookeeper) 的启发。
 
 ## cloud-config-client主要功能介绍  
 * [系统属性配置](#系统属性配置)
@@ -255,8 +256,16 @@ cloud-config通过在应用层做多数据源路由（嵌套路由）来支持�
 
 #### 水平分库路由配置
 
-## 未来计划
+## 开发计划
 * 生产环境配置的权限控制及监管  
 * 敏感数据加密
 * 完善cloud-config-server展现  
+* 支持更多的资源配置  
+	* Mongo connection pools
+	* Redis connections
+	* FTP and SFTP connections
+	* RabbitMQ
+	* SOLR
+	* ElasticSearch
+	* Executor services
 
