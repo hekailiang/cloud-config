@@ -310,7 +310,7 @@ root
         <property name="path" value="/database/mail"/>
         <!-- 启用自动刷新功能 -->
         <property name="autoRefresh" value="true"/>
-        <!-- 每隔5分钟自动刷新可路由列表 -->
+        <!-- 每隔5分钟自动刷新可路由列表 (read节点下的01，02，03节点) -->
         <property name="refreshInterval" value="5"/>
     </bean>
 
