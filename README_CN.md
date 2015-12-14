@@ -303,9 +303,9 @@ root
     <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
     <!-- 创建主Profile路由器 -->
     <bean id="profileResolver"  class="org.squirrelframework.cloud.routing.MajorProfileRoutingKeyResolver"/>
-    <!-- 支持声明式路由器 -->
+    <!-- 创建声明式路由器 -->
     <bean id="rwSplitResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
-    <!-- 支持循环派发路由器 -->
+    <!-- 创建循环派发路由器 -->
     <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver">
         <property name="path" value="/database/mail"/>
         <!-- 启用自动刷新功能 -->
