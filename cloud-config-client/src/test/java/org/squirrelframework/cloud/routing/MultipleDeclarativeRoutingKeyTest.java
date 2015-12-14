@@ -45,7 +45,7 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
             this.inner = inner;
         }
 
-        @RoutingKey("a")
+        @RoutingKey({"a", "1"})
         public String toA1() {
             return inner.one();
         }
@@ -55,7 +55,7 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
             return inner.two();
         }
 
-        @RoutingKey("b")
+        @RoutingKey({"b", "1"})
         public String toB1() {
             return inner.one();
         }
@@ -70,7 +70,7 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
             return inner.one();
         }
 
-        @RoutingKey(value = "a", recordRoutingKeys = true)
+        @RoutingKey(value = {"a", "1"}, recordRoutingKeys = true)
         public String recordRoutingKeys() {
             String value = inner.one();
             List<String> keys = RoutingKeyHolder.getRoutingKeys();
@@ -93,7 +93,6 @@ public class MultipleDeclarativeRoutingKeyTest extends AbstractNestedRoutingTest
             this.jdbcTemplate = new JdbcTemplate(ds);
         }
 
-        @RoutingKey("1")
         public String one() {
             return getDatabase();
         }

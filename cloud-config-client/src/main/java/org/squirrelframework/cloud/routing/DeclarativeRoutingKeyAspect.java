@@ -53,8 +53,10 @@ public class DeclarativeRoutingKeyAspect implements Ordered {
                     setRoutingKeyTraceEnabled(true);
                 }
             }
-            String resolvedValue = resolveRoutingValue(jp, routingKey.value());
-            putDeclarativeRoutingKey(resolvedValue);
+            for(String toBeResolved : routingKey.value()) {
+                String resolvedValue = resolveRoutingValue(jp, toBeResolved);
+                putDeclarativeRoutingKey(resolvedValue);
+            }
             return jp.proceed();
         } finally {
             if(routingEntryFlag) {

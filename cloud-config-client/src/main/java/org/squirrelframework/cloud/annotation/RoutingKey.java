@@ -10,6 +10,6 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Documented
 public @interface RoutingKey {
-    String value();
+    String[] value();
     boolean recordRoutingKeys() default false;
 }
