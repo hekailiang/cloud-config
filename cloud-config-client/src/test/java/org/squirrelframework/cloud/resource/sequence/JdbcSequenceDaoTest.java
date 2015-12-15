@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -100,7 +101,7 @@ public class JdbcSequenceDaoTest {
             assertThat(sr.getAndIncrement(), is(min+i));
         }
 //        assertThat(sr.getAndIncrement(), is(-1L));
-        assertThat(sr.isExhausted(), is(true));
+        assertThat(sr.isDrained(), is(true));
     }
 
     @Test(timeout = 10000)
@@ -234,8 +235,8 @@ public class JdbcSequenceDaoTest {
         sg.setSequenceDao(jdbcSequenceDao);
         sg.setSequenceFormatter(new SequenceFormatter() {
             @Override
-            public String format(SequenceRange sequenceRange) {
-                return sequenceRange.getAndIncrement()+"";
+            public String format(Map<String, Object> parameters) {
+                return parameters.get("value")+"";
             }
         });
         StringBuilder builder = new StringBuilder();
