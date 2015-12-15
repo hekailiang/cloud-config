@@ -75,7 +75,7 @@ mail.password=dev1234
     
     <!--使用时与Spring原生property相同-->
     <bean id="mailBean" class="org.squirrelframework.cloud.spring.ZkPropertyPlaceholderConfigurerTest$SampleBean">
-        <property name="host" value="${mal.host}"/>
+        <property name="host" value="${mail.host}"/>
         <property name="port" value="${mail.port}"/>
     </bean>
 ```
@@ -260,12 +260,12 @@ cloud-config通过在应用层做多数据源路由（嵌套路由）来支持�
 root  
 |---/config    
 |------/database  
-|------|--/mail.................................... _TenantIdThreadLocalResolver_    
-|------------/tenant1........................... _MajorProfileRoutingKeyResolver_   
+|------|--/mail.................................. _TenantIdThreadLocalResolver    (tenant1/tenant2)_    
+|------------/tenant1............................ _MajorProfileRoutingKeyResolver (dev/prod)_   
 |------------|--/dev  
-|------------|--/prod............................ _DeclarativeRoutingKeyResolver_  
+|------------|--/prod............................ _DeclarativeRoutingKeyResolver  (write/read)_  
 |------------|--|--/write  
-|------------|--|--/read........................ _DispatchableRoutingKeyResolver_       
+|------------|--|--/read......................... _DispatchableRoutingKeyResolver (01/02/03)_       
 |------------|--|--|--/01  
 |------------|--|--|--/02    
 |------------|--|--|--/03      

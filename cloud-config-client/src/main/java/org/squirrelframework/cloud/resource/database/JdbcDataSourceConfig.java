@@ -1,5 +1,6 @@
 package org.squirrelframework.cloud.resource.database;
 
+import org.squirrelframework.cloud.annotation.Secret;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 
 import javax.validation.constraints.NotNull;
@@ -37,6 +38,7 @@ public class JdbcDataSourceConfig extends CloudResourceConfig {
         this.userName = userName;
     }
 
+    @Secret
     public String getPassword() {
         return password;
     }
