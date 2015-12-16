@@ -26,6 +26,8 @@ public abstract class CloudConfigCommon {
 
     public static final String ZK_CLIENT_BEAN_NAME = "org.squirrelframework.cloud.conf.ZkClientBean";
 
+    public static final String ZK_SEQUENCE_DAO_BEAN_NAME = "org.squirrelframework.cloud.conf.ZkSequenceDao";
+
     public static String[] getProfiles() {
         Set<String> result = new LinkedHashSet<>();
         String value = getConfProperty(CONFIG_PROFILE_KEY, DEFAULT_CONFIG_PROFILE) +
@@ -45,6 +47,13 @@ public abstract class CloudConfigCommon {
     public static Integer getSafeInteger(final String value) {
         if(StringUtils.isNumeric(value)) {
             return Integer.valueOf(value);
+        }
+        return null;
+    }
+
+    public static Long getSafeLong(final String value) {
+        if(StringUtils.isNumeric(value)) {
+            return Long.valueOf(value);
         }
         return null;
     }

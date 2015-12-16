@@ -36,12 +36,12 @@ public class ExpressionRoutingKeyTest {
 
         @RoutingKey(TEST_ROUTING_KEY)
         public String sampleRoutingKey(String a, String b) {
-            return RoutingKeyHolder.getDeclarativeRoutingKey();
+            return RoutingKeyHolder.pollDeclarativeRoutingKey();
         }
 
         @RoutingKey(PROD_ID_ROUTING_KEY)
         public String prodRoutingKey(String a, @RoutingVariable("productId") long productId, String b) {
-            return RoutingKeyHolder.getDeclarativeRoutingKey();
+            return RoutingKeyHolder.pollDeclarativeRoutingKey();
         }
 
         public String getSeparator() {

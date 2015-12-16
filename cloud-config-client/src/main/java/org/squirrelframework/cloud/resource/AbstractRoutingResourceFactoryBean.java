@@ -4,6 +4,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.validation.Validator;
+import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
 import org.squirrelframework.cloud.routing.RoutingKeyResolver;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.apache.curator.framework.CuratorFramework;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import java.util.List;
 
 /**
  * Created by kailianghe on 9/14/15.
@@ -48,7 +51,7 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(autoReload) {
+        if(isAutoReload()) {
             childNodeCache = new PathChildrenCache(client, path, true);
             childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
@@ -90,11 +93,25 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
         super.afterPropertiesSet();
     }
 
+    protected void createChildResourceBeanDefinition() throws Exception {
+        List<String> children = client.getChildren().forPath(path);
+        for(String child : children) {
+            String resPath = path + "/" + child;
+            buildResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
+        }
+    }
+
     abstract protected String getResourceBeanIdFromPath(String resPath);
 
-    abstract protected void buildResourceBeanDefinition(String resPath, String beanId) throws Exception;
+    protected void buildResourceBeanDefinition(String resPath, String beanId) throws Exception {}
 
-    abstract protected void removeResourceBeanDefinition(String resPath, String beanId) throws Exception;
+    protected void removeResourceBeanDefinition(String resPath, String beanId) throws Exception {}
+
+    protected boolean isNestedRoutingNeeded(String dsPath) throws Exception {
+        return resolver instanceof NestedRoutingKeyResolver &&
+                ((NestedRoutingKeyResolver)resolver).hasNext() &&
+                client.getChildren().forPath(dsPath).size() > 0;
+    }
 
     @Override
     protected void destroyInstance(T instance) throws Exception {

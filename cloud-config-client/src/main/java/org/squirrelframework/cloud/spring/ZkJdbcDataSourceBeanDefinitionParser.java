@@ -1,6 +1,7 @@
 package org.squirrelframework.cloud.spring;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
@@ -37,6 +38,8 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
     @Override
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         String path = element.getAttribute("path");
+        // add alias for data source bean
+        element.setAttribute(AbstractBeanDefinitionParser.NAME_ATTRIBUTE, "_"+path.replace('/','_')+"DS");
         String resourceType = element.getAttribute("resource-type");
         Boolean autoReload = getSafeBoolean(element.getAttribute("auto-reload"));
         Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));

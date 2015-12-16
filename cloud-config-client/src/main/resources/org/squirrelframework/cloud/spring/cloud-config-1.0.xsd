@@ -75,4 +75,17 @@
     <xsd:element name="zk-declarative-routing">
     </xsd:element>
 
+    <xsd:element name="zk-sequence-generator">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute type="xsd:string" name="path" use="required"/>
+                    <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
+                    <xsd:attribute type="xsd:string" name="client-ref"/>
+                    <xsd:attribute type="xsd:string" name="formatter-ref" default="zk-default-formatter"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
 </xsd:schema>

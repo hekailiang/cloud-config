@@ -14,5 +14,6 @@ public class CloudConfigNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("zk-property-placeholder", new ZkPropertyPlaceholderConfigurerParser());
         registerBeanDefinitionParser("zk-jdbc-datasource", new ZkJdbcDataSourceBeanDefinitionParser());
         registerBeanDefinitionParser("zk-resource-config", new ZkResourceConfigBeanDefinitionParser());
+        registerBeanDefinitionParser("zk-sequence-generator", new ZkSequenceGeneratorBeanDefinitionParser());
     }
 }

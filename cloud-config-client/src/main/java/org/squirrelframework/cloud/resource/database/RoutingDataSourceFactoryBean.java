@@ -16,7 +16,6 @@ import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
 
 import javax.sql.DataSource;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by kailianghe on 9/7/15.
@@ -34,11 +33,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
 
     @Override
     protected DataSource createInstance() throws Exception {
-        List<String> children = client.getChildren().forPath(path);
-        for(String child : children) {
-            String resPath = path + "/" + child;
-            buildResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
-        }
+        createChildResourceBeanDefinition();
         return new RoutingDataSource();
     }
 
@@ -72,12 +67,6 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         dsBuilder.setLazyInit(true);
         getBeanFactory().registerBeanDefinition(dsBeanId, dsBuilder.getBeanDefinition());
         myLogger.info("Bean definition of resource '{}' is created as '{}'.", dsPath, dsBeanId);
-    }
-
-    private boolean isNestedRoutingNeeded(String dsPath) throws Exception {
-        return resolver instanceof NestedRoutingKeyResolver &&
-                ((NestedRoutingKeyResolver)resolver).hasNext() &&
-                client.getChildren().forPath(dsPath).size() > 0;
     }
 
     @Override

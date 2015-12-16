@@ -79,8 +79,7 @@ public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig>
     @Override
     public void afterPropertiesSet() throws Exception {
         configProfiles = CloudConfigCommon.getProfiles();
-
-        if(autoReload) {
+        if(isAutoReload()) {
             // attach listeners
             childNodeCache = new PathChildrenCache(client, path, true);
             childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);

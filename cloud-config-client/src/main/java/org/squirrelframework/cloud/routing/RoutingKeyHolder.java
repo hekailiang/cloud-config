@@ -41,8 +41,18 @@ public class RoutingKeyHolder {
         declarativeRoutingKeyHolder.remove();
     }
 
-    public static String getDeclarativeRoutingKey() {
+    public static String pollDeclarativeRoutingKey() {
         return declarativeRoutingKeyHolder.get().poll();
+    }
+
+    public static String peekDeclarativeRoutingKey() {
+        return declarativeRoutingKeyHolder.get().peek();
+    }
+
+    public static String cycleGetDeclarativeRoutingKey() {
+        String routingKey = pollDeclarativeRoutingKey();
+        putDeclarativeRoutingKey(routingKey);
+        return routingKey;
     }
 
     private static final ThreadLocal<List<String>> holder = new ThreadLocal<List<String>>() {

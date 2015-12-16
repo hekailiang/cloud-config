@@ -20,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Created by kailianghe on 15/12/15.
  */
-public class JdbcSequenceDaoTest {
+public class SequenceDaoTest {
 
     public static final String INIT_SQL=
             "CREATE TABLE IF NOT EXISTS __sequence_table__ (" +
@@ -93,7 +93,7 @@ public class JdbcSequenceDaoTest {
         validateSequenceRange(sr5, 1L, step);
     }
 
-    private void validateSequenceRange(SequenceRange sr, long min, int step) {
+    public static void validateSequenceRange(SequenceRange sr, long min, int step) {
         assertThat(sr.getMin(), is(min));
         assertThat(sr.getMax(), is(min+step));
         assertThat(sr.getValue().get(), is(min));
@@ -244,5 +244,10 @@ public class JdbcSequenceDaoTest {
             builder.append(sg.next("test1"));
         }
         assertThat(Long.valueOf(builder.toString()), is(1234123412L));
+    }
+
+    // TODO-hhe: add multiple thread test case
+    public void testMultiThreadGenerateSequence() {
+
     }
 }
