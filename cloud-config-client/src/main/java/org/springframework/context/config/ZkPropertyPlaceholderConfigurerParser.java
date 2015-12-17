@@ -27,12 +27,7 @@ public class ZkPropertyPlaceholderConfigurerParser extends PropertyPlaceholderBe
             builder.addPropertyValue("maxDepth", maxDepth);
         }
 
-        String clientRef = element.getAttribute("client-ref");
-        if(StringUtils.hasLength(clientRef)) {
-            builder.addPropertyReference("client", clientRef);
-        } else {
-            builder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);
-        }
+        builder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);
 
         String jsonConverterRef = element.getAttribute("json-flatten-converter-ref");
         if(StringUtils.hasLength(jsonConverterRef)) {

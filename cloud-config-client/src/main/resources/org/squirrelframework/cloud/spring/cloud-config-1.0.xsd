@@ -28,7 +28,6 @@
                 <xsd:extension base="context:propertyPlaceholder">
                     <xsd:attribute type="xsd:string" name="path" use="required"/>
                     <xsd:attribute type="xsd:integer" name="max-depth"/>
-                    <xsd:attribute type="xsd:string" name="client-ref"/>
                     <xsd:attribute type="xsd:string" name="json-flatten-converter-ref"/>
                 </xsd:extension>
             </xsd:complexContent>
@@ -81,7 +80,6 @@
                 <xsd:extension base="beans:identifiedType">
                     <xsd:attribute type="xsd:string" name="path" use="required"/>
                     <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
-                    <xsd:attribute type="xsd:string" name="client-ref"/>
                     <xsd:attribute type="xsd:string" name="formatter-ref" default="zk-default-formatter"/>
                 </xsd:extension>
             </xsd:complexContent>
