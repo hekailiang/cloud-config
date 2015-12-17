@@ -18,6 +18,10 @@ public class ProductDao {
         em.persist(product);
     }
 
+    public void update(Product product) {
+        em.merge(product);
+    }
+
     public Product findProductById(String id) {
         return em.find(Product.class, id);
     }

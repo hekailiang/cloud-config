@@ -22,8 +22,10 @@ public class ProductService {
         if(product.getId() == null) {
             String productId = sequenceGenerator.next("product");
             product.setId(productId);
+            productDao.save(product);
+        } else {
+            productDao.update(product);
         }
-        productDao.save(product);
         return product.getId();
     }
 

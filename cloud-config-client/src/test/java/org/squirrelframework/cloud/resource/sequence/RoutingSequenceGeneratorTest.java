@@ -37,7 +37,7 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
         String props =  "{\n" +
                 "    \"sequence.format.expression\" : \"T(java.lang.String).format('%s%02d%06d', #dbDateStr, T(java.lang.Integer).valueOf(#dbName.substring(2)), #sequenceValue)\",\n" +
                 "    \"sequence.product.id.sharding.rule\": \"#id.substring(8, 10)\",\n" +
-                "    \"sequence.product.sharding.rule\": \"#product?.id?.subString(8, 10) ?: T(java.lang.String).format('%02d', #product.customerId%2+1)\"\n" +
+                "    \"sequence.product.sharding.rule\": \"#product?.id?.substring(8, 10) ?: T(java.lang.String).format('%02d', #product.customerId%2+1)\"\n" +
                 "}";
         zkPropsClient.create().creatingParentsIfNeeded().forPath("/sequence", props.getBytes());
 
@@ -52,6 +52,7 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
     @Test
     public void testSimpleRoutingSequence() throws Exception {
         ProductService productService = applicationContext.getBean(ProductService.class);
+        // test save
         Product p1 = new Product(1L, "P1");
         productService.saveProduct(p1);
         assertThat( p1.getId().substring(8), is("02000001") );
@@ -68,6 +69,7 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
         productService.saveProduct(p4);
         assertThat( p4.getId().substring(8), is("01000002") );
 
+        // test read
         Product p11 = productService.findProductById(p1.getId());
         assertThat(p1, equalTo(p11));
 
@@ -79,6 +81,27 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
 
         Product p14 = productService.findProductById(p4.getId());
         assertThat(p4, equalTo(p14));
+
+        // test update
+        p11.setName("P11");
+        productService.saveProduct(p11);
+        p1 = productService.findProductById(p11.getId());
+        assertThat( p1.getName(), is("P11") );
+
+        p12.setName("P12");
+        productService.saveProduct(p12);
+        p2 = productService.findProductById(p12.getId());
+        assertThat( p2.getName(), is("P12") );
+
+        p13.setName("P13");
+        productService.saveProduct(p13);
+        p3 = productService.findProductById(p13.getId());
+        assertThat( p3.getName(), is("P13") );
+
+        p14.setName("P14");
+        productService.saveProduct(p14);
+        p4 = productService.findProductById(p14.getId());
+        assertThat( p4.getName(), is("P14") );
     }
 
 }
