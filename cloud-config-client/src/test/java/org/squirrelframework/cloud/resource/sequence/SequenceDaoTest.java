@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -94,13 +95,13 @@ public class SequenceDaoTest {
     }
 
     public static void validateSequenceRange(SequenceRange sr, long min, int step) {
+        assertThat(sr.getDbName(), is("DEV"));
         assertThat(sr.getMin(), is(min));
         assertThat(sr.getMax(), is(min+step));
         assertThat(sr.getValue().get(), is(min));
         for(int i=0; i<step; i++) {
             assertThat(sr.getAndIncrement(), is(min+i));
         }
-//        assertThat(sr.getAndIncrement(), is(-1L));
         assertThat(sr.isDrained(), is(true));
     }
 
@@ -236,7 +237,7 @@ public class SequenceDaoTest {
         sg.setSequenceFormatter(new SequenceFormatter() {
             @Override
             public String format(Map<String, Object> parameters) {
-                return parameters.get("value")+"";
+                return parameters.get(CloudConfigCommon.SEQUENCE_VALUE_KEY)+"";
             }
         });
         StringBuilder builder = new StringBuilder();

@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.squirrelframework.cloud.routing.RoutingKeyHolder;
+import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -61,9 +62,9 @@ public class JdbcSequenceGenerator implements SequenceGenerator {
                         }
                     }
                     Map<String, Object> parameters = Maps.newHashMap();
-                    parameters.put("date", sequenceRangeHolder.get().getDate());
-                    parameters.put("value", value);
-                    parameters.put("keys", RoutingKeyHolder.getRoutingKeys());
+                    parameters.put(CloudConfigCommon.DB_DATE_KEY, sequenceRangeHolder.get().getDate());
+                    parameters.put(CloudConfigCommon.DB_NAME_KEY, sequenceRangeHolder.get().getDbName());
+                    parameters.put(CloudConfigCommon.SEQUENCE_VALUE_KEY, value);
                     return sequenceFormatter.format(parameters);
                 }
 

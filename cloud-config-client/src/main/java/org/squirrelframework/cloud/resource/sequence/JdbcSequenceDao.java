@@ -4,12 +4,13 @@ import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import javax.sql.DataSource;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by kailianghe on 15/12/14.
@@ -23,6 +24,8 @@ public class JdbcSequenceDao implements SequenceDao, InitializingBean {
     public static final String DEFAULT_UPDATE_SQL = "update __sequence_table__ set value=?, modified_time = current_timestamp() where name =? and value = ?";
     public static final String DEFAULT_SELECT_SQL = "select name, min_limit, max_limit, step, value, modified_time from __sequence_table__ where (name = ?)";
     public static final String DEFAULT_DBDATE_SQL = "select current_timestamp();";
+    public static final String DEFAULT_DATABASE_SQL = "select DATABASE();";
+
 
     private String insertSql = DEFAULT_INSERT_SQL;
 
@@ -31,6 +34,8 @@ public class JdbcSequenceDao implements SequenceDao, InitializingBean {
     private String selectSql = DEFAULT_SELECT_SQL;
 
     private String dbDateSql = DEFAULT_DBDATE_SQL;
+
+    private String databaseSql = DEFAULT_DATABASE_SQL;
 
     private int step = 100;
 
@@ -43,6 +48,8 @@ public class JdbcSequenceDao implements SequenceDao, InitializingBean {
     private long defaultMaxLimit = Long.MAX_VALUE;
 
     private DataSource dataSource;
+
+    private final AtomicReference<String> dbNameHolder = new AtomicReference<>();
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -93,23 +100,39 @@ public class JdbcSequenceDao implements SequenceDao, InitializingBean {
             }
             int updatedRows = jdbcTemplate.update(updateSql, max, seqName, value);
             if(updatedRows==1) {
-                result = new SequenceRange(min, max, getDbDate());
+                result = new SequenceRange(min, max, getDbDate(), getDbName());
             }
         } else {
             long value = defaultMinLimit+step;
             int insertedRows = jdbcTemplate.update(insertSql, seqName, defaultMinLimit, defaultMaxLimit, step, value);
             if(insertedRows == 1) {
-                result = new SequenceRange(defaultMinLimit, value, getDbDate());
+                result = new SequenceRange(defaultMinLimit, value, getDbDate(), getDbName());
             }
         }
         return result;
     }
 
-    private Date getDbDate() {
+    protected Date getDbDate() {
         try {
-            return jdbcTemplate.queryForRowSet(dbDateSql, null).getDate(1);
+            return jdbcTemplate.queryForRowSet(dbDateSql, new Object[0]).getDate(1);
         } catch (Exception e) {
             return new Date();
+        }
+    }
+
+    protected String getDbName() {
+        if(dbNameHolder.get() == null) {
+            dbNameHolder.compareAndSet(null, retrieveDbName());
+        }
+        return dbNameHolder.get();
+    }
+
+    protected String retrieveDbName() {
+        try {
+            Map<String, Object> result = jdbcTemplate.queryForMap(databaseSql);
+            return result.values().iterator().next().toString();
+        } catch (Exception e) {
+            throw new IllegalStateException("cannot get database name by \'"+ databaseSql +"\'.");
         }
     }
 
@@ -118,12 +141,10 @@ public class JdbcSequenceDao implements SequenceDao, InitializingBean {
         this.step = step;
     }
 
-    @Autowired
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Autowired
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -142,6 +163,10 @@ public class JdbcSequenceDao implements SequenceDao, InitializingBean {
 
     public void setDbDateSql(String dbDateSql) {
         this.dbDateSql = dbDateSql;
+    }
+
+    public void setDatabaseSql(String databaseSql) {
+        this.databaseSql = databaseSql;
     }
 
     public void setMaxRetryTimes(int maxRetryTimes) {

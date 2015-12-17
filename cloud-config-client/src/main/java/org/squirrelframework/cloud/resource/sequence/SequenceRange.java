@@ -15,13 +15,15 @@ public class SequenceRange {
     private final long min;
     private final long max;
     private final AtomicLong value;
+    private final String dbName;
     private final Date date;
     private volatile boolean drained = false;
 
-    public SequenceRange(long min, long max, Date date) {
+    public SequenceRange(long min, long max, Date date, String dbName) {
         this.min = min;
         this.max = max;
         this.date = date;
+        this.dbName = dbName;
         this.value = new AtomicLong(min);
     }
 
@@ -55,6 +57,10 @@ public class SequenceRange {
         return date;
     }
 
+    public String getDbName() {
+        return dbName;
+    }
+
     public String getFormattedDate(String format) {
         return new SimpleDateFormat(format).format(date);
     }
@@ -70,6 +76,7 @@ public class SequenceRange {
         if (max != that.max) return false;
         if (drained != that.drained) return false;
         if (!value.equals(that.value)) return false;
+        if (!dbName.equals(that.dbName)) return false;
         return date.equals(that.date);
 
     }
@@ -79,6 +86,7 @@ public class SequenceRange {
         int result = (int) (min ^ (min >>> 32));
         result = 31 * result + (int) (max ^ (max >>> 32));
         result = 31 * result + value.hashCode();
+        result = 31 * result + dbName.hashCode();
         result = 31 * result + date.hashCode();
         result = 31 * result + (drained ? 1 : 0);
         return result;
@@ -90,6 +98,7 @@ public class SequenceRange {
                 "min=" + min +
                 ", max=" + max +
                 ", value=" + value +
+                ", dbName='" + dbName + '\'' +
                 ", date=" + date +
                 ", drained=" + drained +
                 '}';

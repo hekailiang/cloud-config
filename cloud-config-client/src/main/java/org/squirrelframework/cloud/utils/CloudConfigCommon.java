@@ -26,7 +26,9 @@ public abstract class CloudConfigCommon {
 
     public static final String ZK_CLIENT_BEAN_NAME = "org.squirrelframework.cloud.conf.ZkClientBean";
 
-    public static final String ZK_SEQUENCE_DAO_BEAN_NAME = "org.squirrelframework.cloud.conf.ZkSequenceDao";
+    public static final String DB_NAME_KEY = "dbName";
+    public static final String DB_DATE_KEY = "dbDate";
+    public static final String SEQUENCE_VALUE_KEY = "sequenceValue";
 
     public static String[] getProfiles() {
         Set<String> result = new LinkedHashSet<>();
