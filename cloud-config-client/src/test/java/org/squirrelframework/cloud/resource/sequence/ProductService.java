@@ -1,6 +1,8 @@
 package org.squirrelframework.cloud.resource.sequence;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.squirrelframework.cloud.annotation.RoutingKey;
 import org.squirrelframework.cloud.annotation.RoutingVariable;
@@ -8,9 +10,11 @@ import org.squirrelframework.cloud.annotation.RoutingVariable;
 /**
  * Created by kailianghe on 15/12/17.
  */
+@Service
 public class ProductService {
 
     @Autowired
+    @Qualifier("sequence")
     private SequenceGenerator sequenceGenerator;
 
     @Autowired

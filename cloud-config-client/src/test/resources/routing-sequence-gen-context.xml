@@ -29,8 +29,6 @@
         </property>
     </bean>
 
-    <bean id="productService" class="org.squirrelframework.cloud.resource.sequence.ProductService"/>
-
     <cc:zk-declarative-routing/>
     <cc:zk-client connection-string="127.0.0.1:1234"/>
     <cc:zk-property-placeholder path="/sequence"/>

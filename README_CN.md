@@ -260,7 +260,7 @@ cloud-config通过在应用层做多数据源路由（嵌套路由）来支持�
 root  
 |---/config    
 |------/database  
-|------|--/mail.................................. _TenantIdThreadLocalResolver    (tenant1/tenant2)_    
+|------|--/user.................................. _TenantIdThreadLocalResolver    (tenant1/tenant2)_    
 |------------/tenant1............................ _MajorProfileRoutingKeyResolver (dev/prod)_   
 |------------|--/dev  
 |------------|--/prod............................ _DeclarativeRoutingKeyResolver  (write/read)_  
@@ -272,13 +272,13 @@ root
 |------------/tenant2  
 |------------|--/dev  
 |------------|--/prod  
-注：mail模块目录结构展现了四层数据源嵌套路由。  
-* 第一层是在模块节点(/database/mail)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。   
-* 第二层是在租户节点(/database/mail/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。  
-* 第三层是在profile节点(/database/mail/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。  
-* 第四层是在读节点(/database/mail/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。   
-* 如果对应节点无子节点，则路由到该节点结束。例如，在/database/mail/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 
-* 当路由到对应叶子节点时，例如/database/mail/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/mail/tenant1/prod)上的配置信息创建数据源。  
+注：user模块目录结构展现了四层数据源嵌套路由。  
+* 第一层是在模块节点(/database/user)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。   
+* 第二层是在租户节点(/database/user/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。  
+* 第三层是在profile节点(/database/user/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。  
+* 第四层是在读节点(/database/user/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。   
+* 如果对应节点无子节点，则路由到该节点结束。例如，在/database/user/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 
+* 当路由到对应叶子节点时，例如/database/user/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/user/tenant1/prod)上的配置信息创建数据源。  
 
 在Spring中使用时需配置如下： 
 ```xml
@@ -309,18 +309,18 @@ root
     <bean id="rwSplitResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
     <!-- 创建循环派发路由器 -->
     <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver">
-        <property name="path" value="/database/mail"/>
+        <property name="path" value="/database/user"/>
         <!-- 启用自动刷新功能 -->
         <property name="autoRefresh" value="true"/>
         <!-- 每隔5分钟自动刷新可路由列表 (read节点下的01，02，03节点) -->
         <property name="refreshInterval" value="5"/>
     </bean>
 
-    <!-- 创建mail模块数据源路由器，id指定为my-default-resolver，通过NestedRoutingKeyResolver组装之前创建的路由器 -->
+    <!-- 创建user模块数据源路由器，id指定为my-default-resolver，通过NestedRoutingKeyResolver组装之前创建的路由器 -->
     <bean id="my-default-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
         <property name="resolvers">
             <list>
-                <!-- 路由器引用顺序与mail模块目录结构对应 -->
+                <!-- 路由器引用顺序与user模块目录结构对应 -->
                 <ref bean="tenantResolver"/>
                 <ref bean="profileResolver"/>
                 <ref bean="rwSplitResolver"/>
@@ -331,7 +331,7 @@ root
 
     <cc:zk-client connection-string="127.0.0.1:1234"/>
     <!-- routing-support设为true启用数据库路由，并将routing resolver指定为my-default-resolver -->
-    <cc:zk-jdbc-datasource id="dataSource" path="/database/mail" routing-support="true" resolver-ref="my-default-resolver"/>
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/user" routing-support="true" resolver-ref="my-default-resolver"/>
 
     <context:component-scan base-package="org.squirrelframework.cloud.sample" />
     <tx:annotation-driven transaction-manager="transactionManager" />
@@ -386,7 +386,189 @@ public class UserService {
 ```
 
 #### 水平分库路由配置
-cloud-config通过支持复杂路由规则设置，来支持数据库水平拆分。
+cloud-config通过支持复杂路由规则设置与可路由的数据库sequence生成器，来支持数据库水平拆分。本例将演示通过用户ID将产品数据均匀分布到01-04数据库中。
+
+对于水平分库数据源配置，Zookeeper中节点配置如下：
+root  
+|---/config    
+|------/database  
+|------|--/product............................... _TenantIdThreadLocalResolver    (tenant1/tenant2)_    
+|------------/tenant1............................ _MajorProfileRoutingKeyResolver (dev/prod)_   
+|------------|--/dev............................. _DeclarativeRoutingKeyResolver  (01/02/03/04)_   
+|------------|--|--/01  
+|------------|--|--/02  
+|------------|--|--/03    
+|------------|--|--/04  
+|------------|--/prod............................ _DeclarativeRoutingKeyResolver  (01/02/03/04)_  
+|------------|--|--/01  
+|------------|--|--/02  
+|------------|--|--/03    
+|------------|--|--/04         
+|------------/tenant2  
+|------------|--/dev  
+|------------|--/prod  
+|---/properties    
+|---|--/sequence  
+
+`/root/config/database/product/tenant1/dev`中配置内容如下：  
+```json
+{
+    "driverClassName" : "com.mysql.jdbc.Driver",
+    
+    "idleMaxAgeInMinutes" : 240,
+    "idleConnectionTestPeriodInMinutes" : 60,
+    "maxConnectionsPerPartition" : 10,
+    "minConnectionsPerPartition" : 1,
+    "partitionCount" : 2,
+    "acquireIncrement" : 5,
+    "statementsCacheSize" : 100,
+    "userName" : "root",
+    "password" : "root"
+}
+```
+
+`/root/config/database/product/tenant1/dev/01`中配置内容如下：  
+```json
+{
+  "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/product-t1-dev-01?useUnicode=true"
+}
+```
+...  
+`/root/config/database/product/tenant1/dev/04`中配置内容如下：  
+```json
+{
+  "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/product-t1-dev-04?useUnicode=true"
+}
+```
+在开发环境上， 我们将01-04产品库对应到同一台数据库服务器。在生产环境中可以对应到单独的数据库服务器。
+
+`/properties/sequence`中配置如下：
+```json
+{
+    "sequence" : {
+        "format.expression" : "T(java.lang.String).format('%s%s%06d', #dbDateStr, #dbName.substring(15), #sequenceValue)",
+        "product.id.sharding.rule" : "#id.substring(8, 10)",
+        "product.sharding.rule" : "#product?.id?.substring(8, 10) ?: T(java.lang.String).format('%02d', #product.customerId%4+1)"
+    }
+}
+```  
+**注**：`/sequence`属性配置定义了sequence生成规则配置与数据库水平分片规则，规则通过Spring EL表达式描述。为了避免在代码中硬编码这些规则，我们将其定义在系统属性中，方便日后管理。  
+* format.sequence：生成由16位数字组成的sequence组装规则，其中前8位由sequence生成时的日期组成（如20151217），9-10位由数据库的index组成（如01），后六位由一个当前库当前sequence下自增长的整数组成（如000001），组装出来的sequence就是2015121701000001.
+*  product.id.sharding.rule：基于产品ID的数据源路由规则，取产品ID的9-10位作为当前路由键值（对应在format sequence的时候将数据库index放置在9-10位）
+* product.sharding.rule：基于产品对象的数据库路由规则。当产品ID不为空时，按产品ID的9-10位键值路由，当产品ID为空时，按产品对应的客户ID与4的模值加1作为路由键值。这条规则可以同时满足创建新产品和保存已有产品时对于数据源路由的需求。
+
+在Spring中使用时需配置如下： 
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <context:annotation-config/>
+
+	<!--  创建租户ID路由器 -->
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
+    <!-- 创建主Profile路由器 -->
+    <bean id="profileResolver"  class="org.squirrelframework.cloud.routing.MajorProfileRoutingKeyResolver"/>
+    <!-- 创建声明式路由器 -->
+    <bean id="routingKeyResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver">
+    	<!-- 启用循环取routing key -->
+        <property name="rollingPoll" value="true"/>
+    </bean>
+
+	<!-- 组装sequence和routing datasource使用的路由器 -->
+    <bean id="my-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
+        <property name="resolvers">
+            <list>
+                <ref bean="tenantResolver"/>
+                <ref bean="profileResolver"/>
+                <ref bean="routingKeyResolver"/>
+            </list>
+        </property>
+    </bean>
+
+	<!-- 启用声明式路由 -->
+    <cc:zk-declarative-routing/>
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <!-- 配置系统属性路径 -->
+    <cc:zk-property-placeholder path="/sequence"/>
+    <!-- 配置routing datasource -->
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" resolver-ref="my-resolver"/>
+    <!-- 配置routing sequence，并设置sequence格式化表达式的属性键 -->
+    <cc:zk-sequence-generator id="sequence" path="/database/mydb" resolver-ref="my-resolver" format-expression="${sequence.format.expression}"/>
+
+    <context:component-scan base-package="org.squirrelframework.cloud.resource.sequence" />
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="org.squirrelframework.cloud.resource.sequence"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.archive.autodetection" />
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
+```
+
+在应用代码中使用这些配置内容：
+```java
+@Service
+public class ProductService {
+
+    @Autowired
+    @Qualifier("sequence")
+    private SequenceGenerator sequenceGenerator;
+
+    @Autowired
+    private ProductDao productDao;
+
+    @Transactional
+    @RoutingKey("#{ ${sequence.product.sharding.rule} }")
+    public String saveProduct(@RoutingVariable("product") Product product) throws Exception {
+        if(product.getId() == null) {
+        	// 创建新产品
+            String productId = sequenceGenerator.next("product");
+            product.setId(productId);
+            productDao.save(product);
+        } else {
+        	// 更新已有产品
+            productDao.update(product);
+        }
+        return product.getId();
+    }
+
+    @RoutingKey("#{ ${sequence.product.id.sharding.rule} }")
+    public Product findProductById(@RoutingVariable("id") String id) {
+        return productDao.findProductById(id);
+    }
+
+}
+```
+
 
 ## 开发计划
 * 生产环境配置的权限控制及监管  
