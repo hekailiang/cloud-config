@@ -1,7 +1,6 @@
 package org.squirrelframework.cloud.routing;
 
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -10,12 +9,11 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.Ordered;
 import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.StringValueResolver;
 import org.squirrelframework.cloud.annotation.RoutingKey;
 import org.squirrelframework.cloud.annotation.RoutingVariable;
+import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -32,18 +30,9 @@ public class DeclarativeRoutingKeyAspect implements Ordered, EmbeddedValueResolv
 
     private static Pattern pattern = Pattern.compile("^#\\s*\\{\\s*(.+?)\\s*\\}$");
 
-    private CacheLoader<String, Expression> loader = new CacheLoader<String, Expression>() {
-        @Override
-        public Expression load(String elExpr) throws Exception {
-            ExpressionParser parser = new SpelExpressionParser();
-            Expression expression = parser.parseExpression(elExpr);
-            return expression;
-        }
-    };
-
     private LoadingCache<String, Expression> expressionCache = CacheBuilder.newBuilder()
             .weakKeys()
-            .build(loader);
+            .build(CloudConfigCommon.EL_EXPRESSION_LOADER);
 
     private StringValueResolver stringValueResolver;
 

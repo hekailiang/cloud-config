@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <context:annotation-config/>
+
+    <bean id="resolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <bean id="productService" class="org.squirrelframework.cloud.resource.sequence.ProductService"/>
+
+    <cc:zk-declarative-routing/>
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <cc:zk-property-placeholder path="/sequence"/>
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" resolver-ref="resolver"/>
+    <cc:zk-sequence-generator id="sequence" path="/database/mydb" resolver-ref="resolver" format-expression="${sequence.format.expression}"/>
+
+</beans>

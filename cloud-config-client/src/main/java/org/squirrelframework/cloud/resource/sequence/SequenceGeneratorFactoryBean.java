@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.util.StringUtils;
 import org.squirrelframework.cloud.resource.AbstractRoutingResourceFactoryBean;
 import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;
@@ -20,6 +21,16 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
     private static final Logger logger = LoggerFactory.getLogger(SequenceGeneratorFactoryBean.class);
 
     private SequenceFormatter sequenceFormatter;
+
+    private String sequenceFormatExpression;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if(sequenceFormatter == null && StringUtils.hasText(sequenceFormatExpression)) {
+            sequenceFormatter = SpringELSequenceFormatterFactory.createFormatter(sequenceFormatExpression);
+        }
+        super.afterPropertiesSet();
+    }
 
     @Override
     protected String getResourceBeanIdFromPath(String resPath) {
@@ -84,9 +95,12 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
         return false;
     }
 
-    @Autowired
     public void setSequenceFormatter(SequenceFormatter sequenceFormatter) {
         this.sequenceFormatter = sequenceFormatter;
+    }
+
+    public void setSequenceFormatExpression(String sequenceFormatExpression) {
+        this.sequenceFormatExpression = sequenceFormatExpression;
     }
 
     private CacheLoader<String, SequenceGenerator> cacheLoader = new CacheLoader<String, SequenceGenerator>() {

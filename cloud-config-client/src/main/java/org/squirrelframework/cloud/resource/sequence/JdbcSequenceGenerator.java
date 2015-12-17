@@ -23,6 +23,8 @@ public class JdbcSequenceGenerator implements SequenceGenerator {
 
     private SequenceFormatter sequenceFormatter;
 
+    private String dateFormat = "yyyyMMdd";
+
     private final Lock locker = new ReentrantLock();
 
     private CacheLoader<String, Iterator<String>> loader = new CacheLoader<String, Iterator<String>>() {
@@ -63,6 +65,7 @@ public class JdbcSequenceGenerator implements SequenceGenerator {
                     }
                     Map<String, Object> parameters = Maps.newHashMap();
                     parameters.put(CloudConfigCommon.DB_DATE_KEY, sequenceRangeHolder.get().getDate());
+                    parameters.put(CloudConfigCommon.DB_DATE_STR_KEY, sequenceRangeHolder.get().getFormattedDate(dateFormat));
                     parameters.put(CloudConfigCommon.DB_NAME_KEY, sequenceRangeHolder.get().getDbName());
                     parameters.put(CloudConfigCommon.SEQUENCE_VALUE_KEY, value);
                     return sequenceFormatter.format(parameters);
@@ -83,12 +86,14 @@ public class JdbcSequenceGenerator implements SequenceGenerator {
         return cachedSequenceRange.get(seqName).next();
     }
 
-    @Autowired
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
     public void setSequenceDao(SequenceDao sequenceDao) {
         this.sequenceDao = sequenceDao;
     }
 
-    @Autowired
     public void setSequenceFormatter(SequenceFormatter sequenceFormatter) {
         this.sequenceFormatter = sequenceFormatter;
     }

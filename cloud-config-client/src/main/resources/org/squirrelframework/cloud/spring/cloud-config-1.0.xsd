@@ -81,6 +81,7 @@
                     <xsd:attribute type="xsd:string" name="path" use="required"/>
                     <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
                     <xsd:attribute type="xsd:string" name="formatter-ref" default="zk-default-formatter"/>
+                    <xsd:attribute type="xsd:string" name="format-expression"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

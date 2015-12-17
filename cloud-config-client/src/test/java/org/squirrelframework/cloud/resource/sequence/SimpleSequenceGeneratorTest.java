@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Created by kailianghe on 15/12/16.
  */
-public class SequenceGeneratorTest extends BaseTestClass {
+public class SimpleSequenceGeneratorTest extends BaseTestClass {
 
     ApplicationContext applicationContext;
 

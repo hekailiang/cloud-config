@@ -5,6 +5,7 @@ import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.squirrelframework.cloud.resource.sequence.SequenceGeneratorFactoryBean;
+import org.squirrelframework.cloud.resource.sequence.SpringELSequenceFormatterFactory;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.w3c.dom.Element;
 
@@ -29,11 +30,16 @@ public class ZkSequenceGeneratorBeanDefinitionParser extends AbstractSingleBeanD
         }
         builder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);
 
-        String formatterBeanName = element.getAttribute("formatter-ref");
-        if(parserContext.getRegistry().containsBeanDefinition(formatterBeanName)) {
-            builder.addPropertyReference("sequenceFormatter", formatterBeanName);
+        String format = element.getAttribute("format-expression");
+        if(StringUtils.hasText(format)) {
+            builder.addPropertyValue("sequenceFormatExpression", format);
         } else {
-            throw new IllegalArgumentException("Undefined formatter bean: "+formatterBeanName);
+            String formatterBeanName = element.getAttribute("formatter-ref");
+            if(parserContext.getRegistry().containsBeanDefinition(formatterBeanName)) {
+                builder.addPropertyReference("sequenceFormatter", formatterBeanName);
+            } else {
+                throw new IllegalArgumentException("Undefined formatter bean: "+formatterBeanName);
+            }
         }
     }
 }

@@ -1,6 +1,10 @@
 package org.squirrelframework.cloud.utils;
 
+import com.google.common.cache.CacheLoader;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -28,6 +32,7 @@ public abstract class CloudConfigCommon {
 
     public static final String DB_NAME_KEY = "dbName";
     public static final String DB_DATE_KEY = "dbDate";
+    public static final String DB_DATE_STR_KEY = "dbDateStr";
     public static final String SEQUENCE_VALUE_KEY = "sequenceValue";
 
     public static String[] getProfiles() {
@@ -70,4 +75,13 @@ public abstract class CloudConfigCommon {
     public static String bytes2String(byte[] content) throws UnsupportedEncodingException {
         return new String(content, "UTF-8");
     }
+
+    public static final CacheLoader<String, Expression> EL_EXPRESSION_LOADER = new CacheLoader<String, Expression>() {
+        @Override
+        public Expression load(String elExpr) throws Exception {
+            ExpressionParser parser = new SpelExpressionParser();
+            Expression expression = parser.parseExpression(elExpr);
+            return expression;
+        }
+    };
 }
