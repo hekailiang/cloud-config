@@ -18,7 +18,7 @@ public class SimpleSequenceGeneratorTest extends BaseTestClass {
     protected void prepare() throws Exception {
         String config = "{\n" +
                 "    \"driverClassName\" : \"org.h2.Driver\",\n" +
-                "    \"jdbcUrl\" : \"jdbc:h2:mem:test;MODE=MySQL;INIT="+SequenceDaoTest.INIT_SQL+"\"\n"+
+                "    \"jdbcUrl\" : \"jdbc:h2:mem:dev;MODE=MySQL;INIT="+SequenceDaoTest.INIT_SQL+"\"\n"+
                 "}";
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb", config.getBytes());
         applicationContext = new ClassPathXmlApplicationContext("classpath:sequence-gen-context.xml");
