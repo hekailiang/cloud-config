@@ -3,17 +3,23 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:cc="http://www.squirrelframework.org/schema/config"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
             http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/context
             http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
     <context:annotation-config/>
 
-    <bean id="resolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <bean id="resolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver">
+        <property name="rollingPoll" value="true"/>
+    </bean>
+
     <bean id="productService" class="org.squirrelframework.cloud.resource.sequence.ProductService"/>
 
     <cc:zk-declarative-routing/>
@@ -21,5 +27,28 @@
     <cc:zk-property-placeholder path="/sequence"/>
     <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" resolver-ref="resolver"/>
     <cc:zk-sequence-generator id="sequence" path="/database/mydb" resolver-ref="resolver" format-expression="${sequence.format.expression}"/>
+
+    <context:component-scan base-package="org.squirrelframework.cloud.resource.sequence" />
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="org.squirrelframework.cloud.resource.sequence"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.archive.autodetection" />
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
 
 </beans>

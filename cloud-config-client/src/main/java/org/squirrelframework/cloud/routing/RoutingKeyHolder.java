@@ -49,7 +49,7 @@ public class RoutingKeyHolder {
         return declarativeRoutingKeyHolder.get().peek();
     }
 
-    public static String cycleGetDeclarativeRoutingKey() {
+    public static String rollingPollDeclarativeRoutingKey() {
         String routingKey = pollDeclarativeRoutingKey();
         putDeclarativeRoutingKey(routingKey);
         return routingKey;

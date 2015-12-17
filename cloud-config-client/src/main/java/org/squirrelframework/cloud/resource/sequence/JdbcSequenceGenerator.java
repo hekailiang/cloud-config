@@ -4,8 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.squirrelframework.cloud.routing.RoutingKeyHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.util.Iterator;
@@ -18,6 +18,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by kailianghe on 15/12/15.
  */
 public class JdbcSequenceGenerator implements SequenceGenerator {
+
+    private static final Logger logger = LoggerFactory.getLogger(SequenceGenerator.class);
 
     private SequenceDao sequenceDao;
 
@@ -68,7 +70,9 @@ public class JdbcSequenceGenerator implements SequenceGenerator {
                     parameters.put(CloudConfigCommon.DB_DATE_STR_KEY, sequenceRangeHolder.get().getFormattedDate(dateFormat));
                     parameters.put(CloudConfigCommon.DB_NAME_KEY, sequenceRangeHolder.get().getDbName());
                     parameters.put(CloudConfigCommon.SEQUENCE_VALUE_KEY, value);
-                    return sequenceFormatter.format(parameters);
+                    String sequence = sequenceFormatter.format(parameters);
+                    logger.debug("new '{}' sequence: {}", seqName, sequence);
+                    return sequence;
                 }
 
                 @Override
