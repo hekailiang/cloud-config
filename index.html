@@ -116,7 +116,7 @@ mail.password=dev1234
 
     <span class="pl-c">&lt;!--使用时与Spring原生property相同--&gt;</span>
     &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>mailBean<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.spring.ZkPropertyPlaceholderConfigurerTest$SampleBean<span class="pl-pds">"</span></span>&gt;
-        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>host<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>${mal.host}<span class="pl-pds">"</span></span>/&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>host<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>${mail.host}<span class="pl-pds">"</span></span>/&gt;
         &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>port<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>${mail.port}<span class="pl-pds">"</span></span>/&gt;
     &lt;/<span class="pl-ent">bean</span>&gt;</pre></div>
 
@@ -303,31 +303,31 @@ root<br>
 root<br>
 |---/config<br>
 |------/database<br>
-|------|--/mail.................................... <em>TenantIdThreadLocalResolver</em><br>
-|------------/tenant1........................... <em>MajorProfileRoutingKeyResolver</em><br>
+|------|--/user.................................. <em>TenantIdThreadLocalResolver    (tenant1/tenant2)</em><br>
+|------------/tenant1............................ <em>MajorProfileRoutingKeyResolver (dev/prod)</em><br>
 |------------|--/dev<br>
-|------------|--/prod............................ <em>DeclarativeRoutingKeyResolver</em><br>
+|------------|--/prod............................ <em>DeclarativeRoutingKeyResolver  (write/read)</em><br>
 |------------|--|--/write<br>
-|------------|--|--/read........................ <em>DispatchableRoutingKeyResolver</em><br>
+|------------|--|--/read......................... <em>DispatchableRoutingKeyResolver (01/02/03)</em><br>
 |------------|--|--|--/01<br>
 |------------|--|--|--/02<br>
 |------------|--|--|--/03<br>
 |------------/tenant2<br>
 |------------|--/dev<br>
 |------------|--/prod<br>
-注：mail模块目录结构展现了四层数据源嵌套路由。  </p>
+注：user模块目录结构展现了四层数据源嵌套路由。  </p>
 
 <ul>
-<li>第一层是在模块节点(/database/mail)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。<br>
+<li>第一层是在模块节点(/database/user)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。<br>
 </li>
-<li>第二层是在租户节点(/database/mail/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。<br>
+<li>第二层是在租户节点(/database/user/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。<br>
 </li>
-<li>第三层是在profile节点(/database/mail/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。<br>
+<li>第三层是在profile节点(/database/user/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。<br>
 </li>
-<li>第四层是在读节点(/database/mail/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。<br>
+<li>第四层是在读节点(/database/user/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。<br>
 </li>
-<li>如果对应节点无子节点，则路由到该节点结束。例如，在/database/mail/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 </li>
-<li>当路由到对应叶子节点时，例如/database/mail/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/mail/tenant1/prod)上的配置信息创建数据源。<br>
+<li>如果对应节点无子节点，则路由到该节点结束。例如，在/database/user/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 </li>
+<li>当路由到对应叶子节点时，例如/database/user/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/user/tenant1/prod)上的配置信息创建数据源。<br>
 </li>
 </ul>
 
@@ -360,18 +360,18 @@ root<br>
     &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>rwSplitResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver<span class="pl-pds">"</span></span>/&gt;
     <span class="pl-c">&lt;!-- 创建循环派发路由器 --&gt;</span>
     &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dispatchResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
-        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>path<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail<span class="pl-pds">"</span></span>/&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>path<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/user<span class="pl-pds">"</span></span>/&gt;
         <span class="pl-c">&lt;!-- 启用自动刷新功能 --&gt;</span>
         &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>autoRefresh<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;
         <span class="pl-c">&lt;!-- 每隔5分钟自动刷新可路由列表 (read节点下的01，02，03节点) --&gt;</span>
         &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>refreshInterval<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>5<span class="pl-pds">"</span></span>/&gt;
     &lt;/<span class="pl-ent">bean</span>&gt;
 
-    <span class="pl-c">&lt;!-- 创建mail模块数据源路由器，id指定为my-default-resolver，通过NestedRoutingKeyResolver组装之前创建的路由器 --&gt;</span>
+    <span class="pl-c">&lt;!-- 创建user模块数据源路由器，id指定为my-default-resolver，通过NestedRoutingKeyResolver组装之前创建的路由器 --&gt;</span>
     &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>my-default-resolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.NestedRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
         &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>resolvers<span class="pl-pds">"</span></span>&gt;
             &lt;<span class="pl-ent">list</span>&gt;
-                <span class="pl-c">&lt;!-- 路由器引用顺序与mail模块目录结构对应 --&gt;</span>
+                <span class="pl-c">&lt;!-- 路由器引用顺序与user模块目录结构对应 --&gt;</span>
                 &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span>/&gt;
                 &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>profileResolver<span class="pl-pds">"</span></span>/&gt;
                 &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>rwSplitResolver<span class="pl-pds">"</span></span>/&gt;
@@ -382,7 +382,7 @@ root<br>
 
     &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
     <span class="pl-c">&lt;!-- routing-support设为true启用数据库路由，并将routing resolver指定为my-default-resolver --&gt;</span>
-    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-jdbc-datasource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mail<span class="pl-pds">"</span></span> <span class="pl-e">routing-support</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span> <span class="pl-e">resolver-ref</span>=<span class="pl-s"><span class="pl-pds">"</span>my-default-resolver<span class="pl-pds">"</span></span>/&gt;
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-jdbc-datasource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/user<span class="pl-pds">"</span></span> <span class="pl-e">routing-support</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span> <span class="pl-e">resolver-ref</span>=<span class="pl-s"><span class="pl-pds">"</span>my-default-resolver<span class="pl-pds">"</span></span>/&gt;
 
     &lt;<span class="pl-ent">context</span><span class="pl-ent">:</span><span class="pl-ent">component-scan</span> <span class="pl-e">base-package</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.sample<span class="pl-pds">"</span></span> /&gt;
     &lt;<span class="pl-ent">tx</span><span class="pl-ent">:</span><span class="pl-ent">annotation-driven</span> <span class="pl-e">transaction-manager</span>=<span class="pl-s"><span class="pl-pds">"</span>transactionManager<span class="pl-pds">"</span></span> /&gt;
@@ -437,7 +437,188 @@ root<br>
 <h4>
 <a id="水平分库路由配置" class="anchor" href="#%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>水平分库路由配置</h4>
 
-<p>cloud-config通过支持复杂路由规则设置，来支持数据库水平拆分。</p>
+<p>cloud-config通过支持复杂路由规则设置与可路由的数据库sequence生成器，来支持数据库水平拆分。本例将演示通过用户ID将产品数据均匀分布到01-04数据库中。</p>
+
+<p>对于水平分库数据源配置，Zookeeper中节点配置如下：
+root<br>
+|---/config<br>
+|------/database<br>
+|------|--/product............................... <em>TenantIdThreadLocalResolver    (tenant1/tenant2)</em><br>
+|------------/tenant1............................ <em>MajorProfileRoutingKeyResolver (dev/prod)</em><br>
+|------------|--/dev............................. <em>DeclarativeRoutingKeyResolver  (01/02/03/04)</em><br>
+|------------|--|--/01<br>
+|------------|--|--/02<br>
+|------------|--|--/03<br>
+|------------|--|--/04<br>
+|------------|--/prod............................ <em>DeclarativeRoutingKeyResolver  (01/02/03/04)</em><br>
+|------------|--|--/01<br>
+|------------|--|--/02<br>
+|------------|--|--/03<br>
+|------------|--|--/04<br>
+|------------/tenant2<br>
+|------------|--/dev<br>
+|------------|--/prod<br>
+|---/properties<br>
+|---|--/sequence  </p>
+
+<p><code>/root/config/database/product/tenant1/dev</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>driverClassName<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>com.mysql.jdbc.Driver<span class="pl-pds">"</span></span>,
+
+    <span class="pl-s"><span class="pl-pds">"</span>idleMaxAgeInMinutes<span class="pl-pds">"</span></span> : <span class="pl-c1">240</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>idleConnectionTestPeriodInMinutes<span class="pl-pds">"</span></span> : <span class="pl-c1">60</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>maxConnectionsPerPartition<span class="pl-pds">"</span></span> : <span class="pl-c1">10</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>minConnectionsPerPartition<span class="pl-pds">"</span></span> : <span class="pl-c1">1</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>partitionCount<span class="pl-pds">"</span></span> : <span class="pl-c1">2</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>acquireIncrement<span class="pl-pds">"</span></span> : <span class="pl-c1">5</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>statementsCacheSize<span class="pl-pds">"</span></span> : <span class="pl-c1">100</span>,
+    <span class="pl-s"><span class="pl-pds">"</span>userName<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>password<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p><code>/root/config/database/product/tenant1/dev/01</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>jdbcUrl<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>jdbc:mysql://127.0.0.1:3306/product-t1-dev-01?useUnicode=true<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p>...<br>
+<code>/root/config/database/product/tenant1/dev/04</code>中配置内容如下：  </p>
+
+<div class="highlight highlight-source-json"><pre>{
+  <span class="pl-s"><span class="pl-pds">"</span>jdbcUrl<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>jdbc:mysql://127.0.0.1:3306/product-t1-dev-04?useUnicode=true<span class="pl-pds">"</span></span>
+}</pre></div>
+
+<p>在开发环境上， 我们将01-04产品库对应到同一台数据库服务器。在生产环境中可以对应到单独的数据库服务器。</p>
+
+<p><code>/properties/sequence</code>中配置如下：</p>
+
+<div class="highlight highlight-source-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>sequence<span class="pl-pds">"</span></span> : {
+        <span class="pl-s"><span class="pl-pds">"</span>format.expression<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>T(java.lang.String).format('%s%s%06d', #dbDateStr, #dbName.substring(15), #sequenceValue)<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>product.id.sharding.rule<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>#id.substring(8, 10)<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>product.sharding.rule<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>#product?.id?.substring(8, 10) ?: T(java.lang.String).format('%02d', #product.customerId%4+1)<span class="pl-pds">"</span></span>
+    }
+}</pre></div>
+
+<p><strong>注</strong>：<code>/sequence</code>属性配置定义了sequence生成规则配置与数据库水平分片规则，规则通过Spring EL表达式描述。为了避免在代码中硬编码这些规则，我们将其定义在系统属性中，方便日后管理。  </p>
+
+<ul>
+<li>format.sequence：生成由16位数字组成的sequence组装规则，其中前8位由sequence生成时的日期组成（如20151217），9-10位由数据库的index组成（如01），后六位由一个当前库当前sequence下自增长的整数组成（如000001），组装出来的sequence就是2015121701000001.</li>
+<li> product.id.sharding.rule：基于产品ID的数据源路由规则，取产品ID的9-10位作为当前路由键值（对应在format sequence的时候将数据库index放置在9-10位）</li>
+<li>product.sharding.rule：基于产品对象的数据库路由规则。当产品ID不为空时，按产品ID的9-10位键值路由，当产品ID为空时，按产品对应的客户ID与4的模值加1作为路由键值。这条规则可以同时满足创建新产品和保存已有产品时对于数据源路由的需求。</li>
+</ul>
+
+<p>在Spring中使用时需配置如下： </p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;?<span class="pl-ent">xml</span><span class="pl-e"> version</span>=<span class="pl-s"><span class="pl-pds">"</span>1.0<span class="pl-pds">"</span></span><span class="pl-e"> encoding</span>=<span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>?&gt;
+&lt;<span class="pl-ent">beans</span> <span class="pl-e">xmlns</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/beans<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">xsi</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">cc</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.squirrelframework.org/schema/config<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">context</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/context<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">tx</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/tx<span class="pl-pds">"</span></span>
+       <span class="pl-e">xsi</span><span class="pl-e">:</span><span class="pl-e">schemaLocation</span>=<span class="pl-s"><span class="pl-pds">"</span></span>
+<span class="pl-s">            http://www.springframework.org/schema/beans</span>
+<span class="pl-s">            http://www.springframework.org/schema/beans/spring-beans.xsd</span>
+<span class="pl-s">            http://www.springframework.org/schema/context</span>
+<span class="pl-s">            http://www.springframework.org/schema/context/spring-context.xsd</span>
+<span class="pl-s">            http://www.springframework.org/schema/tx</span>
+<span class="pl-s">            http://www.springframework.org/schema/tx/spring-tx.xsd</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config/cloud-config.xsd<span class="pl-pds">"</span></span>&gt;
+
+    &lt;<span class="pl-ent">context</span><span class="pl-ent">:</span><span class="pl-ent">annotation-config</span>/&gt;
+
+    <span class="pl-c">&lt;!--  创建租户ID路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 创建主Profile路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>profileResolver<span class="pl-pds">"</span></span>  <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.MajorProfileRoutingKeyResolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 创建声明式路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>routingKeyResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
+        <span class="pl-c">&lt;!-- 启用循环取routing key --&gt;</span>
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>rollingPoll<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+    <span class="pl-c">&lt;!-- 组装sequence和routing datasource使用的路由器 --&gt;</span>
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>my-resolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.NestedRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>resolvers<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">list</span>&gt;
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span>/&gt;
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>profileResolver<span class="pl-pds">"</span></span>/&gt;
+                &lt;<span class="pl-ent">ref</span> <span class="pl-e">bean</span>=<span class="pl-s"><span class="pl-pds">"</span>routingKeyResolver<span class="pl-pds">"</span></span>/&gt;
+            &lt;/<span class="pl-ent">list</span>&gt;
+        &lt;/<span class="pl-ent">property</span>&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+    <span class="pl-c">&lt;!-- 启用声明式路由 --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-declarative-routing</span>/&gt;
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 配置系统属性路径 --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-property-placeholder</span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/sequence<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 配置routing datasource --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-jdbc-datasource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mydb<span class="pl-pds">"</span></span> <span class="pl-e">routing-support</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span> <span class="pl-e">resolver-ref</span>=<span class="pl-s"><span class="pl-pds">"</span>my-resolver<span class="pl-pds">"</span></span>/&gt;
+    <span class="pl-c">&lt;!-- 配置routing sequence，并设置sequence格式化表达式的属性键 --&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-sequence-generator</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>sequence<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/database/mydb<span class="pl-pds">"</span></span> <span class="pl-e">resolver-ref</span>=<span class="pl-s"><span class="pl-pds">"</span>my-resolver<span class="pl-pds">"</span></span> <span class="pl-e">format-expression</span>=<span class="pl-s"><span class="pl-pds">"</span>${sequence.format.expression}<span class="pl-pds">"</span></span>/&gt;
+
+    &lt;<span class="pl-ent">context</span><span class="pl-ent">:</span><span class="pl-ent">component-scan</span> <span class="pl-e">base-package</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.resource.sequence<span class="pl-pds">"</span></span> /&gt;
+    &lt;<span class="pl-ent">tx</span><span class="pl-ent">:</span><span class="pl-ent">annotation-driven</span> <span class="pl-e">transaction-manager</span>=<span class="pl-s"><span class="pl-pds">"</span>transactionManager<span class="pl-pds">"</span></span> /&gt;
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>transactionManager<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.springframework.orm.jpa.JpaTransactionManager<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>entityManagerFactory<span class="pl-pds">"</span></span> <span class="pl-e">ref</span>=<span class="pl-s"><span class="pl-pds">"</span>entityManagerFactory<span class="pl-pds">"</span></span> /&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>entityManagerFactory<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> <span class="pl-e">ref</span>=<span class="pl-s"><span class="pl-pds">"</span>dataSource<span class="pl-pds">"</span></span> /&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>packagesToScan<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.resource.sequence<span class="pl-pds">"</span></span>/&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>jpaVendorAdapter<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">bean</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter<span class="pl-pds">"</span></span> /&gt;
+        &lt;/<span class="pl-ent">property</span>&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>jpaPropertyMap<span class="pl-pds">"</span></span>&gt;
+            &lt;<span class="pl-ent">props</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.show_sql<span class="pl-pds">"</span></span>&gt;false&lt;/<span class="pl-ent">prop</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.archive.autodetection<span class="pl-pds">"</span></span> /&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.dialect<span class="pl-pds">"</span></span>&gt;org.hibernate.dialect.MySQLDialect&lt;/<span class="pl-ent">prop</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.format_sql<span class="pl-pds">"</span></span>&gt;true&lt;/<span class="pl-ent">prop</span>&gt;
+                &lt;<span class="pl-ent">prop</span> <span class="pl-e">key</span>=<span class="pl-s"><span class="pl-pds">"</span>hibernate.temp.use_jdbc_metadata_defaults<span class="pl-pds">"</span></span>&gt;false&lt;/<span class="pl-ent">prop</span>&gt;
+            &lt;/<span class="pl-ent">props</span>&gt;
+        &lt;/<span class="pl-ent">property</span>&gt;
+    &lt;/<span class="pl-ent">bean</span>&gt;
+
+&lt;/<span class="pl-ent">beans</span>&gt;</pre></div>
+
+<p>在应用代码中使用这些配置内容：</p>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">Service</span>
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">ProductService</span> {
+
+    <span class="pl-k">@Autowired</span>
+    <span class="pl-k">@Qualifier</span>(<span class="pl-s"><span class="pl-pds">"</span>sequence<span class="pl-pds">"</span></span>)
+    <span class="pl-k">private</span> <span class="pl-smi">SequenceGenerator</span> sequenceGenerator;
+
+    <span class="pl-k">@Autowired</span>
+    <span class="pl-k">private</span> <span class="pl-smi">ProductDao</span> productDao;
+
+    <span class="pl-k">@Transactional</span>
+    <span class="pl-k">@RoutingKey</span>(<span class="pl-s"><span class="pl-pds">"</span>#{ ${sequence.product.sharding.rule} }<span class="pl-pds">"</span></span>)
+    <span class="pl-k">public</span> <span class="pl-smi">String</span> <span class="pl-en">saveProduct</span>(<span class="pl-k">@RoutingVariable</span>(<span class="pl-s"><span class="pl-pds">"</span>product<span class="pl-pds">"</span></span>) <span class="pl-smi">Product</span> <span class="pl-v">product</span>) <span class="pl-k">throws</span> <span class="pl-smi">Exception</span> {
+        <span class="pl-k">if</span>(product<span class="pl-k">.</span>getId() <span class="pl-k">==</span> <span class="pl-c1">null</span>) {
+            <span class="pl-c">// 创建新产品</span>
+            <span class="pl-smi">String</span> productId <span class="pl-k">=</span> sequenceGenerator<span class="pl-k">.</span>next(<span class="pl-s"><span class="pl-pds">"</span>product<span class="pl-pds">"</span></span>);
+            product<span class="pl-k">.</span>setId(productId);
+            productDao<span class="pl-k">.</span>save(product);
+        } <span class="pl-k">else</span> {
+            <span class="pl-c">// 更新已有产品</span>
+            productDao<span class="pl-k">.</span>update(product);
+        }
+        <span class="pl-k">return</span> product<span class="pl-k">.</span>getId();
+    }
+
+    <span class="pl-k">@RoutingKey</span>(<span class="pl-s"><span class="pl-pds">"</span>#{ ${sequence.product.id.sharding.rule} }<span class="pl-pds">"</span></span>)
+    <span class="pl-k">public</span> <span class="pl-smi">Product</span> <span class="pl-en">findProductById</span>(<span class="pl-k">@RoutingVariable</span>(<span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span>) <span class="pl-smi">String</span> <span class="pl-v">id</span>) {
+        <span class="pl-k">return</span> productDao<span class="pl-k">.</span>findProductById(id);
+    }
+
+}</pre></div>
 
 <h2>
 <a id="开发计划" class="anchor" href="#%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92" aria-hidden="true"><span class="octicon octicon-link"></span></a>开发计划</h2>
