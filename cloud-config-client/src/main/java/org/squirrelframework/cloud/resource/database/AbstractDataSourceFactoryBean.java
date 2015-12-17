@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.squirrelframework.cloud.resource.SimpleResourceConfigFactoryBean;
+import org.squirrelframework.cloud.utils.BeanIdGenerator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import javax.sql.DataSource;
@@ -44,16 +45,12 @@ public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfi
         this.beanFactory = (DefaultListableBeanFactory) beanFactory;
     }
 
-    public static String getResourceConfigBeanIdFromPath(String configPath) {
-        return "_"+configPath.replace('/', '_')+"CNF";
-    }
-
     @Override
     public void afterPropertiesSet() throws Exception {
         if(configPath!=null && config==null) {
             DefaultListableBeanFactory beanFactory = getBeanFactory();
             // build config bean
-            String configBeanId = getResourceConfigBeanIdFromPath(configPath);
+            String configBeanId = BeanIdGenerator.getResourceConfigBeanId(configPath);
             if(!applicationContext.containsBeanDefinition(configBeanId)) {
                 BeanDefinitionBuilder cnfBuilder = BeanDefinitionBuilder.rootBeanDefinition(SimpleResourceConfigFactoryBean.class);
                 cnfBuilder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);

@@ -11,6 +11,7 @@ import org.squirrelframework.cloud.resource.database.DruidDataSourceFactoryBean;
 import org.squirrelframework.cloud.resource.database.RoutingDataSourceFactoryBean;
 import static org.squirrelframework.cloud.utils.CloudConfigCommon.getSafeBoolean;
 
+import org.squirrelframework.cloud.utils.BeanIdGenerator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.w3c.dom.Element;
 
@@ -39,7 +40,7 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
     protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
         String path = element.getAttribute("path");
         // add alias for data source bean
-        element.setAttribute(AbstractBeanDefinitionParser.NAME_ATTRIBUTE, "_"+path.replace('/','_')+"DS");
+        element.setAttribute(AbstractBeanDefinitionParser.NAME_ATTRIBUTE, BeanIdGenerator.getDataSourceBeanId(path));
         String resourceType = element.getAttribute("resource-type");
         Boolean autoReload = getSafeBoolean(element.getAttribute("auto-reload"));
         Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.squirrelframework.cloud.resource.AbstractRoutingResourceFactoryBean;
 import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
+import org.squirrelframework.cloud.utils.BeanIdGenerator;
 
 /**
  * Created by kailianghe on 15/12/15.
@@ -22,7 +23,7 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
 
     @Override
     protected String getResourceBeanIdFromPath(String resPath) {
-        return "_"+resPath.replace('/','_')+"SEQ";
+        return BeanIdGenerator.getSequenceGeneratorBeanId(resPath);
     }
 
     @Override
@@ -46,10 +47,10 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
 
     private void buildGeneratorBeanDefinition(String resPath, String seqBeanId, boolean lazy) {
         BeanDefinitionBuilder daoBuilder = BeanDefinitionBuilder.rootBeanDefinition(JdbcSequenceDao.class);
-        String dataSourceId = "_"+resPath.replace('/','_')+"DS";
+        String dataSourceId = BeanIdGenerator.getDataSourceBeanId(resPath);
         daoBuilder.addPropertyReference("dataSource", dataSourceId);
         daoBuilder.setLazyInit(lazy);
-        String daoBeanId = "_"+resPath.replace('/','_')+"DAO";
+        String daoBeanId = BeanIdGenerator.getSequenceDaoBeanId(resPath);
         getBeanFactory().registerBeanDefinition(daoBeanId, daoBuilder.getBeanDefinition());
 
         BeanDefinitionBuilder seqBuilder = BeanDefinitionBuilder.rootBeanDefinition(JdbcSequenceGenerator.class);

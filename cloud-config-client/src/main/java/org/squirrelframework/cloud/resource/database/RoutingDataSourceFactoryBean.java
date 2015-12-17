@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
+import org.squirrelframework.cloud.utils.BeanIdGenerator;
 
 import javax.sql.DataSource;
 import java.util.Collections;
@@ -39,7 +40,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
 
     @Override
     protected String getResourceBeanIdFromPath(String resPath) {
-        return "_"+resPath.replace('/','_')+"DS";
+        return BeanIdGenerator.getDataSourceBeanId(resPath);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         if(getBeanFactory().containsBeanDefinition(beanId)) {
             getBeanFactory().removeBeanDefinition(beanId);
         }
-        String confBeanId = AbstractDataSourceFactoryBean.getResourceConfigBeanIdFromPath(resPath);
+        String confBeanId = BeanIdGenerator.getResourceConfigBeanId(resPath);
         if(getBeanFactory().containsBeanDefinition(confBeanId)) {
             getBeanFactory().removeBeanDefinition(confBeanId);
         }
