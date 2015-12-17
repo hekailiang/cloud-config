@@ -386,9 +386,9 @@ public class UserService {
 ```
 
 #### 水平分库路由配置
-cloud-config通过支持复杂路由规则设置与可路由的数据库sequence生成器，来支持数据库水平拆分。本例将演示通过用户ID将产品数据均匀分布到01-04数据库中。
+cloud-config通过支持复杂路由规则设置与可路由的数据库sequence生成器，来支持数据库水平拆分。本例将演示通过用户ID将产品数据均匀分布到01-04数据库中。  
 
-对于水平分库数据源配置，Zookeeper中节点配置如下：
+对于水平分库数据源配置，Zookeeper中节点配置如下：   
 root  
 |---/config    
 |------/database  
