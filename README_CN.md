@@ -440,7 +440,7 @@ root
   "jdbcUrl" : "jdbc:mysql://127.0.0.1:3306/product-t1-dev-04?useUnicode=true"
 }
 ```
-在开发环境上， 我们将01-04产品库对应到同一台数据库服务器。在生产环境中可以对应到单独的数据库服务器。
+在开发环境上， 我们将01-04产品库对应到同一台数据库服务器。在生产环境中可以对应到单独的数据库服务器。  
 
 `/properties/sequence`中配置如下：
 ```json
@@ -456,6 +456,21 @@ root
 * format.sequence：生成由16位数字组成的sequence组装规则，其中前8位由sequence生成时的日期组成（如20151217），9-10位由数据库的index组成（如01），后六位由一个当前库当前sequence下自增长的整数组成（如000001），组装出来的sequence就是2015121701000001.
 *  product.id.sharding.rule：基于产品ID的数据源路由规则，取产品ID的9-10位作为当前路由键值（对应在format sequence的时候将数据库index放置在9-10位）
 * product.sharding.rule：基于产品对象的数据库路由规则。当产品ID不为空时，按产品ID的9-10位键值路由，当产品ID为空时，按产品对应的客户ID与4的模值加1作为路由键值。这条规则可以同时满足创建新产品和保存已有产品时对于数据源路由的需求。
+
+为了使用sequence功能，需在各个数据库中创建对应的sequence表。
+```sql
+CREATE TABLE IF NOT EXISTS __sequence_table__ (
+     name varchar(64) NOT NULL,
+     value varchar(20) NOT NULL,
+     min_limit varchar(20) NOT NULL
+     max_limit varchar(20) NOT NULL
+     step varchar(20) NOT NULL
+     create_time datetime NOT NULL
+     modified_time datetime NOT NULL
+     PRIMARY KEY (name)
+)；
+```
+其中，```name```是sequence的名称，```value```是当前sequence的值，```min_limit```是sequence起始值，```max_limit```是sequence最大值（超过最大值后回到min_limit），```step```是每次取sequence的步长。
 
 在Spring中使用时需配置如下： 
 ```xml
