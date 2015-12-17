@@ -17,7 +17,7 @@ public class ProductService {
     private ProductDao productDao;
 
     @Transactional
-    @RoutingKey("#{ ${sequence.product.sharding.rule} }")
+    @RoutingKey({"a", "#{ ${sequence.product.sharding.rule} }"})
     public String saveProduct(@RoutingVariable("product") Product product) throws Exception {
         if(product.getId() == null) {
             String productId = sequenceGenerator.next("product");
@@ -29,7 +29,7 @@ public class ProductService {
         return product.getId();
     }
 
-    @RoutingKey("#{ ${sequence.product.id.sharding.rule} }")
+    @RoutingKey({"a", "#{ ${sequence.product.id.sharding.rule} }"})
     public Product findProductById(@RoutingVariable("id") String id) {
         return productDao.findProductById(id);
     }

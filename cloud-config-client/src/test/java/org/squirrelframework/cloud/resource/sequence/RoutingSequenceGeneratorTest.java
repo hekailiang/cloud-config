@@ -31,8 +31,8 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
                 "    \"driverClassName\" : \"org.h2.Driver\",\n" +
                 "    \"jdbcUrl\" : \"jdbc:h2:mem:db2;MODE=MySQL;INIT=" + SequenceDaoTest.INIT_SQL + "\"\n" +
                 "}";
-        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/01", config1.getBytes());
-        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/02", config2.getBytes());
+        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/01", config1.getBytes());
+        zkConfigClient.create().creatingParentsIfNeeded().forPath("/database/mydb/a/02", config2.getBytes());
 
         String props =  "{\n" +
                 "    \"sequence.format.expression\" : \"T(java.lang.String).format('%s%02d%06d', #dbDateStr, T(java.lang.Integer).valueOf(#dbName.substring(2)), #sequenceValue)\",\n" +
@@ -43,8 +43,10 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
 
         applicationContext = new ClassPathXmlApplicationContext("classpath:routing-sequence-gen-context.xml");
 
-        DataSource ds01 = applicationContext.getBean(BeanIdGenerator.getDataSourceBeanId("/database/mydb/01"), DataSource.class);
-        DataSource ds02 = applicationContext.getBean(BeanIdGenerator.getDataSourceBeanId("/database/mydb/02"), DataSource.class);
+        // need to use side effect to trigger routing data source initialization for testing its child data source
+        DataSource ds = applicationContext.getBean(BeanIdGenerator.getDataSourceBeanId("/database/mydb/a"), DataSource.class);
+        DataSource ds01 = applicationContext.getBean(BeanIdGenerator.getDataSourceBeanId("/database/mydb/a/01"), DataSource.class);
+        DataSource ds02 = applicationContext.getBean(BeanIdGenerator.getDataSourceBeanId("/database/mydb/a/02"), DataSource.class);
         new JdbcTemplate(ds01).execute(CREATE_TABLE);
         new JdbcTemplate(ds02).execute(CREATE_TABLE);
     }

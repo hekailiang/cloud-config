@@ -16,8 +16,17 @@
 
     <context:annotation-config/>
 
-    <bean id="resolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver">
+    <bean id="routingKeyResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver">
         <property name="rollingPoll" value="true"/>
+    </bean>
+
+    <bean id="my-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
+        <property name="resolvers">
+            <list>
+                <ref bean="routingKeyResolver"/>
+                <ref bean="routingKeyResolver"/>
+            </list>
+        </property>
     </bean>
 
     <bean id="productService" class="org.squirrelframework.cloud.resource.sequence.ProductService"/>
@@ -25,8 +34,8 @@
     <cc:zk-declarative-routing/>
     <cc:zk-client connection-string="127.0.0.1:1234"/>
     <cc:zk-property-placeholder path="/sequence"/>
-    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" resolver-ref="resolver"/>
-    <cc:zk-sequence-generator id="sequence" path="/database/mydb" resolver-ref="resolver" format-expression="${sequence.format.expression}"/>
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" resolver-ref="my-resolver"/>
+    <cc:zk-sequence-generator id="sequence" path="/database/mydb" resolver-ref="my-resolver" format-expression="${sequence.format.expression}"/>
 
     <context:component-scan base-package="org.squirrelframework.cloud.resource.sequence" />
     <tx:annotation-driven transaction-manager="transactionManager" />
