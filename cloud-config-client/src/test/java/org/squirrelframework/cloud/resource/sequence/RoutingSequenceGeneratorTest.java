@@ -53,7 +53,7 @@ public class RoutingSequenceGeneratorTest extends BaseTestClass {
 
     @Test
     public void testSimpleRoutingSequence() throws Exception {
-        ProductService productService = applicationContext.getBean(ProductService.class);
+        ContainerService productService = applicationContext.getBean(ContainerService.class);
         // test save
         Product p1 = new Product(1L, "P1");
         productService.saveProduct(p1);

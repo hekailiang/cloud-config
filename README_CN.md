@@ -94,8 +94,8 @@ root
 
 `/root/config`: 系统资源配置根节点，所有系统资源相关配置都定义在这个节点下  
 `/root/config/database`：数据库资源配置节点  
-`/root/config/database/mail`: mail模块数据库资源配置节点，资源定义以json格式在这个节点中 
-`/root/config/database/mail/dev`: mail模块数据库资源dev profile配置节点
+`/root/config/database/mail`: mail模块数据库资源配置节点，资源定义以json格式在这个节点中  
+`/root/config/database/mail/dev`: mail模块数据库资源dev profile配置节点  
 
 `/root/config/database`中配置内容如下：  
 ```json
@@ -256,7 +256,7 @@ root
 #### 读写分离数据库路由配置
 cloud-config通过在应用层做多数据源路由（嵌套路由）来支持读写分离，一写多读等应用场景。
 
-对于读写分离数据源配置，Zookeeper中节点配置如下：
+对于读写分离数据源配置，Zookeeper中节点配置如下：  
 root  
 |---/config    
 |------/database  
@@ -583,6 +583,7 @@ public class ProductService {
 
 }
 ```
+**注意**：如果使用了多层RoutingKey声明，@Transactional必须声明在最内层RoutingKey上。因为在创建Transaction时需要关联数据源，如果不在最内层@RoutingKey上，将会因为缺少routing key信息导致无法指定数据源。  
 
 
 ## 开发计划
