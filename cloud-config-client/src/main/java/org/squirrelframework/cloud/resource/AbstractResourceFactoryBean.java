@@ -46,7 +46,7 @@ public abstract class AbstractResourceFactoryBean<R, T extends CloudResourceConf
         if(configPath!=null && config==null) {
             DefaultListableBeanFactory beanFactory = getBeanFactory();
             // build config bean
-            String configBeanId = BeanIdGenerator.getResourceConfigBeanId(configPath);
+            String configBeanId = BeanIdGenerator.getResourceConfigBeanId(configPath, getConfigType());
             if(!applicationContext.containsBeanDefinition(configBeanId)) {
                 BeanDefinitionBuilder cnfBuilder = BeanDefinitionBuilder.rootBeanDefinition(SimpleResourceConfigFactoryBean.class);
                 cnfBuilder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);
@@ -80,6 +80,8 @@ public abstract class AbstractResourceFactoryBean<R, T extends CloudResourceConf
     public void setConfigPath(String configPath) {
         this.configPath = configPath;
     }
+
+    protected abstract Class<? extends CloudResourceConfig> getConfigType();
 
     public void setValidator(Validator validator) {
         this.validator = validator;

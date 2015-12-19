@@ -76,7 +76,7 @@ public class NestedRoutingKeyResolverTest extends AbstractNestedRoutingTest {
         dsBeans.removeAll(nowDsBeans);
         cnfBeans.removeAll(nowCnfBeans);
         assertThat(dsBeans, hasItems("__database_mydb_aDS", "__database_mydb_a_1DS", "__database_mydb_a_2DS"));
-        assertThat(cnfBeans, hasItems("__database_mydb_a_1CNF", "__database_mydb_a_2CNF"));
+        assertThat(cnfBeans, hasItems("__database_mydb_a_1DS_CNF", "__database_mydb_a_2DS_CNF"));
     }
 
 }

@@ -14,4 +14,9 @@ public abstract class AbstractDataSourceFactoryBean<T extends CloudResourceConfi
     public Class<?> getObjectType() {
         return DataSource.class;
     }
+
+    @Override
+    protected Class<? extends CloudResourceConfig> getConfigType() {
+        return JdbcDataSourceConfig.class;
+    }
 }

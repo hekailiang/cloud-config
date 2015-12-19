@@ -75,7 +75,7 @@ public class RoutingDataSourceFactoryBean extends AbstractRoutingResourceFactory
         if(getBeanFactory().containsBeanDefinition(beanId)) {
             getBeanFactory().removeBeanDefinition(beanId);
         }
-        String confBeanId = BeanIdGenerator.getResourceConfigBeanId(resPath);
+        String confBeanId = BeanIdGenerator.getResourceConfigBeanId(resPath, JdbcDataSourceConfig.class);
         if(getBeanFactory().containsBeanDefinition(confBeanId)) {
             getBeanFactory().removeBeanDefinition(confBeanId);
         }
