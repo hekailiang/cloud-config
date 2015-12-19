@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by kailianghe on 9/6/15.
  */
-public class SimpleResourceConfigFactoryBean<T extends CloudResourceConfig> extends AbstractResourceFactoryBean<T> {
+public class SimpleResourceConfigFactoryBean<T extends CloudResourceConfig> extends AbstractResourceConfigFactoryBean<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleResourceConfigFactoryBean.class);
 

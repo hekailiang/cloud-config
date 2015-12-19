@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by kailianghe on 9/10/15.
  */
-public class TenantAwareResourceConfigFactoryBean extends AbstractResourceFactoryBean<TenantAwareResourceConfig> {
+public class TenantAwareResourceConfigFactoryBean extends AbstractResourceConfigFactoryBean<TenantAwareResourceConfig> {
 
     private ConcurrentMap<String, Object> configHolder = Maps.newConcurrentMap();
 

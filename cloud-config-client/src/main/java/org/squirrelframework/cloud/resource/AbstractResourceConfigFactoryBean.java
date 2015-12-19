@@ -24,10 +24,10 @@ import java.util.Set;
 /**
  * Created by kailianghe on 9/10/15.
  */
-public abstract class AbstractResourceFactoryBean<T extends CloudResourceConfig> extends AbstractFactoryBean<T>
+public abstract class AbstractResourceConfigFactoryBean<T extends CloudResourceConfig> extends AbstractFactoryBean<T>
         implements EmbeddedValueResolverAware {
 
-    protected Logger logger = LoggerFactory.getLogger(AbstractResourceFactoryBean.class);
+    protected Logger logger = LoggerFactory.getLogger(AbstractResourceConfigFactoryBean.class);
 
     protected static final ObjectMapper mapper = new ObjectMapper()
             /*.setPropertyNamingStrategy(new com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase() {
