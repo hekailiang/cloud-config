@@ -57,7 +57,7 @@ public class C3P0DataSourceFactoryBean extends AbstractDataSourceFactoryBean<C3P
     }
 
     @Override
-    protected String baseDataSourceConfigType() {
+    protected String resourceConfigType() {
         return C3P0DataSourceConfig.class.getName();
     }
 }

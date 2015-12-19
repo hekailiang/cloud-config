@@ -55,7 +55,7 @@ public class BoneCPDataSourceFactoryBean extends AbstractDataSourceFactoryBean<B
     }
 
     @Override
-    protected String baseDataSourceConfigType() {
+    protected String resourceConfigType() {
         return BoneCPDataSourceConfig.class.getName();
     }
 }

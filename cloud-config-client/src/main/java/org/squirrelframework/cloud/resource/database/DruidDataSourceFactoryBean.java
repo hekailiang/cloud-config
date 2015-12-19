@@ -62,7 +62,7 @@ public class DruidDataSourceFactoryBean extends AbstractDataSourceFactoryBean<Dr
     }
 
     @Override
-    protected String baseDataSourceConfigType() {
+    protected String resourceConfigType() {
         return DruidDataSourceConfig.class.getName();
     }
 }
