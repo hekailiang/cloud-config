@@ -1,7 +1,11 @@
 package org.squirrelframework.cloud.resource;
 
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.util.StringValueResolver;
+import org.squirrelframework.cloud.resource.json.SpringHandlerInstantiator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.curator.framework.CuratorFramework;
@@ -25,11 +29,11 @@ import java.util.Set;
  * Created by kailianghe on 9/10/15.
  */
 public abstract class AbstractResourceConfigFactoryBean<T extends CloudResourceConfig> extends AbstractFactoryBean<T>
-        implements EmbeddedValueResolverAware {
+        implements EmbeddedValueResolverAware, ApplicationContextAware {
 
     protected Logger logger = LoggerFactory.getLogger(AbstractResourceConfigFactoryBean.class);
 
-    protected static final ObjectMapper mapper = new ObjectMapper()
+    protected final ObjectMapper mapper = new ObjectMapper()
             /*.setPropertyNamingStrategy(new com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase() {
                 @Override
                 public String translate(String input) {
@@ -76,8 +80,14 @@ public abstract class AbstractResourceConfigFactoryBean<T extends CloudResourceC
 
     private boolean autoReload = false;
 
+    protected ApplicationContext applicationContext;
+
     @Override
     public void afterPropertiesSet() throws Exception {
+        if(applicationContext!=null) {
+            AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+            mapper.setHandlerInstantiator(new SpringHandlerInstantiator(beanFactory));
+        }
         configProfiles = CloudConfigCommon.getProfiles();
         if(isAutoReload()) {
             // attach listeners
@@ -206,5 +216,10 @@ public abstract class AbstractResourceConfigFactoryBean<T extends CloudResourceC
 
     public boolean isAutoReload() {
         return autoReload;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 }

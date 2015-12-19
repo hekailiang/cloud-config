@@ -9,5 +9,9 @@
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
     <cc:zk-client connection-string="127.0.0.1:1234"/>
-    <cc:zk-resource id="cipher" path="/codec/mycipher" resource-type="Cipher"/>
+    <cc:zk-resource id="zk-default-cipher-codec" path="/codec/mycipher" resource-type="Cipher"/>
+
+    <cc:zk-resource-config id="dsconfig" path="/database/mydb"
+                           resource-type="org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig"
+    />
 </beans>

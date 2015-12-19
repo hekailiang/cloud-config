@@ -1,7 +1,11 @@
 package org.squirrelframework.cloud.resource.database;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.squirrelframework.cloud.annotation.Secret;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
+import org.squirrelframework.cloud.resource.json.CipherDecodeDeSerializer;
+import org.squirrelframework.cloud.resource.json.CipherEncodeSerializer;
 
 import javax.validation.constraints.NotNull;
 
@@ -39,6 +43,8 @@ public class JdbcDataSourceConfig extends CloudResourceConfig {
     }
 
     @Secret
+    @JsonSerialize(using = CipherEncodeSerializer.class)
+    @JsonDeserialize(using = CipherDecodeDeSerializer.class)
     public String getPassword() {
         return password;
     }

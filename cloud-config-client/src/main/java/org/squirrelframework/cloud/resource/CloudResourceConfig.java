@@ -1,6 +1,7 @@
 package org.squirrelframework.cloud.resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Map;
  * Created by kailianghe on 9/6/15.
  */
 @JsonIgnoreProperties({"__type__", "__name__", "__description__", "__order__", "__link__"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class CloudResourceConfig {
 
     private Map<String, Object> attributes;
