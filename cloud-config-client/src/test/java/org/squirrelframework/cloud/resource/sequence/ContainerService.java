@@ -14,7 +14,7 @@ public class ContainerService {
     private ProductService productService;
 
     // @Transactional
-    // @Transaction需要在Routing key的最内层声明, 因为在@Transactioal在创建Transaction时需要指定DataSource.
+    // @Transaction需要在Routing key的最内层声明, 因为在@Transactional在创建Transaction时需要指定DataSource.
     // 如果在RoutingKey外层将因为缺少routing key信息, 无法定位正确地DataSource
     @RoutingKey("a")
     public String saveProduct(Product product) throws Exception {

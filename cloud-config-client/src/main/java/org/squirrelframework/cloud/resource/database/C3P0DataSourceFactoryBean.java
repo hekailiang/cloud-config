@@ -3,6 +3,7 @@ package org.squirrelframework.cloud.resource.database;
 import com.google.common.base.Preconditions;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
+import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.ReloadCallback;
 
 import javax.sql.DataSource;
@@ -57,7 +58,7 @@ public class C3P0DataSourceFactoryBean extends AbstractDataSourceFactoryBean<C3P
     }
 
     @Override
-    protected String resourceConfigType() {
-        return C3P0DataSourceConfig.class.getName();
+    protected Class<? extends CloudResourceConfig> getConfigType() {
+        return C3P0DataSourceConfig.class;
     }
 }

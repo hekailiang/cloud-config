@@ -1,5 +1,6 @@
 package org.squirrelframework.cloud.resource.database;
 
+import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.ReloadCallback;
 import com.google.common.base.Preconditions;
 import com.jolbox.bonecp.BoneCPDataSource;
@@ -55,7 +56,7 @@ public class BoneCPDataSourceFactoryBean extends AbstractDataSourceFactoryBean<B
     }
 
     @Override
-    protected String resourceConfigType() {
-        return BoneCPDataSourceConfig.class.getName();
+    protected Class<? extends CloudResourceConfig> getConfigType() {
+        return BoneCPDataSourceConfig.class;
     }
 }

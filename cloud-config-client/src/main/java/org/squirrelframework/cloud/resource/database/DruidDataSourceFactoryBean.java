@@ -3,6 +3,7 @@ package org.squirrelframework.cloud.resource.database;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.base.Preconditions;
 import org.springframework.jdbc.datasource.DelegatingDataSource;
+import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.ReloadCallback;
 
 import javax.sql.DataSource;
@@ -62,7 +63,7 @@ public class DruidDataSourceFactoryBean extends AbstractDataSourceFactoryBean<Dr
     }
 
     @Override
-    protected String resourceConfigType() {
-        return DruidDataSourceConfig.class.getName();
+    protected Class<? extends CloudResourceConfig> getConfigType() {
+        return DruidDataSourceConfig.class;
     }
 }

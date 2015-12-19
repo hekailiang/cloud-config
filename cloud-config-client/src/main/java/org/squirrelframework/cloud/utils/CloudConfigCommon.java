@@ -22,11 +22,13 @@ public abstract class CloudConfigCommon {
 
     public static final String CONFIG_ROOT   = NAMESPACE + "/config";
 
-    public static String CONFIG_PROFILE_KEY = "config.profile";
+    public static final String CONFIG_PROFILE_KEY = "config.profile";
 
-    public static String SPRING_PROFILE_KEY = "spring.profiles.active";
+    public static final String ENABLE_ENCRYPTION = "enable.encryption";
 
-    public static String DEFAULT_CONFIG_PROFILE = "dev";
+    public static final String SPRING_PROFILE_KEY = "spring.profiles.active";
+
+    public static final String DEFAULT_CONFIG_PROFILE = "dev";
 
     public static final String ZK_CLIENT_BEAN_NAME = "org.squirrelframework.cloud.conf.ZkClientBean";
 
@@ -44,6 +46,10 @@ public abstract class CloudConfigCommon {
             result.add(profiles[i].trim());
         }
         return result.toArray(new String[0]);
+    }
+
+    public static boolean isEncryptionEnabled() {
+        return "true".equals( getConfProperty(ENABLE_ENCRYPTION, "false") );
     }
 
     public static String getConfProperty(String key, String defaultValue) {

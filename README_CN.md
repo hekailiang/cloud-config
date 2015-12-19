@@ -590,7 +590,7 @@ public class ProductService {
 * 生产环境配置的权限控制及监管  
 * 敏感数据加密
 * 完善cloud-config-server展现  
-* 支持Routing Sequence
+* ~~支持Routing Sequence~~
 * 支持更多的资源配置  
 	* Mongo connection pools
 	* Redis connections

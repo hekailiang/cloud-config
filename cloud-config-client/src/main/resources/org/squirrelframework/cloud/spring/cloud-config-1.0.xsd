@@ -34,6 +34,25 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="zk-resource">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute type="xsd:string" name="path" use="required"/>
+                    <xsd:attribute name="resource-type" default="Cipher">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:NMTOKEN">
+                                <xsd:enumeration value="Cipher"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                    <xsd:attribute type="xsd:boolean" name="auto-reload" default="false"/>
+                    <xsd:attribute type="xsd:string" name="validator-ref" default="zk-default-validator"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="zk-jdbc-datasource">
         <xsd:complexType>
             <xsd:complexContent>

@@ -51,7 +51,7 @@ public abstract class AbstractResourceFactoryBean<R, T extends CloudResourceConf
                 BeanDefinitionBuilder cnfBuilder = BeanDefinitionBuilder.rootBeanDefinition(SimpleResourceConfigFactoryBean.class);
                 cnfBuilder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);
                 cnfBuilder.addPropertyValue("path", configPath);
-                cnfBuilder.addPropertyValue("resourceType", resourceConfigType());
+                cnfBuilder.addPropertyValue("resourceType", getConfigType().getName());
                 cnfBuilder.addPropertyValue("validator", validator);
                 cnfBuilder.addPropertyValue("autoReload", autoReload);
                 cnfBuilder.setLazyInit(true);
@@ -61,11 +61,6 @@ public abstract class AbstractResourceFactoryBean<R, T extends CloudResourceConf
         }
         super.afterPropertiesSet();
     }
-
-    /**
-     * @return abstract bean id matched with cloud-config.xml
-     */
-    abstract protected String resourceConfigType();
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
