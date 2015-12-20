@@ -13,7 +13,7 @@ public class CipherCodecConfig extends CloudResourceConfig {
 
     private String type = "jceks";
 
-    private String keystorePassword;
+    private String keyStorePassword;
 
     private String keyAlias;
 
@@ -35,12 +35,12 @@ public class CipherCodecConfig extends CloudResourceConfig {
         this.type = type;
     }
 
-    public String getKeystorePassword() {
-        return keystorePassword;
+    public String getKeyStorePassword() {
+        return keyStorePassword;
     }
 
-    public void setKeystorePassword(String keystorePassword) {
-        this.keystorePassword = keystorePassword;
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
     }
 
     public String getKeyAlias() {

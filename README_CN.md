@@ -2,7 +2,7 @@
 cloud-config是一个基于Zookeeper的集中式应用配置中心，并与Spring框架紧密集。cloud-config解决了分布式应用或者集群环境中，以硬编码、配置文件、环境变量管理应用配置所造成的应用开发、系统运维工作的繁琐，支持`配置一次，处处使用`。     
 cloud-confg在开发过程中受到 [Centralized Application Configuration with Spring and Apache ZooKeeper](http://www.infoq.com/presentations/spring-apache-zookeeper) 的启发。
 
-## cloud-config-client主要功能介绍  
+## cloud-config-client主要功能示例  
 * [系统属性配置](#系统属性配置)
 * [数据库资源配置](#数据库资源配置)
 	* [单一数据源配置] (#单一数据源配置)
@@ -10,6 +10,7 @@ cloud-confg在开发过程中受到 [Centralized Application Configuration with 
 * [数据库路由器配置] (#数据库路由器配置)
 	* [读写分离数据库路由配置] (#读写分离数据库路由配置)
 	* [水平分库路由配置] (#水平分库路由配置)
+* [加解密资源配置] (#加解密资源配置)
 * [自定义资源配置] (#自定义资源配置)
 
 ## cloud-config-server主要功能介绍
@@ -584,6 +585,78 @@ public class ProductService {
 }
 ```
 **注意**：如果使用了多层RoutingKey声明，@Transactional必须声明在最内层RoutingKey上。因为在创建Transaction时需要关联数据源，如果不在最内层@RoutingKey上，将会因为缺少routing key信息导致无法指定数据源。  
+
+### 加解密源配置  
+通过cloud-config，用户可以管理Java KeyStore(JKS)相关的加解密配置信息，并且支持不同租户下的加解密器的路由。
+
+Zookeeper配置入下：  
+root  
+|---/config    
+|------/codec  
+|------|--/keystore  
+|---------|--/tenant1  
+|---------|--/tenant2    
+|---------|--/unknown    
+
+```root/config/codec/keystore/tenant1```中配置如下：
+```json
+{
+    "keyStoreLocation" : "/usr/local/etc/keystore/t1.keystore",
+    "keyStorePassword" : "myStorePassword",
+    "keyAlias" : "t1",
+    "keyPassword" : "myKeyPassword"
+}
+```
+
+Spring配置如下：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
+
+    <!-- 创建类型为Codec加解密器-->
+    <cc:zk-resource id="zk-default-cipher-codec" path="/codec/keystore"
+                    resource-type="Cipher" routing-support="true" resolver-ref="tenantResolver"/>
+
+</beans>
+```
+
+在Java代码中使用：
+```java
+@Component
+public class SecurityUtil {
+   @Autowired
+   @Qualifier("zk-default-cipher-codec")
+   private Codec cipherCodec;
+   
+   public void doEncryption(String sensitiveData) {
+       String encryptedData = cipherCodec.encode(sensitiveData);
+       ...
+   }
+}
+```
+
+在Json序列化与反序列化时使用：
+```java
+public class JdbcDataSourceConfig extends CloudResourceConfig {
+    ...
+    @Secret
+    @JsonSerialize(using = CipherEncodeSerializer.class)
+    @JsonDeserialize(using = CipherDecodeDeSerializer.class)
+    public String getPassword() {
+        return password;
+    }
+}
+```  
 
 
 ## 开发计划

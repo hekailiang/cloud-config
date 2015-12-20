@@ -24,12 +24,13 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
 
     private ApplicationContext applicationContext;
 
+    @Override
     protected void prepare() throws Exception {
         keyStoreFile1 = createKeyStoreFileForTest(KEY1, "test1", KEY_PASSWORD, STORE_PASSWORD);
         keyStoreFile2 = createKeyStoreFileForTest(KEY2, "test2", KEY_PASSWORD, STORE_PASSWORD);
         String ccConfig1 = "{\n" +
                 "    \"keyStoreLocation\" : \""+keyStoreFile1.getAbsolutePath()+"\",\n" +
-                "    \"keystorePassword\" : \""+STORE_PASSWORD+"\",\n" +
+                "    \"keyStorePassword\" : \""+STORE_PASSWORD+"\",\n" +
                 "    \"keyAlias\" : \"test1\", \n"+
                 "    \"keyPassword\" : \""+KEY_PASSWORD+"\"\n"+
                 "}";
@@ -37,7 +38,7 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
 
         String ccConfig2 = "{\n" +
                 "    \"keyStoreLocation\" : \""+keyStoreFile2.getAbsolutePath()+"\",\n" +
-                "    \"keystorePassword\" : \""+STORE_PASSWORD+"\",\n" +
+                "    \"keyStorePassword\" : \""+STORE_PASSWORD+"\",\n" +
                 "    \"keyAlias\" : \"test2\", \n"+
                 "    \"keyPassword\" : \""+KEY_PASSWORD+"\"\n"+
                 "}";
@@ -46,6 +47,7 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
         applicationContext = new ClassPathXmlApplicationContext("classpath:routing-ciphercodec-context.xml");
     }
 
+    @Override
     protected void finish() throws Exception {
         System.getProperties().remove(CloudConfigCommon.ENABLE_ENCRYPTION);
         if(keyStoreFile1.exists()) {
@@ -58,7 +60,7 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
     }
 
     @Test
-    public void testCipherCodec() throws Exception {
+    public void testRoutingCipherCodec() throws Exception {
         String random = RandomStringUtils.randomAlphabetic(10);
         System.out.println("random: "+random);
 

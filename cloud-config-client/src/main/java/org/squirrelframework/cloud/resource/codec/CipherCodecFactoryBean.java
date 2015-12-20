@@ -46,7 +46,7 @@ public class CipherCodecFactoryBean extends AbstractResourceFactoryBean<CipherCo
         }
         try {
             InputStream input = new FileInputStream(keyStoreFile);
-            store.load(input, (config.getKeystorePassword() != null) ? config.getKeystorePassword().toCharArray() : null);
+            store.load(input, (config.getKeyStorePassword() != null) ? config.getKeyStorePassword().toCharArray() : null);
         } catch (IOException e) {
             throw new IllegalStateException("load .keystore file failed", e.getCause());
         }

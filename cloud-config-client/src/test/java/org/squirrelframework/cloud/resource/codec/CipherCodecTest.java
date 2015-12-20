@@ -27,7 +27,7 @@ public class CipherCodecTest extends AbstractCipherCodecTest {
         keyStoreFile = createKeyStoreFileForTest(KEY1, "test", KEY_PASSWORD, STORE_PASSWORD);
         String ccConfig = "{\n" +
                 "    \"keyStoreLocation\" : \""+keyStoreFile.getAbsolutePath()+"\",\n" +
-                "    \"keystorePassword\" : \""+STORE_PASSWORD+"\",\n" +
+                "    \"keyStorePassword\" : \""+STORE_PASSWORD+"\",\n" +
                 "    \"keyAlias\" : \"test\", \n"+
                 "    \"keyPassword\" : \""+KEY_PASSWORD+"\"\n"+
                 "}";
