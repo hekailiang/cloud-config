@@ -11,6 +11,7 @@ cloud-confg在开发过程中受到 [Centralized Application Configuration with 
 	* [读写分离数据库路由配置] (#读写分离数据库路由配置)
 	* [水平分库路由配置] (#水平分库路由配置)
 * [加解密资源配置] (#加解密资源配置)
+* [敏感数据加密] (#敏感数据加密)
 * [自定义资源配置] (#自定义资源配置)
 
 ## cloud-config-server主要功能介绍
@@ -658,10 +659,12 @@ public class JdbcDataSourceConfig extends CloudResourceConfig {
 }
 ```  
 
+### 敏感数据加密
+
 
 ## 开发计划
 * 生产环境配置的权限控制及监管  
-* 敏感数据加密
+* ~~敏感数据加密~~
 * 完善cloud-config-server展现  
 * ~~支持Routing Sequence~~
 * 支持更多的资源配置  
