@@ -26,7 +26,7 @@
 cloud-confg在开发过程中受到 <a href="http://www.infoq.com/presentations/spring-apache-zookeeper">Centralized Application Configuration with Spring and Apache ZooKeeper</a> 的启发。</p>
 
 <h2>
-<a id="cloud-config-client主要功能介绍" class="anchor" href="#cloud-config-client%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D" aria-hidden="true"><span class="octicon octicon-link"></span></a>cloud-config-client主要功能介绍</h2>
+<a id="cloud-config-client主要功能示例" class="anchor" href="#cloud-config-client%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD%E7%A4%BA%E4%BE%8B" aria-hidden="true"><span class="octicon octicon-link"></span></a>cloud-config-client主要功能示例</h2>
 
 <ul>
 <li><a href="#%E7%B3%BB%E7%BB%9F%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE">系统属性配置</a></li>
@@ -46,6 +46,7 @@ cloud-confg在开发过程中受到 <a href="http://www.infoq.com/presentations/
 <li><a href="#%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE">水平分库路由配置</a></li>
 </ul>
 </li>
+<li><a href="#%E5%8A%A0%E8%A7%A3%E5%AF%86%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE">加解密资源配置</a></li>
 <li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE">自定义资源配置</a></li>
 </ul>
 
@@ -552,7 +553,7 @@ root<br>
     <span class="pl-c">&lt;!-- 创建声明式路由器 --&gt;</span>
     &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>routingKeyResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver<span class="pl-pds">"</span></span>&gt;
         <span class="pl-c">&lt;!-- 启用循环取routing key --&gt;</span>
-        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>rollingPoll<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;
+        &lt;<span class="pl-ent">property</span> <span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>selectRoutingKeyMethod<span class="pl-pds">"</span></span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>ROLLING_POLL<span class="pl-pds">"</span></span>/&gt;
     &lt;/<span class="pl-ent">bean</span>&gt;
 
     <span class="pl-c">&lt;!-- 组装sequence和routing datasource使用的路由器 --&gt;</span>
@@ -637,6 +638,76 @@ root<br>
 
 <p><strong>注意</strong>：如果使用了多层RoutingKey声明，<a href="https://github.com/Transactional" class="user-mention">@Transactional</a>必须声明在最内层RoutingKey上。因为在创建Transaction时需要关联数据源，如果不在最内层@RoutingKey上，将会因为缺少routing key信息导致无法指定数据源。  </p>
 
+<h3>
+<a id="加解密资源配置" class="anchor" href="#%E5%8A%A0%E8%A7%A3%E5%AF%86%E8%B5%84%E6%BA%90%E9%85%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>加解密资源配置</h3>
+
+<p>通过cloud-config，用户可以管理Java KeyStore(JKS)相关的加解密配置信息，并且支持不同租户下的加解密器的路由。</p>
+
+<p>Zookeeper配置入下：<br>
+root<br>
+|---/config<br>
+|------/codec<br>
+|------|--/keystore<br>
+|---------|--/tenant1<br>
+|---------|--/tenant2<br>
+|---------|--/unknown    </p>
+
+<pre lang="root/config/codec/keystore/tenant1```中配置如下："><code>```json
+{
+    "keyStoreLocation" : "/usr/local/etc/keystore/t1.keystore",
+    "keyStorePassword" : "myStorePassword",
+    "keyAlias" : "t1",
+    "keyPassword" : "myKeyPassword"
+}
+</code></pre>
+
+<p>Spring配置如下：</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;?<span class="pl-ent">xml</span><span class="pl-e"> version</span>=<span class="pl-s"><span class="pl-pds">"</span>1.0<span class="pl-pds">"</span></span><span class="pl-e"> encoding</span>=<span class="pl-s"><span class="pl-pds">"</span>UTF-8<span class="pl-pds">"</span></span>?&gt;
+&lt;<span class="pl-ent">beans</span> <span class="pl-e">xmlns</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.springframework.org/schema/beans<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">xsi</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.w3.org/2001/XMLSchema-instance<span class="pl-pds">"</span></span>
+       <span class="pl-e">xmlns</span><span class="pl-e">:</span><span class="pl-e">cc</span>=<span class="pl-s"><span class="pl-pds">"</span>http://www.squirrelframework.org/schema/config<span class="pl-pds">"</span></span>
+       <span class="pl-e">xsi</span><span class="pl-e">:</span><span class="pl-e">schemaLocation</span>=<span class="pl-s"><span class="pl-pds">"</span></span>
+<span class="pl-s">            http://www.springframework.org/schema/beans</span>
+<span class="pl-s">            http://www.springframework.org/schema/beans/spring-beans.xsd</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config</span>
+<span class="pl-s">            http://www.squirrelframework.org/schema/config/cloud-config.xsd<span class="pl-pds">"</span></span>&gt;
+
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-client</span> <span class="pl-e">connection-string</span>=<span class="pl-s"><span class="pl-pds">"</span>127.0.0.1:1234<span class="pl-pds">"</span></span>/&gt;
+    &lt;<span class="pl-ent">bean</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver<span class="pl-pds">"</span></span>/&gt;
+
+    <span class="pl-c">&lt;!-- 创建类型为Codec加解密器--&gt;</span>
+    &lt;<span class="pl-ent">cc</span><span class="pl-ent">:</span><span class="pl-ent">zk-resource</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>zk-default-cipher-codec<span class="pl-pds">"</span></span> <span class="pl-e">path</span>=<span class="pl-s"><span class="pl-pds">"</span>/codec/keystore<span class="pl-pds">"</span></span>
+                    <span class="pl-e">resource-type</span>=<span class="pl-s"><span class="pl-pds">"</span>Cipher<span class="pl-pds">"</span></span> <span class="pl-e">routing-support</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span> <span class="pl-e">resolver-ref</span>=<span class="pl-s"><span class="pl-pds">"</span>tenantResolver<span class="pl-pds">"</span></span>/&gt;
+
+&lt;/<span class="pl-ent">beans</span>&gt;</pre></div>
+
+<p>在Java代码中使用：</p>
+
+<div class="highlight highlight-source-java"><pre>@<span class="pl-smi">Component</span>
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">SecurityUtil</span> {
+   <span class="pl-k">@Autowired</span>
+   <span class="pl-k">@Qualifier</span>(<span class="pl-s"><span class="pl-pds">"</span>zk-default-cipher-codec<span class="pl-pds">"</span></span>)
+   <span class="pl-k">private</span> <span class="pl-smi">Codec</span> cipherCodec;
+
+   <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">doEncryption</span>(<span class="pl-smi">String</span> <span class="pl-v">sensitiveData</span>) {
+       <span class="pl-smi">String</span> encryptedData <span class="pl-k">=</span> cipherCodec<span class="pl-k">.</span>encode(sensitiveData);
+       <span class="pl-c1">...</span>
+   }
+}</pre></div>
+
+<p>在Json序列化与反序列化时使用：</p>
+
+<div class="highlight highlight-source-java"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">JdbcDataSourceConfig</span> <span class="pl-k">extends</span> <span class="pl-e">CloudResourceConfig</span> {
+    <span class="pl-c1">...</span>
+    <span class="pl-k">@Secret</span>
+    <span class="pl-k">@JsonSerialize</span>(<span class="pl-c1">using</span> <span class="pl-k">=</span> <span class="pl-smi">CipherEncodeSerializer</span><span class="pl-k">.</span>class)
+    <span class="pl-k">@JsonDeserialize</span>(<span class="pl-c1">using</span> <span class="pl-k">=</span> <span class="pl-smi">CipherDecodeDeSerializer</span><span class="pl-k">.</span>class)
+    <span class="pl-k">public</span> <span class="pl-smi">String</span> <span class="pl-en">getPassword</span>() {
+        <span class="pl-k">return</span> password;
+    }
+}</pre></div>
+
 <h2>
 <a id="开发计划" class="anchor" href="#%E5%BC%80%E5%8F%91%E8%AE%A1%E5%88%92" aria-hidden="true"><span class="octicon octicon-link"></span></a>开发计划</h2>
 
@@ -646,7 +717,7 @@ root<br>
 <li>敏感数据加密</li>
 <li>完善cloud-config-server展现<br>
 </li>
-<li>支持Routing Sequence</li>
+<li><del>支持Routing Sequence</del></li>
 <li>支持更多的资源配置<br>
 
 <ul>
