@@ -586,7 +586,7 @@ public class ProductService {
 ```
 **注意**：如果使用了多层RoutingKey声明，@Transactional必须声明在最内层RoutingKey上。因为在创建Transaction时需要关联数据源，如果不在最内层@RoutingKey上，将会因为缺少routing key信息导致无法指定数据源。  
 
-### 加解密源配置  
+### 加解密资源配置  
 通过cloud-config，用户可以管理Java KeyStore(JKS)相关的加解密配置信息，并且支持不同租户下的加解密器的路由。
 
 Zookeeper配置入下：  
