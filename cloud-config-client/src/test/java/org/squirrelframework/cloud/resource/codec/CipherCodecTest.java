@@ -1,22 +1,15 @@
 package org.squirrelframework.cloud.resource.codec;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.squirrelframework.cloud.BaseTestClass;
 import org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig;
 import org.squirrelframework.cloud.resource.json.SpringHandlerInstantiator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.security.Key;
-import java.security.KeyStore;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,29 +17,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Created by kailianghe on 15/12/19.
  */
-public class CipherCodecTest extends BaseTestClass {
-
-    private static final String KEY = "x4zOovfg7+Y=";
-    private static final String ALGORITHM = "DES";
-    private static final String STORE_PASSWORD = "password_store";
-    private static final String KEY_PASSWORD = "password_key";
+public class CipherCodecTest extends AbstractCipherCodecTest {
 
     File keyStoreFile;
 
     ApplicationContext applicationContext;
 
     protected void prepare() throws Exception {
-        keyStoreFile = File.createTempFile("CipherCodecTest", "keystore");
-        SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
-        Key key = factory.generateSecret(new DESKeySpec(Base64.decodeBase64(KEY.getBytes())));
-        KeyStore store = KeyStore.getInstance("jceks");
-        store.load(null, null);
-        store.setKeyEntry("test", key, KEY_PASSWORD.toCharArray(), null);
-
-        try (FileOutputStream out = new FileOutputStream(keyStoreFile)) {
-            store.store(out, STORE_PASSWORD.toCharArray());
-        }
-
+        keyStoreFile = createKeyStoreFileForTest(KEY1, "test", KEY_PASSWORD, STORE_PASSWORD);
         String ccConfig = "{\n" +
                 "    \"keyStoreLocation\" : \""+keyStoreFile.getAbsolutePath()+"\",\n" +
                 "    \"keystorePassword\" : \""+STORE_PASSWORD+"\",\n" +

@@ -8,17 +8,29 @@ import com.google.common.base.Preconditions;
  */
 public class DeclarativeRoutingKeyResolver implements RoutingKeyResolver {
 
-    private boolean rollingPoll = false;
+    private SelectRoutingKeyMethod selectRoutingKeyMethod = SelectRoutingKeyMethod.POLL;
 
     @Override
     public Optional<String> get() {
-        String routingKey = rollingPoll ? RoutingKeyHolder.rollingPollDeclarativeRoutingKey() :
-                RoutingKeyHolder.pollDeclarativeRoutingKey();
+        final String routingKey;
+        switch (selectRoutingKeyMethod) {
+            case PEEK:
+                routingKey = RoutingKeyHolder.peekDeclarativeRoutingKey();
+                break;
+            case POLL:
+                routingKey = RoutingKeyHolder.pollDeclarativeRoutingKey();
+                break;
+            case ROLLING_POLL:
+                routingKey = RoutingKeyHolder.rollingPollDeclarativeRoutingKey();
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported method "+selectRoutingKeyMethod.name());
+        }
         Preconditions.checkNotNull(routingKey, "cannot find any routing key in current context");
         return Optional.of(routingKey);
     }
 
-    public void setRollingPoll(boolean rollingPoll) {
-        this.rollingPoll = rollingPoll;
+    public void setSelectRoutingKeyMethod(SelectRoutingKeyMethod selectRoutingKeyMethod) {
+        this.selectRoutingKeyMethod = selectRoutingKeyMethod;
     }
 }

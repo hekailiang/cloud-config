@@ -17,7 +17,7 @@
     <context:annotation-config/>
 
     <bean id="routingKeyResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver">
-        <property name="rollingPoll" value="true"/>
+        <property name="selectRoutingKeyMethod" value="ROLLING_POLL"/>
     </bean>
 
     <bean id="my-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">

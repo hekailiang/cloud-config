@@ -1,8 +1,5 @@
 package org.squirrelframework.cloud.resource.sequence;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +87,16 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
     }
 
     @Override
+    public void setResourceFactoryBeanClass(Class<?> resourceFactoryBeanClass) {
+        throw new UnsupportedOperationException("no simple resource factory bean is defined for sequence");
+    }
+
+    @Override
+    protected void removeResourceBeanDefinition(String resPath, String beanId) throws Exception {
+        throw new UnsupportedOperationException("cannot reload sequence");
+    }
+
+    @Override
     public boolean isAutoReload() {
         return false;
     }
@@ -102,20 +109,7 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
         this.sequenceFormatExpression = sequenceFormatExpression;
     }
 
-    private CacheLoader<String, SequenceGenerator> cacheLoader = new CacheLoader<String, SequenceGenerator>() {
-        @Override
-        public SequenceGenerator load(String routingKey) throws Exception {
-            String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ routingKey);
-            SequenceGenerator sequenceGenerator = applicationContext.getBean(expectedBeanId, SequenceGenerator.class);
-            logger.info("SequenceGenerator for '{}' is resolved.", routingKey);
-            return sequenceGenerator;
-        }
-    };
-
     public class RoutingSequenceGenerator implements SequenceGenerator {
-        private LoadingCache<String, SequenceGenerator> localSequenceGeneratorStore =
-                CacheBuilder.newBuilder().build(cacheLoader);
-
         @Override
         public String next(String seqName) throws Exception {
             String routingKey = resolver.get().orNull();
@@ -126,7 +120,7 @@ public class SequenceGeneratorFactoryBean extends AbstractRoutingResourceFactory
                 routingKey = "__absent_tenant__";
             }
             try {
-                return localSequenceGeneratorStore.getUnchecked(routingKey).next(seqName);
+                return localResourceStore.getUnchecked(routingKey).next(seqName);
             } catch (UncheckedExecutionException e) {
                 Throwable cause = e.getCause();
                 throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + routingKey + "]", cause);

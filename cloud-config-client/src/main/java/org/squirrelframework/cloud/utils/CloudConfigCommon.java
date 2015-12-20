@@ -75,7 +75,7 @@ public abstract class CloudConfigCommon {
         if(StringUtils.isNotBlank(value)) {
             return Boolean.valueOf(value);
         }
-        return null;
+        return Boolean.FALSE;
     }
 
     public static String bytes2String(byte[] content) throws UnsupportedEncodingException {

@@ -23,7 +23,7 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
     @Override
     protected Class getBeanClass(Element element) {
         String resourceType = element.getAttribute("resource-type");
-        Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
+        boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
         if (routingSupport) {
             return RoutingDataSourceFactoryBean.class;
         } else if ("BoneCP".equals(resourceType)) {
@@ -42,39 +42,35 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
         // add alias for data source bean
         element.setAttribute(AbstractBeanDefinitionParser.NAME_ATTRIBUTE, BeanIdGenerator.getDataSourceBeanId(path));
         String resourceType = element.getAttribute("resource-type");
-        Boolean autoReload = getSafeBoolean(element.getAttribute("auto-reload"));
-        Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
+        boolean autoReload = getSafeBoolean(element.getAttribute("auto-reload"));
+        boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
         String validatorBeanName = element.getAttribute("validator-ref");
-        String fallbackDsPath = element.getAttribute("fallback");
-        if(!parserContext.getRegistry().containsBeanDefinition(validatorBeanName)) {
-            validatorBeanName = null;
-        }
         if (routingSupport) {
-            if ("BoneCP".equals(resourceType)) {
-                builder.addPropertyValue("dataSourceFactoryBeanClass", BoneCPDataSourceFactoryBean.class.getName());
-            } else if ("C3P0".equals(resourceType)) {
-                builder.addPropertyValue("dataSourceFactoryBeanClass", C3P0DataSourceFactoryBean.class.getName());
-            } else if ("C3P0".equals(resourceType)) {
-                builder.addPropertyValue("dataSourceFactoryBeanClass", DruidDataSourceFactoryBean.class.getName());
-            } else {
-                throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
-            }
+            String fallbackDsPath = element.getAttribute("fallback");
             String resolverBeanName = element.getAttribute("resolver-ref");
             if(!parserContext.getRegistry().containsBeanDefinition(resolverBeanName)) {
                 throw new IllegalArgumentException("Undefined routing key resolver");
             }
-            builder.addPropertyReference("resolver", resolverBeanName);
+            if ("BoneCP".equals(resourceType)) {
+                builder.addPropertyValue("resourceFactoryBeanClass", BoneCPDataSourceFactoryBean.class.getName());
+            } else if ("C3P0".equals(resourceType)) {
+                builder.addPropertyValue("resourceFactoryBeanClass", C3P0DataSourceFactoryBean.class.getName());
+            } else if ("C3P0".equals(resourceType)) {
+                builder.addPropertyValue("resourceFactoryBeanClass", DruidDataSourceFactoryBean.class.getName());
+            } else {
+                throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
+            }
 
+            builder.addPropertyReference("resolver", resolverBeanName);
             builder.addPropertyValue("path", path);
             builder.addPropertyReference("client", CloudConfigCommon.ZK_CLIENT_BEAN_NAME);
-
             if(StringUtils.hasLength(fallbackDsPath)) {
                 builder.addPropertyValue("fallbackDataSourcePath", fallbackDsPath);
             }
         } else {
             builder.addPropertyValue("configPath", path);
         }
-        if(StringUtils.hasLength(validatorBeanName)) {
+        if(StringUtils.hasText(validatorBeanName) && parserContext.getRegistry().containsBeanDefinition(validatorBeanName)) {
             builder.addPropertyReference("validator", validatorBeanName);
         }
         builder.addPropertyValue("autoReload", autoReload);

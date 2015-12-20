@@ -8,11 +8,9 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
-import javax.sql.DataSource;
 import javax.validation.Validator;
 
 /**
@@ -80,19 +78,6 @@ public abstract class AbstractResourceFactoryBean<R, T extends CloudResourceConf
 
     public void setValidator(Validator validator) {
         this.validator = validator;
-    }
-
-    protected DelegatingDataSource createProxyDataSource(DataSource targetDataSource) {
-        return new DelegatingDataSource(targetDataSource) {
-            @Override
-            public String toString() {
-                if(getTargetDataSource()!=null) {
-                    return getTargetDataSource().toString();
-                } else {
-                    return "_NULL_DATA_SOURCE_";
-                }
-            }
-        };
     }
 
     public boolean isAutoReload() {

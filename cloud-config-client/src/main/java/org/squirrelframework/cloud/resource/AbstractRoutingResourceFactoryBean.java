@@ -1,7 +1,13 @@
 package org.squirrelframework.cloud.resource;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.validation.Validator;
 import org.squirrelframework.cloud.routing.NestedRoutingKeyResolver;
@@ -48,6 +54,33 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
     private DefaultListableBeanFactory beanFactory;
 
     private boolean autoReload = false;
+
+    protected Class<?> resourceFactoryBeanClass;
+
+    protected CacheLoader<String, T> resourceCacheLoader = new CacheLoader<String, T>() {
+        @Override
+        public T load(String routingKey) throws Exception {
+            String expectedBeanId = getResourceBeanIdFromPath(path+"/"+ routingKey);
+            T resource = (T)applicationContext.getBean(expectedBeanId);
+            logger.info("DataSource for '{}' is resolved as '{}'.", routingKey, resource.toString());
+            return resource;
+        }
+    };
+
+    protected LoadingCache<String, T> localResourceStore = CacheBuilder.newBuilder().build(resourceCacheLoader);
+
+    protected T getLocalResource(String routingKey) {
+        try {
+            return localResourceStore.getUnchecked(routingKey);
+        } catch (UncheckedExecutionException e) {
+            Throwable cause = e.getCause();
+            if(cause instanceof NoSuchBeanDefinitionException && fallbackResource!=null) {
+                logger.warn("Cannot find proper data source for '{}'. Use fallback data source instead.", routingKey);
+                return fallbackResource;
+            }
+            throw new IllegalStateException("Cannot determine target DataSource for lookup key [" + routingKey + "]", cause);
+        }
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -101,11 +134,44 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
         }
     }
 
+    protected void buildResourceBeanDefinition(String dsPath, String dsBeanId) throws Exception {
+        if(getBeanFactory().containsBeanDefinition(dsBeanId)) {
+            return;
+        }
+
+        // build datasource bean based on config bean
+        final BeanDefinitionBuilder dsBuilder;
+        if( isNestedRoutingNeeded(dsPath) ) {
+            dsBuilder = BeanDefinitionBuilder.rootBeanDefinition(getClass());
+            dsBuilder.addPropertyValue("path", dsPath);
+            dsBuilder.addPropertyValue("client", this.client);
+            dsBuilder.addPropertyValue("fallbackResource", this.fallbackResource);
+            dsBuilder.addPropertyValue("fallbackResourcePath", this.fallbackResourcePath);
+            dsBuilder.addPropertyValue("resourceFactoryBeanClass", this.resourceFactoryBeanClass);
+            dsBuilder.addPropertyValue("resolver", ((NestedRoutingKeyResolver)this.resolver).next());
+        } else {
+            dsBuilder = BeanDefinitionBuilder.rootBeanDefinition(resourceFactoryBeanClass);
+            dsBuilder.addPropertyValue("configPath", dsPath);
+        }
+        dsBuilder.addPropertyValue("autoReload", isAutoReload());
+        dsBuilder.addPropertyValue("validator", validator);
+        dsBuilder.setLazyInit(true);
+        getBeanFactory().registerBeanDefinition(dsBeanId, dsBuilder.getBeanDefinition());
+        logger.info("Bean definition of resource '{}' is created as '{}'.", dsPath, dsBeanId);
+    }
+
     abstract protected String getResourceBeanIdFromPath(String resPath);
 
-    protected void buildResourceBeanDefinition(String resPath, String beanId) throws Exception {}
-
-    protected void removeResourceBeanDefinition(String resPath, String beanId) throws Exception {}
+    protected void removeResourceBeanDefinition(String resPath, String beanId) throws Exception {
+        if(getBeanFactory().containsBeanDefinition(beanId)) {
+            getBeanFactory().removeBeanDefinition(beanId);
+        }
+        // TODO-hhe: clean local cached data sources as we cannot get tenant id here
+        if( getObject()!=null ) {
+            localResourceStore.invalidateAll();
+        }
+        logger.info("Bean definition of resource '{}' is removed as '{}'.", resPath, beanId);
+    }
 
     protected boolean isNestedRoutingNeeded(String dsPath) throws Exception {
         return resolver instanceof NestedRoutingKeyResolver &&
@@ -164,5 +230,10 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
 
     public boolean isAutoReload() {
         return autoReload;
+    }
+
+    @Required
+    public void setResourceFactoryBeanClass(Class<?> resourceFactoryBeanClass) {
+        this.resourceFactoryBeanClass = resourceFactoryBeanClass;
     }
 }

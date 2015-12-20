@@ -499,7 +499,7 @@ CREATE TABLE IF NOT EXISTS __sequence_table__ (
     <!-- 创建声明式路由器 -->
     <bean id="routingKeyResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver">
     	<!-- 启用循环取routing key -->
-        <property name="rollingPoll" value="true"/>
+        <property name="selectRoutingKeyMethod" value="ROLLING_POLL"/>
     </bean>
 
 	<!-- 组装sequence和routing datasource使用的路由器 -->

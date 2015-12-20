@@ -1,5 +1,7 @@
 package org.squirrelframework.cloud.resource.codec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.squirrelframework.cloud.resource.AbstractResourceFactoryBean;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 
@@ -15,6 +17,8 @@ import java.security.KeyStore;
  */
 public class CipherCodecFactoryBean extends AbstractResourceFactoryBean<CipherCodec, CipherCodecConfig> {
 
+    private static final Logger logger = LoggerFactory.getLogger(CipherCodecFactoryBean.class);
+
     @Override
     protected Class<? extends CloudResourceConfig> getConfigType() {
         return CipherCodecConfig.class;
@@ -23,6 +27,14 @@ public class CipherCodecFactoryBean extends AbstractResourceFactoryBean<CipherCo
     @Override
     public Class<?> getObjectType() {
         return CipherCodec.class;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if(isAutoReload()) {
+            logger.warn("CipherCodec cannot be auto reloaded.");
+        }
+        super.afterPropertiesSet();
     }
 
     @Override
