@@ -1,6 +1,7 @@
 package org.squirrelframework.cloud.resource.codec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import javax.crypto.Cipher;
 import java.security.Key;
@@ -19,6 +20,6 @@ public class CipherDecoder implements Decoder {
     public String decode(String value) throws Exception {
         Cipher cipher = Cipher.getInstance(this.key.getAlgorithm());
         cipher.init(Cipher.DECRYPT_MODE, this.key);
-        return new String(cipher.doFinal(Base64.decodeBase64(value.getBytes())));
+        return CloudConfigCommon.bytes2String( cipher.doFinal(Base64.decodeBase64(value.getBytes())) );
     }
 }
