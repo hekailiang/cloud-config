@@ -628,25 +628,6 @@ Spring配置如下：
     <cc:zk-client connection-string="127.0.0.1:1234"/>
     <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
 
-    <!-- 创建类型为Codec加解密器-->
-    <cc:zk-resource id="zk-default-cipher-codec" path="/codec/keystore"
-                    resource-type="Cipher" routing-support="true" resolver-ref="tenantResolver"/>
-
-</beans>
-
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:cc="http://www.squirrelframework.org/schema/config"
-       xsi:schemaLocation="
-            http://www.springframework.org/schema/beans
-            http://www.springframework.org/schema/beans/spring-beans.xsd
-            http://www.squirrelframework.org/schema/config
-            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
-
-    <cc:zk-client connection-string="127.0.0.1:1234"/>
-    <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
-
     <cc:zk-resource id="zk-default-cipher-encoder" path="/keystore/encoder"
                     resource-type="CipherEncoder" routing-support="true" resolver-ref="tenantResolver"/>
     <cc:zk-resource id="zk-default-cipher-decoder" path="/keystore/decoder"
