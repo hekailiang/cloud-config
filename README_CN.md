@@ -591,16 +591,20 @@ public class ProductService {
 通过cloud-config，用户可以管理Java KeyStore(JKS)相关的加解密配置信息，并且支持不同租户下的加解密器的路由。
 
 Zookeeper配置入下：  
-root  
-|---/config    
-|------/codec  
-|------|--/keystore  
-|---------|--/tenant1  
-|---------|--/tenant2    
-|---------|--/unknown    
+/root/config/keystore  
+/encoder  
+  |— tenant1  
+  |— tenant2  
+  |— tenant3  
+  |— tenant4  
+/decoder  
+  |— tenant1  
+  |— tenant2  
+  |— default     
 
-```root/config/codec/keystore/tenant1```中配置如下：
-```json
+
+root/config/codec/keystore/encoder/tenant1中配置如下：   
+```json  
 {
     "keyStoreLocation" : "/usr/local/etc/keystore/t1.keystore",
     "keyStorePassword" : "myStorePassword",
@@ -629,6 +633,30 @@ Spring配置如下：
                     resource-type="Cipher" routing-support="true" resolver-ref="tenantResolver"/>
 
 </beans>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.routing.TenantIdThreadLocalResolver"/>
+
+    <cc:zk-resource id="zk-default-cipher-encoder" path="/keystore/encoder"
+                    resource-type="CipherEncoder" routing-support="true" resolver-ref="tenantResolver"/>
+    <cc:zk-resource id="zk-default-cipher-decoder" path="/keystore/decoder"
+                    resource-type="CipherDecoder" routing-support="true" fallback="/keystore/default" resolver-ref="tenantResolver"/>
+
+    <bean id="zk-default-cipher-codec" class="org.squirrelframework.cloud.resource.codec.CipherCodec">
+        <constructor-arg name="encoder" ref="zk-default-cipher-encoder"/>
+        <constructor-arg name="decoder" ref="zk-default-cipher-decoder"/>
+    </bean>
+</beans>
 ```
 
 在Java代码中使用：
@@ -637,7 +665,7 @@ Spring配置如下：
 public class SecurityUtil {
    @Autowired
    @Qualifier("zk-default-cipher-codec")
-   private Codec cipherCodec;
+   private CipherCodec cipherCodec;
    
    public void doEncryption(String sensitiveData) {
        String encryptedData = cipherCodec.encode(sensitiveData);
