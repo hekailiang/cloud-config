@@ -8,6 +8,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.squirrelframework.cloud.resource.codec.CipherCodec;
+import org.squirrelframework.cloud.resource.codec.Encoder;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.io.IOException;
@@ -17,14 +18,14 @@ import java.io.IOException;
  */
 public class CipherEncodeSerializer extends JsonSerializer<String> implements InitializingBean, ApplicationContextAware {
 
-    private CipherCodec cipherCodec;
+    private Encoder cipherEncoder;
 
     private ApplicationContext applicationContext;
 
     @Override
     public void afterPropertiesSet() throws Exception {
         if( CloudConfigCommon.isEncryptionEnabled() ) {
-            cipherCodec = applicationContext.getBean("zk-default-cipher-codec", CipherCodec.class);
+            cipherEncoder = applicationContext.getBean(CloudConfigCommon.ZK_DEFAULT_CIPHER_ENCODER_BEAN_ID, Encoder.class);
         }
     }
 
@@ -32,7 +33,7 @@ public class CipherEncodeSerializer extends JsonSerializer<String> implements In
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if( CloudConfigCommon.isEncryptionEnabled() ) {
             try {
-                gen.writeString(cipherCodec.encode(value));
+                gen.writeString(cipherEncoder.encode(value));
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e.getCause());
             }

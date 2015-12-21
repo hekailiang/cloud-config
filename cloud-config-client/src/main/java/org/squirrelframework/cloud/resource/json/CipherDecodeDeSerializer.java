@@ -9,6 +9,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.squirrelframework.cloud.resource.codec.CipherCodec;
+import org.squirrelframework.cloud.resource.codec.CipherDecoder;
+import org.squirrelframework.cloud.resource.codec.Decoder;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.io.IOException;
@@ -18,14 +20,14 @@ import java.io.IOException;
  */
 public class CipherDecodeDeSerializer extends JsonDeserializer<String> implements InitializingBean, ApplicationContextAware {
 
-    private CipherCodec cipherCodec;
+    private Decoder cipherDecoder;
 
     private ApplicationContext applicationContext;
 
     @Override
     public void afterPropertiesSet() throws Exception {
         if( CloudConfigCommon.isEncryptionEnabled() ) {
-            cipherCodec = applicationContext.getBean("zk-default-cipher-codec", CipherCodec.class);
+            cipherDecoder = applicationContext.getBean(CloudConfigCommon.ZK_DEFAULT_CIPHER_DECODER_BEAN_ID, Decoder.class);
         }
     }
 
@@ -34,7 +36,7 @@ public class CipherDecodeDeSerializer extends JsonDeserializer<String> implement
         String result = p.getText();
         if( CloudConfigCommon.isEncryptionEnabled() ) {
             try {
-                result = cipherCodec.decode(result);
+                result = cipherDecoder.decode(result);
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e.getCause());
             }

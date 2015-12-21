@@ -32,9 +32,16 @@ public abstract class CloudConfigCommon {
 
     public static final String ZK_CLIENT_BEAN_NAME = "org.squirrelframework.cloud.conf.ZkClientBean";
 
+    public static final String ZK_DEFAULT_CIPHER_ENCODER_BEAN_ID = "zk-default-cipher-encoder";
+
+    public static final String ZK_DEFAULT_CIPHER_DECODER_BEAN_ID = "zk-default-cipher-decoder";
+
     public static final String DB_NAME_KEY = "dbName";
+
     public static final String DB_DATE_KEY = "dbDate";
+
     public static final String DB_DATE_STR_KEY = "dbDateStr";
+
     public static final String SEQUENCE_VALUE_KEY = "sequenceValue";
 
     public static String[] getProfiles() {

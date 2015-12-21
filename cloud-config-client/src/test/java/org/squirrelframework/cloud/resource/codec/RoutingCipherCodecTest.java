@@ -64,7 +64,7 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
         String random = RandomStringUtils.randomAlphabetic(10);
         System.out.println("random: "+random);
 
-        Codec cc = applicationContext.getBean("zk-default-cipher-codec", Codec.class);
+        CipherCodec cc = applicationContext.getBean("zk-default-cipher-codec", CipherCodec.class);
         CustomRoutingKeyResolver resolver = applicationContext.getBean("tenantResolver", CustomRoutingKeyResolver.class);
 
         resolver.key = "tenant1";

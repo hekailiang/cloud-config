@@ -5,9 +5,7 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.squirrelframework.cloud.resource.codec.CipherCodecFactoryBean;
-import org.squirrelframework.cloud.resource.codec.RoutingCipherCodecFactoryBean;
-import org.squirrelframework.cloud.resource.database.DruidDataSourceFactoryBean;
+import org.squirrelframework.cloud.resource.codec.*;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.w3c.dom.Element;
@@ -58,16 +56,19 @@ public class ZkResourceBeanDefinitionParser extends AbstractSingleBeanDefinition
     }
 
     private Class<?> getFactoryBeanClassByType(String resourceType, boolean routingSupport) {
-        if ("Cipher".equals(resourceType)) {
-            return routingSupport ? RoutingCipherCodecFactoryBean.class : CipherCodecFactoryBean.class;
+        if ("CipherEncoder".equals(resourceType)) {
+            return routingSupport ? RoutingCipherEncoderFactoryBean.class : CipherEncoderFactoryBean.class;
+        } else if ("CipherDecoder".equals(resourceType)) {
+            return routingSupport ? RoutingCipherDecoderFactoryBean.class : CipherDecoderFactoryBean.class;
         }
         throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
     }
 
     private String getBeanAliasByType(String resourceType, String path) {
-        if ("Cipher".equals(resourceType)) {
-            return BeanIdGenerator.getCipherCodecBeanId(path);
-
+        if ("CipherEncoder".equals(resourceType)) {
+            return BeanIdGenerator.getCipherEncoderBeanId(path);
+        } else if ("CipherDecoder".equals(resourceType)) {
+            return BeanIdGenerator.getCipherDecoderBeanId(path);
         }
         throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
     }

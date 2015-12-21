@@ -3,6 +3,8 @@ package org.squirrelframework.cloud.utils;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.codec.CipherCodec;
 import org.squirrelframework.cloud.resource.codec.CipherCodecConfig;
+import org.squirrelframework.cloud.resource.codec.CipherDecoder;
+import org.squirrelframework.cloud.resource.codec.CipherEncoder;
 import org.squirrelframework.cloud.resource.database.JdbcDataSourceConfig;
 import org.squirrelframework.cloud.resource.sequence.SequenceDao;
 import org.squirrelframework.cloud.resource.sequence.SequenceGenerator;
@@ -31,8 +33,10 @@ public class BeanIdGenerator {
             postfix = "DAO";
         } else if(SequenceGenerator.class.isAssignableFrom(type)) {
             postfix = "SEQ";
-        } else if(CipherCodec.class.isAssignableFrom(type)) {
-            postfix = "CC";
+        } else if(CipherEncoder.class.isAssignableFrom(type)) {
+            postfix = "CE";
+        } else if(CipherDecoder.class.isAssignableFrom(type)) {
+            postfix = "CD";
         }
         return "_"+path.replace('/', '_')+postfix;
     }
@@ -53,7 +57,11 @@ public class BeanIdGenerator {
         return generateBeanId(path, SequenceGenerator.class);
     }
 
-    public static String getCipherCodecBeanId(String path) {
-        return generateBeanId(path, CipherCodec.class);
+    public static String getCipherEncoderBeanId(String path) {
+        return generateBeanId(path, CipherEncoder.class);
+    }
+
+    public static String getCipherDecoderBeanId(String path) {
+        return generateBeanId(path, CipherDecoder.class);
     }
 }

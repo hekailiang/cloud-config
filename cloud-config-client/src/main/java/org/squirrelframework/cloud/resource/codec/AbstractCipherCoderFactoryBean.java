@@ -15,18 +15,13 @@ import java.security.KeyStore;
 /**
  * Created by kailianghe on 15/12/19.
  */
-public class CipherCodecFactoryBean extends AbstractResourceFactoryBean<CipherCodec, CipherCodecConfig> {
+public abstract class AbstractCipherCoderFactoryBean<T> extends AbstractResourceFactoryBean<T, CipherCodecConfig> {
 
-    private static final Logger logger = LoggerFactory.getLogger(CipherCodecFactoryBean.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCipherCoderFactoryBean.class);
 
     @Override
     protected Class<? extends CloudResourceConfig> getConfigType() {
         return CipherCodecConfig.class;
-    }
-
-    @Override
-    public Class<?> getObjectType() {
-        return CipherCodec.class;
     }
 
     @Override
@@ -38,7 +33,7 @@ public class CipherCodecFactoryBean extends AbstractResourceFactoryBean<CipherCo
     }
 
     @Override
-    protected CipherCodec createInstance() throws Exception {
+    protected T createInstance() throws Exception {
         KeyStore store = KeyStore.getInstance(config.getType());
         File keyStoreFile = new File(config.getKeyStoreLocation());
         if(!keyStoreFile.exists()) {
@@ -51,6 +46,8 @@ public class CipherCodecFactoryBean extends AbstractResourceFactoryBean<CipherCo
             throw new IllegalStateException("load .keystore file failed", e.getCause());
         }
         Key key = store.getKey(config.getKeyAlias(), (config.getKeyPassword() != null) ? config.getKeyPassword().toCharArray() : null);
-        return new CipherCodec(key);
+        return createCoder(key);
     }
+
+    abstract protected T createCoder(Key key);
 }

@@ -8,35 +8,28 @@ import org.squirrelframework.cloud.utils.BeanIdGenerator;
 /**
  * Created by kailianghe on 15/12/20.
  */
-public class RoutingCipherCodecFactoryBean extends AbstractRoutingResourceFactoryBean<Codec> {
+public class RoutingCipherEncoderFactoryBean extends AbstractRoutingResourceFactoryBean<Encoder> {
 
     @Override
     protected String getResourceBeanIdFromPath(String resPath) {
-        return BeanIdGenerator.getCipherCodecBeanId(resPath);
+        return BeanIdGenerator.getCipherEncoderBeanId(resPath);
     }
 
     @Override
     public Class<?> getObjectType() {
-        return Codec.class;
+        return Encoder.class;
     }
 
     @Override
-    protected Codec createInstance() throws Exception {
+    protected Encoder createInstance() throws Exception {
         createChildResourceBeanDefinition();
-        return new RoutingCipherCode();
+        return new RoutingCipherEncoder();
     }
 
-    public class RoutingCipherCode implements Codec, RoutingSupport<Codec> {
+    public class RoutingCipherEncoder implements Encoder, RoutingSupport<Encoder> {
         @Override
-        public Codec get(String routingKey) {
+        public Encoder get(String routingKey) {
             return getLocalResource(routingKey);
-        }
-
-        @Override
-        public String decode(String value) throws Exception {
-            String routingKey = resolver.get().orNull();
-            Preconditions.checkNotNull(routingKey, "routing key is not defined");
-            return get(routingKey).decode(value);
         }
 
         @Override
