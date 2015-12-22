@@ -17,7 +17,6 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
-import org.apache.curator.utils.ZKPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -85,29 +84,22 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
     @Override
     public void afterPropertiesSet() throws Exception {
         if(isAutoReload()) {
-            childNodeCache = new PathChildrenCache(client, path, true);
+            childNodeCache = new PathChildrenCache(client, path, true, false, CloudConfigCommon.EVENT_EXECUTOR_SERVICE);
             childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
                 @Override
                 public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-                    String nodeName = event.getData()!=null ?
-                            ZKPaths.getNodeFromPath(event.getData().getPath()) : "";
-                    String resPath = path+"/"+nodeName;
+                    String nodePath = event.getData().getPath();
                     switch (event.getType()) {
                         case CHILD_ADDED: {
-                            logger.info("ChildNode added: {}", nodeName);
-                            buildResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
-                            break;
-                        }
-
-                        case CHILD_UPDATED: {
-                            logger.info("ChildNode changed: {}", nodeName);
+                            logger.info("CHILD_ADDED {}", nodePath);
+                            buildResourceBeanDefinition(nodePath, getResourceBeanIdFromPath(nodePath));
                             break;
                         }
 
                         case CHILD_REMOVED: {
-                            logger.info("ChildNode removed: {}", nodeName);
-                            removeResourceBeanDefinition(resPath, getResourceBeanIdFromPath(resPath));
+                            logger.info("CHILD_REMOVED {}", nodePath);
+                            removeResourceBeanDefinition(nodePath, getResourceBeanIdFromPath(nodePath));
                             break;
                         }
                         default:

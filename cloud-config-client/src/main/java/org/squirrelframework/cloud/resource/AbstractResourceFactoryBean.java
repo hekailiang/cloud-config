@@ -52,7 +52,6 @@ public abstract class AbstractResourceFactoryBean<R, T extends CloudResourceConf
                 cnfBuilder.addPropertyValue("resourceType", getConfigType().getName());
                 cnfBuilder.addPropertyValue("validator", validator);
                 cnfBuilder.addPropertyValue("autoReload", autoReload);
-                cnfBuilder.setLazyInit(true);
                 beanFactory.registerBeanDefinition(configBeanId, cnfBuilder.getBeanDefinition());
             }
             config = (T) applicationContext.getBean(configBeanId);

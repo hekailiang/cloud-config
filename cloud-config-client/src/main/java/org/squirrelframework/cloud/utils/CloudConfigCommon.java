@@ -8,6 +8,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by kailianghe on 9/17/15.
@@ -43,6 +45,8 @@ public abstract class CloudConfigCommon {
     public static final String DB_DATE_STR_KEY = "dbDateStr";
 
     public static final String SEQUENCE_VALUE_KEY = "sequenceValue";
+
+    public static final ExecutorService EVENT_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
     public static String[] getProfiles() {
         Set<String> result = new LinkedHashSet<>();

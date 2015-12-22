@@ -23,7 +23,7 @@ public abstract class AbstractSimpeDataSourceTest extends BaseTestClass {
 
     protected void testSimpleDataSource(String config) throws Exception {
         prepareZk(config);
-        DataSource dataSource = applicationContext.getBean(DataSource.class);
+        DataSource dataSource = applicationContext.getBean("dataSource", DataSource.class);
         assertThat(dataSource, notNullValue());
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);

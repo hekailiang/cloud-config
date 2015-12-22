@@ -5,6 +5,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.squirrelframework.cloud.CustomRoutingKeyResolver;
 import org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig;
+import org.squirrelframework.cloud.resource.database.JdbcDataSourceConfig;
+import org.squirrelframework.cloud.utils.BeanIdGenerator;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -62,21 +64,23 @@ public class NestedRoutingKeyResolverTest extends AbstractNestedRoutingTest {
 
         Set<String> dsBeans = applicationContext.getBeansOfType(DataSource.class).keySet();
         Set<String> cnfBeans = applicationContext.getBeansOfType(BoneCPDataSourceConfig.class).keySet();
-        zkConfigClient.delete().forPath("/database/mydb/a/1");
-        Thread.sleep(500);
 
-        zkConfigClient.delete().forPath("/database/mydb/a/2");
-        Thread.sleep(500);
-
-        zkConfigClient.delete().forPath("/database/mydb/a");
+        zkConfigClient.delete().deletingChildrenIfNeeded().forPath("/database/mydb/a");
         Thread.sleep(500);
 
         Set<String> nowDsBeans = applicationContext.getBeansOfType(DataSource.class).keySet();
         Set<String> nowCnfBeans = applicationContext.getBeansOfType(BoneCPDataSourceConfig.class).keySet();
         dsBeans.removeAll(nowDsBeans);
         cnfBeans.removeAll(nowCnfBeans);
-        assertThat(dsBeans, hasItems("__database_mydb_aDS", "__database_mydb_a_1DS", "__database_mydb_a_2DS"));
-        assertThat(cnfBeans, hasItems("__database_mydb_a_1DS_CNF", "__database_mydb_a_2DS_CNF"));
+        assertThat(dsBeans, hasItems(
+                BeanIdGenerator.getDataSourceBeanId("/database/mydb/a"),
+                BeanIdGenerator.getDataSourceBeanId("/database/mydb/a/1"),
+                BeanIdGenerator.getDataSourceBeanId("/database/mydb/a/2")
+        ));
+        assertThat(cnfBeans, hasItems(
+                BeanIdGenerator.getResourceConfigBeanId("/database/mydb/a/1", JdbcDataSourceConfig.class),
+                BeanIdGenerator.getResourceConfigBeanId("/database/mydb/a/2", JdbcDataSourceConfig.class)
+        ));
     }
 
 }
