@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -16,6 +18,8 @@ import java.util.Properties;
  * Created by kailianghe on 8/28/15.
  */
 public class JsonFlattenConverter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JsonFlattenConverter.class);
 
     private boolean isAllowOverride = true;
 
@@ -29,8 +33,7 @@ public class JsonFlattenConverter {
         } catch (IOException e) {
             String errMsg = "Invalid json format\n"+json;
             if(ignoreInvalidJson) {
-                System.err.println(errMsg);
-                // TODO-logger
+                logger.error(errMsg);
             } else {
                 throw new RuntimeException(errMsg, e);
             }
