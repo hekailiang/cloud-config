@@ -19,7 +19,7 @@
     <bean id="tenantResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
     <bean id="profileResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
     <bean id="rwSplitResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
-    <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver">
+    <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.RoundRobinRoutingKeyResolver">
         <property name="path" value="/database/mydb"/>
     </bean>
 

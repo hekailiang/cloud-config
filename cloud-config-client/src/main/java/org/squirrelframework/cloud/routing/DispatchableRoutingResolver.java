@@ -12,7 +12,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.squirrelframework.cloud.conf.ZkPath;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
-import org.squirrelframework.cloud.utils.RoundRobin;
 
 import java.util.Iterator;
 import java.util.List;
@@ -20,30 +19,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by kailianghe on 15/12/10.
+ * Created by kailianghe on 15/12/23.
  */
-public class DispatchableRoutingKeyResolver implements RoutingKeyResolver, InitializingBean {
+public abstract class DispatchableRoutingResolver implements RoutingKeyResolver, InitializingBean {
 
-    private static final Logger logger = LoggerFactory.getLogger(DispatchableRoutingKeyResolver.class);
+    protected static final Logger logger = LoggerFactory.getLogger(DispatchableRoutingResolver.class);
 
     private String path;
 
-    private CuratorFramework client;
+    protected CuratorFramework client;
 
     private boolean autoRefresh = false;
 
     private int refreshInterval = 10;
 
-    CacheLoader<String, Iterator<String>> cacheLoader = new CacheLoader<String, Iterator<String>>() {
-        @Override
-        public Iterator<String> load(final String zkPath) throws Exception {
-            List<String> candidates = client.getChildren().forPath(zkPath);
-            logger.debug("Dispatchable routing candidates loaded - {}", candidates);
-            return new RoundRobin<>(candidates).iterator();
-        }
-    };
+    abstract protected CacheLoader<String, Iterator<String>> getCacheLoader();
 
-    LoadingCache<String, Iterator<String>> cachedIterators;
+    private LoadingCache<String, Iterator<String>> cachedIterators;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -51,7 +43,7 @@ public class DispatchableRoutingKeyResolver implements RoutingKeyResolver, Initi
         if(autoRefresh) {
             cacheBuilder.refreshAfterWrite(refreshInterval, TimeUnit.MINUTES);
         }
-        cachedIterators = cacheBuilder.build(cacheLoader);
+        cachedIterators = cacheBuilder.build(getCacheLoader());
     }
 
     @Override

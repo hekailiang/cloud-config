@@ -267,7 +267,7 @@ root
 |------------|--/dev  
 |------------|--/prod............................ _DeclarativeRoutingKeyResolver  (write/read)_  
 |------------|--|--/write  
-|------------|--|--/read......................... _DispatchableRoutingKeyResolver (01/02/03)_       
+|------------|--|--/read......................... RoundRobinRoutingKeyResolver (01/02/03)_       
 |------------|--|--|--/01  
 |------------|--|--|--/02    
 |------------|--|--|--/03      
@@ -278,7 +278,7 @@ root
 * 第一层是在模块节点(/database/user)上通过TenantIdThreadLocalResolver定位到指定的租户配置节点上。   
 * 第二层是在租户节点(/database/user/tenant1)上通过MajorProfileRoutingKeyResolver对应的profile节点上。  
 * 第三层是在profile节点(/database/user/tenant1/prod)上通过DeclarativeRoutingKeyResolver对应的读或写节点上。  
-* 第四层是在读节点(/database/user/tenant1/prod/write)上通过DispatchableRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。   
+* 第四层是在读节点(/database/user/tenant1/prod/write)上通过RoundRobinRoutingKeyResolver读节点下的子节点(01, 02, 03)进行Round-Robin选择。   
 * 如果对应节点无子节点，则路由到该节点结束。例如，在/database/user/tenant1/dev下无读写节点，则所有的读写请求都路由到dev节点所对应的同一数据源。 
 * 当路由到对应叶子节点时，例如/database/user/tenant1/prod/write，cloud-config仅合并该节点与其父节点(/database/user/tenant1/prod)上的配置信息创建数据源。  
 
@@ -310,7 +310,7 @@ root
     <!-- 创建声明式路由器 -->
     <bean id="rwSplitResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
     <!-- 创建循环派发路由器 -->
-    <bean id="dispatchResolver" class="org.squirrelframework.cloud.routing.DispatchableRoutingKeyResolver">
+    <bean id="roundRobinResolver" class="org.squirrelframework.cloud.routing.RoundRobinRoutingKeyResolver">
         <property name="path" value="/database/user"/>
         <!-- 启用自动刷新功能 -->
         <property name="autoRefresh" value="true"/>
@@ -326,7 +326,7 @@ root
                 <ref bean="tenantResolver"/>
                 <ref bean="profileResolver"/>
                 <ref bean="rwSplitResolver"/>
-                <ref bean="dispatchResolver"/>
+                <ref bean="roundRobinResolver"/>
             </list>
         </property>
     </bean>
@@ -379,7 +379,7 @@ public class UserService {
         userDAO.insertUser(user);
     }
     
-    // 如果使用了DispatchableRoutingKeyResolver，则recordRoutingKeys需设置为true
+    // 如果使用了RoundRobinRoutingKeyResolver，则recordRoutingKeys需设置为true
     @RoutingKey(value = "read", recordRoutingKeys = true)
     public List<User> findAllUsers() {
         return userDAO.findAllUsers();
