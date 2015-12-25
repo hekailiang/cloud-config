@@ -1,31 +1,25 @@
 package org.squirrelframework.cloud.resource.sequence;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.squirrelframework.cloud.annotation.RoutingKey;
 import org.squirrelframework.cloud.annotation.RoutingVariable;
 
 /**
- * Created by kailianghe on 15/12/17.
+ * Created by kailianghe on 15/12/25.
  */
 @Service
-public class ProductService {
-
-    @Autowired(required = false)
-    @Qualifier("sequence")
-    private SequenceGenerator sequenceGenerator;
-
+public class ProductService2 {
     @Autowired
     private ProductDao productDao;
 
     @Transactional
-    @RoutingKey( "#{ ${sequence.product.sharding.rule} }" )
+    @RoutingKey( "#{ #product.customerId }" )
     public String saveProduct(@RoutingVariable("product") Product product) throws Exception {
         if(product.getId() == null) {
-            String productId = sequenceGenerator.next("product");
-            product.setId(productId);
+            product.setId(RandomStringUtils.randomAlphabetic(16));
             productDao.save(product);
         } else {
             productDao.update(product);
@@ -33,9 +27,8 @@ public class ProductService {
         return product.getId();
     }
 
-    @RoutingKey( "#{ ${sequence.product.id.sharding.rule} }" )
-    public Product findProductById(@RoutingVariable("id") String id) {
-        return productDao.findProductById(id);
+    @RoutingKey( "#{ #customerId }" )
+    public Product findProductById(String prodId, @RoutingVariable("customerId") long customerId) {
+        return productDao.findProductById(prodId);
     }
-
 }

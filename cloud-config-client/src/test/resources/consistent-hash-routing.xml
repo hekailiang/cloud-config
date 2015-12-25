@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <context:annotation-config/>
+
+    <bean id="declarativeRoutingKeyResolver" class="org.squirrelframework.cloud.routing.DeclarativeRoutingKeyResolver"/>
+    <bean id="consistentHashRoutingKeyResolver" class="org.squirrelframework.cloud.routing.ConsistentHashRoutingKeyResolver">
+        <property name="path" value="/database/mydb"/>
+        <property name="declarativeRoutingKeyResolver" ref="declarativeRoutingKeyResolver"/>
+    </bean>
+
+    <bean id="my-resolver" class="org.squirrelframework.cloud.routing.NestedRoutingKeyResolver">
+        <property name="resolvers">
+            <list>
+                <ref bean="declarativeRoutingKeyResolver"/>
+                <ref bean="consistentHashRoutingKeyResolver"/>
+            </list>
+        </property>
+    </bean>
+
+    <cc:zk-declarative-routing/>
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <cc:zk-jdbc-datasource id="dataSource" path="/database/mydb" routing-support="true" resolver-ref="my-resolver"/>
+
+    <context:component-scan base-package="org.squirrelframework.cloud.resource.sequence" />
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="org.squirrelframework.cloud.resource.sequence"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+        </property>
+        <property name="jpaPropertyMap">
+            <props>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.archive.autodetection" />
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

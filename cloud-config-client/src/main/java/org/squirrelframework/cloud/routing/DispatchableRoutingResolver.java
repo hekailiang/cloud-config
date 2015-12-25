@@ -48,17 +48,28 @@ public abstract class DispatchableRoutingResolver implements RoutingKeyResolver,
 
     @Override
     public Optional<String> get() {
-        List<String> routingKeys = RoutingKeyHolder.getRoutingKeys();
-        String zkPath = routingKeys.isEmpty() ? path :
-                path + ZkPath.PATH_SEPARATOR + StringUtils.join(routingKeys, ZkPath.PATH_SEPARATOR);
+        String routingPath = buildRoutingPath();
         try {
-            Iterator<String> iterator = cachedIterators.get(zkPath);
+            Iterator<String> iterator = cachedIterators.get(routingPath);
             String value = iterator.next();
-            logger.debug("Dispatched to path \"{}/{}\"", zkPath, value);
+            logger.debug("Dispatched to path \"{}/{}\"", routingPath, value);
             return Optional.of(value);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("Cannot find any dispatchable candidates under \""+zkPath+"\"", e.getCause());
+            throw new IllegalStateException("Cannot find any dispatchable candidates under \""+routingPath+"\"", e.getCause());
         }
+    }
+
+    protected String buildRoutingPath() {
+        List<String> routingKeys = RoutingKeyHolder.getRoutingKeys();
+        String zkPath = path;
+        if(!routingKeys.isEmpty()) {
+            zkPath += ZkPath.PATH_SEPARATOR + StringUtils.join(routingKeys, ZkPath.PATH_SEPARATOR);
+        }
+        return zkPath;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public void setPath(String path) {

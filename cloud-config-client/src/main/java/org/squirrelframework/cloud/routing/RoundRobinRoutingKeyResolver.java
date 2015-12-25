@@ -14,8 +14,8 @@ public class RoundRobinRoutingKeyResolver extends DispatchableRoutingResolver {
     protected CacheLoader<String, Iterator<String>> getCacheLoader() {
         return new CacheLoader<String, Iterator<String>>() {
             @Override
-            public Iterator<String> load(final String zkPath) throws Exception {
-                List<String> candidates = client.getChildren().forPath(zkPath);
+            public Iterator<String> load(final String routingPath) throws Exception {
+                List<String> candidates = client.getChildren().forPath(routingPath);
                 logger.debug("Dispatchable routing candidates loaded - {}", candidates);
                 return new RoundRobin<>(candidates).iterator();
             }
