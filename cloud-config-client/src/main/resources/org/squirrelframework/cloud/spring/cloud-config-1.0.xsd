@@ -44,6 +44,7 @@
                             <xsd:restriction base="xsd:NMTOKEN">
                                 <xsd:enumeration value="CipherEncoder"/>
                                 <xsd:enumeration value="CipherDecoder"/>
+                                <xsd:enumeration value="Memcache"/>
                             </xsd:restriction>
                         </xsd:simpleType>
                     </xsd:attribute>
@@ -52,6 +53,19 @@
                     <xsd:attribute type="xsd:boolean" name="routing-support" default="false"/>
                     <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
                     <xsd:attribute type="xsd:string" name="fallback" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="zk-cache-resource">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute type="xsd:string" name="path" use="required"/>
+                    <xsd:attribute type="xsd:string" name="cache-name" use="required"/>
+                    <xsd:attribute type="xsd:string" name="validator-ref" default="zk-default-validator"/>
+                    <xsd:attribute type="xsd:string" name="resolver-ref" default="zk-default-resolver"/>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

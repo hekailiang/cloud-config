@@ -1,7 +1,8 @@
 package org.squirrelframework.cloud.utils;
 
+import com.google.code.ssm.Cache;
+import com.google.code.ssm.spring.SSMCache;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
-import org.squirrelframework.cloud.resource.codec.CipherCodec;
 import org.squirrelframework.cloud.resource.codec.CipherCodecConfig;
 import org.squirrelframework.cloud.resource.codec.CipherDecoder;
 import org.squirrelframework.cloud.resource.codec.CipherEncoder;
@@ -17,7 +18,7 @@ import javax.sql.DataSource;
 public class BeanIdGenerator {
 
     public static String generateBeanId(String path, Class<?> type) {
-        String postfix = "?";
+        String postfix;
         if(DataSource.class.isAssignableFrom(type)) {
             postfix = "DS";
         } else if(CloudResourceConfig.class.isAssignableFrom(type)) {
@@ -37,6 +38,10 @@ public class BeanIdGenerator {
             postfix = "CE";
         } else if(CipherDecoder.class.isAssignableFrom(type)) {
             postfix = "CD";
+        } else if(Cache.class.isAssignableFrom(type)) {
+            postfix = "CAC";
+        } else {
+            postfix = type.getSimpleName();
         }
         return "_"+path.replace('/', '_')+postfix;
     }
@@ -63,5 +68,9 @@ public class BeanIdGenerator {
 
     public static String getCipherDecoderBeanId(String path) {
         return generateBeanId(path, CipherDecoder.class);
+    }
+
+    public static String getMemcachedBeanId(String path) {
+        return generateBeanId(path, Cache.class);
     }
 }

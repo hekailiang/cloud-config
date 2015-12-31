@@ -16,5 +16,6 @@ public class CloudConfigNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("zk-resource-config", new ZkResourceConfigBeanDefinitionParser());
         registerBeanDefinitionParser("zk-sequence-generator", new ZkSequenceGeneratorBeanDefinitionParser());
         registerBeanDefinitionParser("zk-resource", new ZkResourceBeanDefinitionParser());
+        registerBeanDefinitionParser("zk-cache-resource", new ZkCacheResourceBeanDefinitionParser());
     }
 }

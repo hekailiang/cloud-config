@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/cache
+            http://www.springframework.org/schema/cache/spring-cache.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <cache:annotation-driven />
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <cc:zk-cache-resource id="defaultCache" path="/cache/mycahce" cache-name="user"/>
+
+    <bean id="tenantResolver" class="org.squirrelframework.cloud.CustomRoutingKeyResolver"/>
+    <cc:zk-cache-resource id="routingCache" path="/cache/mycahce" cache-name="user2" resolver-ref="tenantResolver"/>
+
+    <bean name="cacheManager" class="com.google.code.ssm.spring.ExtendedSSMCacheManager">
+        <property name="caches">
+            <set>
+                <bean class="com.google.code.ssm.spring.SSMCache">
+                    <constructor-arg name="cache" index="0" ref="defaultCache" />
+                    <constructor-arg name="expiration" index="1" value="300" />
+                    <constructor-arg name="allowClear" index="2" value="true" />
+                </bean>
+                <bean class="com.google.code.ssm.spring.SSMCache">
+                    <constructor-arg name="cache" index="0" ref="routingCache" />
+                    <constructor-arg name="expiration" index="1" value="300" />
+                    <constructor-arg name="allowClear" index="2" value="true" />
+                </bean>
+            </set>
+        </property>
+    </bean>
+
+    <bean id="userService" class="org.squirrelframework.cloud.resource.cache.MockUserService"/>
+
+</beans>
