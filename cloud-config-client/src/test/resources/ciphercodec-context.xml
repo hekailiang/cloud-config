@@ -12,7 +12,7 @@
     <cc:zk-resource id="zk-default-cipher-encoder" path="/codec/mycipher" resource-type="CipherEncoder"/>
     <cc:zk-resource id="zk-default-cipher-decoder" path="/codec/mycipher" resource-type="CipherDecoder"/>
 
-    <bean id="zk-default-cipher-codec" class="org.squirrelframework.cloud.resource.codec.CipherCodec">
+    <bean id="zk-default-cipher-codec" class="org.squirrelframework.cloud.resource.security.CipherCodec">
         <constructor-arg name="encoder" ref="zk-default-cipher-encoder"/>
         <constructor-arg name="decoder" ref="zk-default-cipher-decoder"/>
     </bean>

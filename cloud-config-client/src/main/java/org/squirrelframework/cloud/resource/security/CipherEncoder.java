@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.codec;
+package org.squirrelframework.cloud.resource.security;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -16,9 +16,9 @@ public class CipherEncoder implements Encoder {
     }
 
     @Override
-    public String encode(String value) throws Exception {
+    public String encode(String value, String charset) throws Exception {
         Cipher cipher = Cipher.getInstance(this.key.getAlgorithm());
         cipher.init(Cipher.ENCRYPT_MODE, this.key);
-        return new String(Base64.encodeBase64(cipher.doFinal(value.getBytes())));
+        return new String(Base64.encodeBase64(cipher.doFinal(value.getBytes())), charset);
     }
 }

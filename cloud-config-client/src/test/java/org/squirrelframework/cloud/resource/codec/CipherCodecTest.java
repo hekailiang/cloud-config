@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig;
 import org.squirrelframework.cloud.resource.json.SpringHandlerInstantiator;
+import org.squirrelframework.cloud.resource.security.CipherCodec;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.io.File;
@@ -59,9 +60,9 @@ public class CipherCodecTest extends AbstractCipherCodecTest {
 
         String random = RandomStringUtils.randomAlphabetic(10);
         System.out.println("random: "+random);
-        String encrypted = cc.encode(random);
+        String encrypted = cc.encode(random, "UTF-8");
         System.out.println("encrypted: "+encrypted);
-        String decrypted = cc.decode(encrypted);
+        String decrypted = cc.decode(encrypted, "UTF-8");
         System.out.println("decrypted: "+decrypted);
         assertThat(random, is(decrypted));
     }
@@ -70,7 +71,7 @@ public class CipherCodecTest extends AbstractCipherCodecTest {
     public void testJsonSerialize() throws Exception {
         CipherCodec cc = applicationContext.getBean("zk-default-cipher-codec", CipherCodec.class);
         String random = RandomStringUtils.randomAlphabetic(10);
-        String encrypted = cc.encode(random);
+        String encrypted = cc.encode(random, "UTF-8");
         System.out.println("encrypted: "+encrypted);
 
         BoneCPDataSourceConfig config = new BoneCPDataSourceConfig();

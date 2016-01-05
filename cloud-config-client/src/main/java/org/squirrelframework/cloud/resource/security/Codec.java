@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.codec;
+package org.squirrelframework.cloud.resource.security;
 
 /**
  * Created by kailianghe on 15/12/19.

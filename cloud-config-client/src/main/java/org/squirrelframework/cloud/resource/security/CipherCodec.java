@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.codec;
+package org.squirrelframework.cloud.resource.security;
 
 /**
  * Created by kailianghe on 15/12/19.
@@ -15,12 +15,12 @@ public class CipherCodec implements Codec {
     }
 
     @Override
-    public String decode(String value) throws Exception {
-        return decoder.decode(value);
+    public String decode(String value, String charset) throws Exception {
+        return decoder.decode(value, charset);
     }
 
     @Override
-    public String encode(String value) throws Exception {
-        return encoder.encode(value);
+    public String encode(String value, String charset) throws Exception {
+        return encoder.encode(value, charset);
     }
 }

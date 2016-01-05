@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.codec;
+package org.squirrelframework.cloud.resource.security;
 
 import org.apache.commons.codec.binary.Base64;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
@@ -17,9 +17,9 @@ public class CipherDecoder implements Decoder {
     }
 
     @Override
-    public String decode(String value) throws Exception {
+    public String decode(String value, String charset) throws Exception {
         Cipher cipher = Cipher.getInstance(this.key.getAlgorithm());
         cipher.init(Cipher.DECRYPT_MODE, this.key);
-        return CloudConfigCommon.bytes2String( cipher.doFinal(Base64.decodeBase64(value.getBytes())) );
+        return CloudConfigCommon.bytes2String( cipher.doFinal(Base64.decodeBase64(value.getBytes(charset))) );
     }
 }

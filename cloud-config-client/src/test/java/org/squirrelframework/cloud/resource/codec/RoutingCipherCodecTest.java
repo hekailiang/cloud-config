@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.squirrelframework.cloud.CustomRoutingKeyResolver;
+import org.squirrelframework.cloud.resource.security.CipherCodec;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.io.File;
@@ -68,16 +69,16 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
         CustomRoutingKeyResolver resolver = applicationContext.getBean("tenantResolver", CustomRoutingKeyResolver.class);
 
         resolver.key = "tenant1";
-        String encrypted1 = cc.encode(random);
+        String encrypted1 = cc.encode(random, "UTF-8");
         System.out.println("encrypted: "+encrypted1);
-        String decrypted1 = cc.decode(encrypted1);
+        String decrypted1 = cc.decode(encrypted1, "UTF-8");
         System.out.println("decrypted: "+decrypted1);
         assertThat(random, is(decrypted1));
 
         resolver.key = "tenant2";
-        String encrypted2 = cc.encode(random);
+        String encrypted2 = cc.encode(random, "UTF-8");
         System.out.println("encrypted: "+encrypted2);
-        String decrypted2 = cc.decode(encrypted2);
+        String decrypted2 = cc.decode(encrypted2, "UTF-8");
         System.out.println("decrypted: "+decrypted2);
         assertThat(random, is(decrypted2));
 

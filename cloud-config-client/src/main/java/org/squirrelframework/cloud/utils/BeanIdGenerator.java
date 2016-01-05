@@ -1,12 +1,11 @@
 package org.squirrelframework.cloud.utils;
 
 import com.google.code.ssm.Cache;
-import com.google.code.ssm.spring.SSMCache;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.cache.MemcachedResourceConfig;
-import org.squirrelframework.cloud.resource.codec.CipherCodecConfig;
-import org.squirrelframework.cloud.resource.codec.CipherDecoder;
-import org.squirrelframework.cloud.resource.codec.CipherEncoder;
+import org.squirrelframework.cloud.resource.security.CipherCodecConfig;
+import org.squirrelframework.cloud.resource.security.CipherDecoder;
+import org.squirrelframework.cloud.resource.security.CipherEncoder;
 import org.squirrelframework.cloud.resource.database.JdbcDataSourceConfig;
 import org.squirrelframework.cloud.resource.sequence.SequenceDao;
 import org.squirrelframework.cloud.resource.sequence.SequenceGenerator;

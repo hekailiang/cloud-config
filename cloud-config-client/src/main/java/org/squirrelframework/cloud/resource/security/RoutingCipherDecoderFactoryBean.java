@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.codec;
+package org.squirrelframework.cloud.resource.security;
 
 import com.google.common.base.Preconditions;
 import org.squirrelframework.cloud.resource.AbstractRoutingResourceFactoryBean;
@@ -8,35 +8,35 @@ import org.squirrelframework.cloud.utils.BeanIdGenerator;
 /**
  * Created by kailianghe on 15/12/20.
  */
-public class RoutingCipherEncoderFactoryBean extends AbstractRoutingResourceFactoryBean<Encoder> {
+public class RoutingCipherDecoderFactoryBean extends AbstractRoutingResourceFactoryBean<Decoder> {
 
     @Override
     protected String getResourceBeanIdFromPath(String resPath) {
-        return BeanIdGenerator.getCipherEncoderBeanId(resPath);
+        return BeanIdGenerator.getCipherDecoderBeanId(resPath);
     }
 
     @Override
     public Class<?> getObjectType() {
-        return Encoder.class;
+        return Decoder.class;
     }
 
     @Override
-    protected Encoder createInstance() throws Exception {
+    protected Decoder createInstance() throws Exception {
         createChildResourceBeanDefinition();
-        return new RoutingCipherEncoder();
+        return new RoutingCipherDecoder();
     }
 
-    public class RoutingCipherEncoder implements Encoder, RoutingSupport<Encoder> {
+    public class RoutingCipherDecoder implements Decoder, RoutingSupport<Decoder> {
         @Override
-        public Encoder get(String routingKey) {
+        public Decoder get(String routingKey) {
             return getLocalResource(routingKey);
         }
 
         @Override
-        public String encode(String value) throws Exception {
+        public String decode(String value, String charset) throws Exception {
             String routingKey = resolver.get().orNull();
             Preconditions.checkNotNull(routingKey, "routing key is not defined");
-            return get(routingKey).encode(value);
+            return get(routingKey).decode(value, charset);
         }
     }
 }

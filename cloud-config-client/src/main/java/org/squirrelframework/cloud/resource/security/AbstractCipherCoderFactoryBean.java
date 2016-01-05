@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.codec;
+package org.squirrelframework.cloud.resource.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

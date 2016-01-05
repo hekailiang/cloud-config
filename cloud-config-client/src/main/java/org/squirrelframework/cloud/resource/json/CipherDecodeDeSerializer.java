@@ -8,9 +8,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.squirrelframework.cloud.resource.codec.CipherCodec;
-import org.squirrelframework.cloud.resource.codec.CipherDecoder;
-import org.squirrelframework.cloud.resource.codec.Decoder;
+import org.squirrelframework.cloud.resource.security.Decoder;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.io.IOException;
@@ -36,7 +34,7 @@ public class CipherDecodeDeSerializer extends JsonDeserializer<String> implement
         String result = p.getText();
         if( CloudConfigCommon.isEncryptionEnabled() ) {
             try {
-                result = cipherDecoder.decode(result);
+                result = cipherDecoder.decode(result, "UTF-8");
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e.getCause());
             }
