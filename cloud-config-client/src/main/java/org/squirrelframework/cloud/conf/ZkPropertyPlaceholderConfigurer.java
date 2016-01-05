@@ -159,7 +159,7 @@ public class ZkPropertyPlaceholderConfigurer extends PropertySourcesPlaceholderC
     }
 
     public void setPath(String path) {
-        this.pathArray = StringUtils.tokenizeToStringArray(path, ",;|+");
+        this.pathArray = StringUtils.tokenizeToStringArray(path, CloudConfigCommon.STRING_ARRAY_SEPARATOR);
     }
 
     public void setJsonFlattenConverter(JsonFlattenConverter jsonFlattenConverter) {

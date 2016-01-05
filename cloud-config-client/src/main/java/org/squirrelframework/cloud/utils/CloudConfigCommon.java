@@ -48,6 +48,8 @@ public abstract class CloudConfigCommon {
 
     public static final ExecutorService EVENT_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
 
+    public static final String STRING_ARRAY_SEPARATOR = " ,;|";
+
     public static String[] getProfiles() {
         Set<String> result = new LinkedHashSet<>();
         String value = getConfProperty(CONFIG_PROFILE_KEY, DEFAULT_CONFIG_PROFILE) +

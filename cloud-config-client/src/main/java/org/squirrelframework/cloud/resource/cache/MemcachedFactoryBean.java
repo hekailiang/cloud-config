@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import org.squirrelframework.cloud.resource.AbstractResourceFactoryBean;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.routing.RoutingKeyResolver;
+import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.util.Arrays;
 
@@ -61,7 +62,7 @@ public class MemcachedFactoryBean extends AbstractResourceFactoryBean<Cache, Mem
             try {
                 String weights = config.getWeights();
                 if(weights!=null) {
-                    String[] weightsStr = StringUtils.tokenizeToStringArray(weights, ",:");
+                    String[] weightsStr = StringUtils.tokenizeToStringArray(weights, CloudConfigCommon.STRING_ARRAY_SEPARATOR);
                     Integer[] weightVal = toArray(transform( Arrays.asList(weightsStr), new Function<String, Integer>() {
                         @Override
                         public Integer apply(String input) {
