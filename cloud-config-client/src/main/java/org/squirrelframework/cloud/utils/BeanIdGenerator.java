@@ -3,6 +3,7 @@ package org.squirrelframework.cloud.utils;
 import com.google.code.ssm.Cache;
 import com.google.code.ssm.spring.SSMCache;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
+import org.squirrelframework.cloud.resource.cache.MemcachedResourceConfig;
 import org.squirrelframework.cloud.resource.codec.CipherCodecConfig;
 import org.squirrelframework.cloud.resource.codec.CipherDecoder;
 import org.squirrelframework.cloud.resource.codec.CipherEncoder;
@@ -26,6 +27,8 @@ public class BeanIdGenerator {
                 postfix = "DS";
             } else if(CipherCodecConfig.class.isAssignableFrom(type)) {
                 postfix = "CC";
+            } else if(MemcachedResourceConfig.class.isAssignableFrom(type)) {
+                postfix = "CAC";
             } else {
                 postfix = type.getSimpleName();
             }

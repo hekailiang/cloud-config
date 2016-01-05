@@ -84,12 +84,21 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
     @Override
     public void afterPropertiesSet() throws Exception {
         if(isAutoReload()) {
+            /**
+             * Cannot use new PathChildrenCache(client, path, true, false) here,
+             * 1. update spring bean definition need to be performed in single thread
+             * 2. when remove spring bean it may caused its corresponding childNodeCache to be closed, and ChildNodeCache's
+             * default behavior will try to shutdown its owned execution service, which may cause
+             * PathChildrenCacheEvent not being processed.
+             */
             childNodeCache = new PathChildrenCache(client, path, true, false, CloudConfigCommon.EVENT_EXECUTOR_SERVICE);
             childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
                 @Override
                 public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+                    if(event.getData()==null) return;
                     String nodePath = event.getData().getPath();
+                    logger.debug("ZK Event: {}", event.toString());
                     switch (event.getType()) {
                         case CHILD_ADDED: {
                             logger.info("CHILD_ADDED {}", nodePath);
@@ -173,7 +182,9 @@ public abstract class AbstractRoutingResourceFactoryBean<T> extends AbstractFact
 
     @Override
     protected void destroyInstance(T instance) throws Exception {
-        childNodeCache.close();
+        if(childNodeCache!=null) {
+            childNodeCache.close();
+        }
     }
 
     @Required

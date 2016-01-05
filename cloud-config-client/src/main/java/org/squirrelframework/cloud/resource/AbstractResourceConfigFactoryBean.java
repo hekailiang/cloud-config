@@ -91,11 +91,13 @@ public abstract class AbstractResourceConfigFactoryBean<T extends CloudResourceC
         configProfiles = CloudConfigCommon.getProfiles();
         if(isAutoReload()) {
             // attach listeners
-            childNodeCache = new PathChildrenCache(client, path, true);
+            childNodeCache = new PathChildrenCache(client, path, true, false, CloudConfigCommon.EVENT_EXECUTOR_SERVICE);
             childNodeCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             childNodeCache.getListenable().addListener(new PathChildrenCacheListener() {
                 @Override
                 public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+                    if(event.getData()==null) return;
+                    logger.debug("ZK Event: {}", event.toString());
                     switch (event.getType()) {
                         case CHILD_ADDED: {
                             handleChildAdded(client, event);

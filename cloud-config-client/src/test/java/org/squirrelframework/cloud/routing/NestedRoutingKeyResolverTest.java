@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.squirrelframework.cloud.CustomRoutingKeyResolver;
+import org.squirrelframework.cloud.resource.RoutingSupport;
 import org.squirrelframework.cloud.resource.database.BoneCPDataSourceConfig;
 import org.squirrelframework.cloud.resource.database.JdbcDataSourceConfig;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;
@@ -61,13 +62,24 @@ public class NestedRoutingKeyResolverTest extends AbstractNestedRoutingTest {
         r1.key = "dsadkj"; r2.key = "231312";
         result = jdbcTemplate.queryForList(SELECT_DB);
         assertThat((String)result.get(0).get("DATABASE()"), is("UNKNOWN"));
+    }
 
+    @Test
+    public void testRemoveParentNode() throws Exception {
+        DataSource dataSource = applicationContext.getBean("dataSource", DataSource.class);
+        // force datasource 1/2 created
+        RoutingSupport<DataSource> routingSupport = (RoutingSupport<DataSource>) dataSource;
+        DataSource ds1 = ((RoutingSupport<DataSource>)routingSupport.get("a")).get("1");
+        DataSource ds2 = ((RoutingSupport<DataSource>)routingSupport.get("a")).get("2");
+
+        // beans before remove
         Set<String> dsBeans = applicationContext.getBeansOfType(DataSource.class).keySet();
         Set<String> cnfBeans = applicationContext.getBeansOfType(BoneCPDataSourceConfig.class).keySet();
 
         zkConfigClient.delete().deletingChildrenIfNeeded().forPath("/database/mydb/a");
         Thread.sleep(500);
 
+        // beans after remove
         Set<String> nowDsBeans = applicationContext.getBeansOfType(DataSource.class).keySet();
         Set<String> nowCnfBeans = applicationContext.getBeansOfType(BoneCPDataSourceConfig.class).keySet();
         dsBeans.removeAll(nowDsBeans);
