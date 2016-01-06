@@ -9,7 +9,7 @@ import java.security.Key;
 /**
  * Created by kailianghe on 15/12/21.
  */
-public class CipherDecoder implements Decoder {
+public class CipherDecoder extends AbstractDecoder {
     private static final int MAX_DECODE_BLOCK = 128;
 
     private final Key key;
@@ -29,10 +29,5 @@ public class CipherDecoder implements Decoder {
             result = CloudConfigCommon.addAll(result, doFinal);
         }
         return new String(result, charset);
-    }
-
-    @Override
-    public String decode(String value) throws Exception {
-        return decode(value, "UTF-8");
     }
 }

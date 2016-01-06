@@ -44,7 +44,8 @@
                             <xsd:restriction base="xsd:NMTOKEN">
                                 <xsd:enumeration value="CipherEncoder"/>
                                 <xsd:enumeration value="CipherDecoder"/>
-                                <xsd:enumeration value="Memcache"/>
+                                <xsd:enumeration value="SignatureEncoder"/>
+                                <xsd:enumeration value="SignatureChecker"/>
                             </xsd:restriction>
                         </xsd:simpleType>
                     </xsd:attribute>

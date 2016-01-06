@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.squirrelframework.org/schema/config
+            http://www.squirrelframework.org/schema/config/cloud-config.xsd">
+
+    <cc:zk-client connection-string="127.0.0.1:1234"/>
+
+    <cc:zk-resource id="zk-default-signature-encoder" path="/codec/md5"  resource-type="SignatureEncoder"/>
+    <cc:zk-resource id="zk-default-signature-checker" path="/codec/md5" resource-type="SignatureChecker"/>
+    <bean id="zk-default-signature-codec" class="org.squirrelframework.cloud.resource.security.SignatureCodec">
+        <constructor-arg name="encoder" ref="zk-default-signature-encoder"/>
+        <constructor-arg name="checker" ref="zk-default-signature-checker"/>
+    </bean>
+</beans>

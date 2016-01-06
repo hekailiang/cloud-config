@@ -26,7 +26,7 @@ public class RoutingDecoderFactoryBean extends AbstractRoutingResourceFactoryBea
         return new RoutingDecoder();
     }
 
-    public class RoutingDecoder implements Decoder, RoutingSupport<Decoder> {
+    public class RoutingDecoder extends AbstractDecoder implements RoutingSupport<Decoder> {
         @Override
         public Decoder get(String routingKey) {
             return getLocalResource(routingKey);
@@ -37,11 +37,6 @@ public class RoutingDecoderFactoryBean extends AbstractRoutingResourceFactoryBea
             String routingKey = resolver.get().orNull();
             Preconditions.checkNotNull(routingKey, "routing key is not defined");
             return get(routingKey).decode(value, charset);
-        }
-
-        @Override
-        public String decode(String value) throws Exception {
-            return decode(value, "UTF-8");
         }
     }
 }

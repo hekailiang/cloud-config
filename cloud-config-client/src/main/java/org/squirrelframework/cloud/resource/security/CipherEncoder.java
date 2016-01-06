@@ -10,7 +10,7 @@ import java.security.Key;
 /**
  * Created by kailianghe on 15/12/21.
  */
-public class CipherEncoder implements Encoder {
+public class CipherEncoder extends AbstractEncoder {
     private static final int MAX_ENCODE_BLOCK   = 128;
 
     private final Key key;
@@ -30,10 +30,5 @@ public class CipherEncoder implements Encoder {
             result = CloudConfigCommon.addAll(result, doFinal);
         }
         return new String(Base64.encodeBase64(result), charset);
-    }
-
-    @Override
-    public String encode(String value) throws Exception {
-        return encode(value, "UTF-8");
     }
 }

@@ -7,5 +7,5 @@ import org.squirrelframework.cloud.resource.CloudResourceConfig;
  * Created by kailianghe on 15/12/19.
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="__type__")
-public abstract class CipherCodecConfig extends CloudResourceConfig {
+public abstract class CoderConfig extends CloudResourceConfig {
 }

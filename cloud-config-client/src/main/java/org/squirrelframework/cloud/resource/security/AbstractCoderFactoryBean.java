@@ -19,13 +19,13 @@ import java.security.spec.X509EncodedKeySpec;
 /**
  * Created by kailianghe on 15/12/19.
  */
-public abstract class AbstractCipherCoderFactoryBean<T> extends AbstractResourceFactoryBean<T, CipherCodecConfig> {
+public abstract class AbstractCoderFactoryBean<T> extends AbstractResourceFactoryBean<T, CoderConfig> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractCipherCoderFactoryBean.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCoderFactoryBean.class);
 
     @Override
     protected Class<? extends CloudResourceConfig> getConfigType() {
-        return CipherCodecConfig.class;
+        return CoderConfig.class;
     }
 
     @Override

@@ -26,7 +26,7 @@ public class RoutingEncoderFactoryBean extends AbstractRoutingResourceFactoryBea
         return new RoutingEncoder();
     }
 
-    public class RoutingEncoder implements Encoder, RoutingSupport<Encoder> {
+    public class RoutingEncoder extends AbstractEncoder implements RoutingSupport<Encoder> {
         @Override
         public Encoder get(String routingKey) {
             return getLocalResource(routingKey);
@@ -37,11 +37,6 @@ public class RoutingEncoderFactoryBean extends AbstractRoutingResourceFactoryBea
             String routingKey = resolver.get().orNull();
             Preconditions.checkNotNull(routingKey, "routing key is not defined");
             return get(routingKey).encode(value, charset);
-        }
-
-        @Override
-        public String encode(String value) throws Exception {
-            return encode(value, "UTF-8");
         }
     }
 }

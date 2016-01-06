@@ -50,6 +50,8 @@ public abstract class CloudConfigCommon {
 
     public static final String STRING_ARRAY_SEPARATOR = " ,;|";
 
+    public static final String SIGNATURE_ALGORITHM = "SHA1WithRSA";
+
     public static String[] getProfiles() {
         Set<String> result = new LinkedHashSet<>();
         String value = getConfProperty(CONFIG_PROFILE_KEY, DEFAULT_CONFIG_PROFILE) +

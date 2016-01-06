@@ -5,10 +5,7 @@ import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
-import org.squirrelframework.cloud.resource.security.CipherDecoderFactoryBean;
-import org.squirrelframework.cloud.resource.security.CipherEncoderFactoryBean;
-import org.squirrelframework.cloud.resource.security.RoutingDecoderFactoryBean;
-import org.squirrelframework.cloud.resource.security.RoutingEncoderFactoryBean;
+import org.squirrelframework.cloud.resource.security.*;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.w3c.dom.Element;
@@ -63,6 +60,10 @@ public class ZkResourceBeanDefinitionParser extends AbstractSingleBeanDefinition
             return routingSupport ? RoutingEncoderFactoryBean.class : CipherEncoderFactoryBean.class;
         } else if ("CipherDecoder".equals(resourceType)) {
             return routingSupport ? RoutingDecoderFactoryBean.class : CipherDecoderFactoryBean.class;
+        } else if("SignatureEncoder".equals(resourceType)) {
+            return routingSupport ? RoutingDecoderFactoryBean.class : SignatureEncoderFactoryBean.class;
+        } else if("SignatureChecker".equals(resourceType)) {
+            return routingSupport ? RoutingSignatureCheckerFactoryBean.class : SignatureCheckerFactoryBean.class;
         }
         throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
     }
@@ -72,6 +73,10 @@ public class ZkResourceBeanDefinitionParser extends AbstractSingleBeanDefinition
             return BeanIdGenerator.getCipherEncoderBeanId(path);
         } else if ("CipherDecoder".equals(resourceType)) {
             return BeanIdGenerator.getCipherDecoderBeanId(path);
+        } else if("SignatureEncoder".equals(resourceType)) {
+            return BeanIdGenerator.getSignatureEncoderBeanId(path);
+        } else if("SignatureChecker".equals(resourceType)) {
+            return BeanIdGenerator.getSignatureCheckerBeanId(path);
         }
         throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
     }

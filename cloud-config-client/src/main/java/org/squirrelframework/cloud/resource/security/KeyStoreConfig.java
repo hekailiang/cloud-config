@@ -3,7 +3,7 @@ package org.squirrelframework.cloud.resource.security;
 /**
  * Created by kailianghe on 16/1/6.
  */
-public class KeyStoreConfig extends CipherCodecConfig {
+public class KeyStoreConfig extends CoderConfig {
     public static final String DEFAULT_KEYSTORE_LOCATION = String.format("%s/.keystore", System.getProperty("user.home"));
 
     private String keyStoreLocation = DEFAULT_KEYSTORE_LOCATION;

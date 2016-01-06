@@ -3,9 +3,7 @@ package org.squirrelframework.cloud.utils;
 import com.google.code.ssm.Cache;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
 import org.squirrelframework.cloud.resource.cache.MemcachedResourceConfig;
-import org.squirrelframework.cloud.resource.security.CipherCodecConfig;
-import org.squirrelframework.cloud.resource.security.CipherDecoder;
-import org.squirrelframework.cloud.resource.security.CipherEncoder;
+import org.squirrelframework.cloud.resource.security.*;
 import org.squirrelframework.cloud.resource.database.JdbcDataSourceConfig;
 import org.squirrelframework.cloud.resource.sequence.SequenceDao;
 import org.squirrelframework.cloud.resource.sequence.SequenceGenerator;
@@ -24,7 +22,7 @@ public class BeanIdGenerator {
         } else if(CloudResourceConfig.class.isAssignableFrom(type)) {
             if(JdbcDataSourceConfig.class.isAssignableFrom(type)) {
                 postfix = "DS";
-            } else if(CipherCodecConfig.class.isAssignableFrom(type)) {
+            } else if(CoderConfig.class.isAssignableFrom(type)) {
                 postfix = "CC";
             } else if(MemcachedResourceConfig.class.isAssignableFrom(type)) {
                 postfix = "CAC";
@@ -40,6 +38,10 @@ public class BeanIdGenerator {
             postfix = "CE";
         } else if(CipherDecoder.class.isAssignableFrom(type)) {
             postfix = "CD";
+        } else if(SignatureChecker.class.isAssignableFrom(type)) {
+            postfix = "SC";
+        } else if(RSASignatureEncoder.class.isAssignableFrom(type)) {
+            postfix = "SE";
         } else if(Cache.class.isAssignableFrom(type)) {
             postfix = "CAC";
         } else {
@@ -70,6 +72,14 @@ public class BeanIdGenerator {
 
     public static String getCipherDecoderBeanId(String path) {
         return generateBeanId(path, CipherDecoder.class);
+    }
+
+    public static String getSignatureEncoderBeanId(String path) {
+        return generateBeanId(path, RSASignatureEncoder.class);
+    }
+
+    public static String getSignatureCheckerBeanId(String path) {
+        return generateBeanId(path, SignatureChecker.class);
     }
 
     public static String getMemcachedBeanId(String path) {
