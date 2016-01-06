@@ -5,4 +5,5 @@ package org.squirrelframework.cloud.resource.security;
  */
 public interface Decoder {
     String decode(String value, String charset) throws Exception;
+    String decode(String value) throws Exception;
 }

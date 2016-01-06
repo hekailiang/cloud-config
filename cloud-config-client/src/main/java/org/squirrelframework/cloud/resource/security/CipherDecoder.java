@@ -30,4 +30,9 @@ public class CipherDecoder implements Decoder {
         }
         return new String(result, charset);
     }
+
+    @Override
+    public String decode(String value) throws Exception {
+        return decode(value, "UTF-8");
+    }
 }

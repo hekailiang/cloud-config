@@ -22,7 +22,17 @@ public class CipherCodec implements Codec {
     }
 
     @Override
+    public String decode(String value) throws Exception {
+        return decoder.decode(value);
+    }
+
+    @Override
     public String encode(String value, String charset) throws Exception {
         return encoder.encode(value, charset);
+    }
+
+    @Override
+    public String encode(String value) throws Exception {
+        return encoder.encode(value);
     }
 }

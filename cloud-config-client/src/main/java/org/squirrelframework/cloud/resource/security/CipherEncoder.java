@@ -31,4 +31,9 @@ public class CipherEncoder implements Encoder {
         }
         return new String(Base64.encodeBase64(result), charset);
     }
+
+    @Override
+    public String encode(String value) throws Exception {
+        return encode(value, "UTF-8");
+    }
 }

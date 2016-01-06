@@ -49,8 +49,8 @@ public class RSACodecTest extends BaseTestClass {
     @Test
     public void testRoundTrip() throws Exception {
         CipherCodec cc = applicationContext.getBean("zk-default-cipher-codec", CipherCodec.class);
-        String encoded = cc.encode("hello world", "UTF-8");
-        String decoded = cc.decode(encoded, "UTF-8");
+        String encoded = cc.encode("hello world");
+        String decoded = cc.decode(encoded);
         assertThat(decoded, is("hello world"));
     }
 

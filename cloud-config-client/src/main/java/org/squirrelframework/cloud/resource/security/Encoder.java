@@ -5,4 +5,5 @@ package org.squirrelframework.cloud.resource.security;
  */
 public interface Encoder {
     String encode(String value, String charset) throws Exception;
+    String encode(String value) throws Exception;
 }

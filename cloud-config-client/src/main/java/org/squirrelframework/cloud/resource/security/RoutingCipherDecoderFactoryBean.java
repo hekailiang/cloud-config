@@ -38,5 +38,10 @@ public class RoutingCipherDecoderFactoryBean extends AbstractRoutingResourceFact
             Preconditions.checkNotNull(routingKey, "routing key is not defined");
             return get(routingKey).decode(value, charset);
         }
+
+        @Override
+        public String decode(String value) throws Exception {
+            return decode(value, "UTF-8");
+        }
     }
 }
