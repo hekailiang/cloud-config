@@ -10,6 +10,8 @@ import java.security.Key;
  * Created by kailianghe on 15/12/21.
  */
 public class CipherDecoder implements Decoder {
+    private static final int MAX_DECODE_BLOCK = 128;
+
     private final Key key;
 
     public CipherDecoder(Key key) {
@@ -20,6 +22,12 @@ public class CipherDecoder implements Decoder {
     public String decode(String value, String charset) throws Exception {
         Cipher cipher = Cipher.getInstance(this.key.getAlgorithm());
         cipher.init(Cipher.DECRYPT_MODE, this.key);
-        return CloudConfigCommon.bytes2String( cipher.doFinal(Base64.decodeBase64(value.getBytes(charset))) );
+        byte[] data = Base64.decodeBase64( value.getBytes(charset) );
+        byte[] result = null;
+        for (int i = 0; i < data.length; i += MAX_DECODE_BLOCK) {
+            byte[] doFinal = cipher.doFinal(CloudConfigCommon.subarray(data, i, i + MAX_DECODE_BLOCK));
+            result = CloudConfigCommon.addAll(result, doFinal);
+        }
+        return new String(result, charset);
     }
 }

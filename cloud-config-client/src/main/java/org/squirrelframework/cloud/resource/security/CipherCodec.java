@@ -5,6 +5,8 @@ package org.squirrelframework.cloud.resource.security;
  */
 public class CipherCodec implements Codec {
 
+    private static final int   MAX_ENCRYPT_BLOCK   = 117;
+
     private final Encoder encoder;
 
     private final Decoder decoder;

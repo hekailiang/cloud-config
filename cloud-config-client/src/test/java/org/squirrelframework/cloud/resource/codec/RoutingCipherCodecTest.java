@@ -30,6 +30,7 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
         keyStoreFile1 = createKeyStoreFileForTest(KEY1, "test1", KEY_PASSWORD, STORE_PASSWORD);
         keyStoreFile2 = createKeyStoreFileForTest(KEY2, "test2", KEY_PASSWORD, STORE_PASSWORD);
         String ccConfig1 = "{\n" +
+                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.KeyStoreConfig\", \n"+
                 "    \"keyStoreLocation\" : \""+keyStoreFile1.getAbsolutePath()+"\",\n" +
                 "    \"keyStorePassword\" : \""+STORE_PASSWORD+"\",\n" +
                 "    \"keyAlias\" : \"test1\", \n"+
@@ -38,6 +39,7 @@ public class RoutingCipherCodecTest extends AbstractCipherCodecTest {
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/codec/mycipher/tenant1", ccConfig1.getBytes());
 
         String ccConfig2 = "{\n" +
+                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.KeyStoreConfig\", \n"+
                 "    \"keyStoreLocation\" : \""+keyStoreFile2.getAbsolutePath()+"\",\n" +
                 "    \"keyStorePassword\" : \""+STORE_PASSWORD+"\",\n" +
                 "    \"keyAlias\" : \"test2\", \n"+

@@ -1,5 +1,6 @@
 package org.squirrelframework.cloud.resource.security;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.squirrelframework.cloud.resource.AbstractResourceFactoryBean;
@@ -10,7 +11,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * Created by kailianghe on 15/12/19.
@@ -34,18 +38,34 @@ public abstract class AbstractCipherCoderFactoryBean<T> extends AbstractResource
 
     @Override
     protected T createInstance() throws Exception {
-        KeyStore store = KeyStore.getInstance(config.getType());
-        File keyStoreFile = new File(config.getKeyStoreLocation());
-        if(!keyStoreFile.exists()) {
-            throw new IllegalArgumentException("cannot find any .keystore file at \""+config.getKeyStoreLocation()+"\".");
+        Key key = null;
+        if(config instanceof KeyStoreConfig) {
+            KeyStoreConfig ksConfig = (KeyStoreConfig)config;
+            KeyStore store = KeyStore.getInstance(ksConfig.getType());
+            File keyStoreFile = new File(ksConfig.getKeyStoreLocation());
+            if(!keyStoreFile.exists()) {
+                throw new IllegalArgumentException("cannot find any .keystore file at \""+ksConfig.getKeyStoreLocation()+"\".");
+            }
+            try {
+                InputStream input = new FileInputStream(keyStoreFile);
+                store.load(input, (ksConfig.getKeyStorePassword() != null) ? ksConfig.getKeyStorePassword().toCharArray() : null);
+            } catch (IOException e) {
+                throw new IllegalStateException("load .keystore file failed", e.getCause());
+            }
+            key = store.getKey(ksConfig.getKeyAlias(), (ksConfig.getKeyPassword() != null) ? ksConfig.getKeyPassword().toCharArray() : null);
+        } else if (config instanceof RSAPublicKeyConfig) {
+            RSAPublicKeyConfig rsaPublicKeyConfig = (RSAPublicKeyConfig) config;
+            byte[] keyBytes = Base64.decodeBase64( rsaPublicKeyConfig.getPublicKey() );
+            X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            key = keyFactory.generatePublic(x509EncodedKeySpec);
+        } else if(config instanceof RSAPrivateKeyConfig) {
+            RSAPrivateKeyConfig rsaPrivateKeyConfig = (RSAPrivateKeyConfig) config;
+            byte[] keyBytes = Base64.decodeBase64( rsaPrivateKeyConfig.getPrivateKey() );
+            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            key = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
         }
-        try {
-            InputStream input = new FileInputStream(keyStoreFile);
-            store.load(input, (config.getKeyStorePassword() != null) ? config.getKeyStorePassword().toCharArray() : null);
-        } catch (IOException e) {
-            throw new IllegalStateException("load .keystore file failed", e.getCause());
-        }
-        Key key = store.getKey(config.getKeyAlias(), (config.getKeyPassword() != null) ? config.getKeyPassword().toCharArray() : null);
         return createCoder(key);
     }
 
