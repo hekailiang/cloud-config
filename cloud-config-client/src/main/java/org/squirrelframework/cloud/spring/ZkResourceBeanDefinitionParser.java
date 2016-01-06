@@ -7,8 +7,8 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.squirrelframework.cloud.resource.security.CipherDecoderFactoryBean;
 import org.squirrelframework.cloud.resource.security.CipherEncoderFactoryBean;
-import org.squirrelframework.cloud.resource.security.RoutingCipherDecoderFactoryBean;
-import org.squirrelframework.cloud.resource.security.RoutingCipherEncoderFactoryBean;
+import org.squirrelframework.cloud.resource.security.RoutingDecoderFactoryBean;
+import org.squirrelframework.cloud.resource.security.RoutingEncoderFactoryBean;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.w3c.dom.Element;
@@ -60,9 +60,9 @@ public class ZkResourceBeanDefinitionParser extends AbstractSingleBeanDefinition
 
     private Class<?> getFactoryBeanClassByType(String resourceType, boolean routingSupport) {
         if ("CipherEncoder".equals(resourceType)) {
-            return routingSupport ? RoutingCipherEncoderFactoryBean.class : CipherEncoderFactoryBean.class;
+            return routingSupport ? RoutingEncoderFactoryBean.class : CipherEncoderFactoryBean.class;
         } else if ("CipherDecoder".equals(resourceType)) {
-            return routingSupport ? RoutingCipherDecoderFactoryBean.class : CipherDecoderFactoryBean.class;
+            return routingSupport ? RoutingDecoderFactoryBean.class : CipherDecoderFactoryBean.class;
         }
         throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
     }

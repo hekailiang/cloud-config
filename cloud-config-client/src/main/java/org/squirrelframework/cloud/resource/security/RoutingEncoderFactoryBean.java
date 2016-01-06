@@ -8,40 +8,40 @@ import org.squirrelframework.cloud.utils.BeanIdGenerator;
 /**
  * Created by kailianghe on 15/12/20.
  */
-public class RoutingCipherDecoderFactoryBean extends AbstractRoutingResourceFactoryBean<Decoder> {
+public class RoutingEncoderFactoryBean extends AbstractRoutingResourceFactoryBean<Encoder> {
 
     @Override
     protected String getResourceBeanIdFromPath(String resPath) {
-        return BeanIdGenerator.getCipherDecoderBeanId(resPath);
+        return BeanIdGenerator.getCipherEncoderBeanId(resPath);
     }
 
     @Override
     public Class<?> getObjectType() {
-        return Decoder.class;
+        return Encoder.class;
     }
 
     @Override
-    protected Decoder createInstance() throws Exception {
+    protected Encoder createInstance() throws Exception {
         createChildResourceBeanDefinition();
-        return new RoutingCipherDecoder();
+        return new RoutingEncoder();
     }
 
-    public class RoutingCipherDecoder implements Decoder, RoutingSupport<Decoder> {
+    public class RoutingEncoder implements Encoder, RoutingSupport<Encoder> {
         @Override
-        public Decoder get(String routingKey) {
+        public Encoder get(String routingKey) {
             return getLocalResource(routingKey);
         }
 
         @Override
-        public String decode(String value, String charset) throws Exception {
+        public String encode(String value, String charset) throws Exception {
             String routingKey = resolver.get().orNull();
             Preconditions.checkNotNull(routingKey, "routing key is not defined");
-            return get(routingKey).decode(value, charset);
+            return get(routingKey).encode(value, charset);
         }
 
         @Override
-        public String decode(String value) throws Exception {
-            return decode(value, "UTF-8");
+        public String encode(String value) throws Exception {
+            return encode(value, "UTF-8");
         }
     }
 }
