@@ -13,17 +13,17 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by kailianghe on 9/10/15.
  */
-public class TenantAwareResourceConfigFactoryBean extends AbstractResourceConfigFactoryBean<TenantAwareResourceConfig> {
+public class RoutingAwareResourceConfigFactoryBean extends AbstractResourceConfigFactoryBean<RoutingAwareResourceConfig> {
 
     private ConcurrentMap<String, Object> configHolder = Maps.newConcurrentMap();
 
     @Override
-    protected TenantAwareResourceConfig createInstance() throws Exception {
+    protected RoutingAwareResourceConfig createInstance() throws Exception {
         List<String> children = client.getChildren().forPath(path);
         for(String child : children) {
             buildResourceConfig(child);
         }
-        return new TenantAwareResourceConfig(configHolder);
+        return new RoutingAwareResourceConfig(configHolder);
     }
 
     private void buildResourceConfig(String tenantId) throws Exception {
@@ -62,6 +62,6 @@ public class TenantAwareResourceConfigFactoryBean extends AbstractResourceConfig
 
     @Override
     public Class<?> getObjectType() {
-        return TenantAwareResourceConfig.class;
+        return RoutingAwareResourceConfig.class;
     }
 }

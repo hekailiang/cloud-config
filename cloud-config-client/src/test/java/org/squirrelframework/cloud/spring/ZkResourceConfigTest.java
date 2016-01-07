@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.squirrelframework.cloud.BaseTestClass;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
-import org.squirrelframework.cloud.resource.TenantAwareResourceConfig;
+import org.squirrelframework.cloud.resource.RoutingAwareResourceConfig;
 
 import javax.validation.constraints.Min;
 
@@ -62,8 +62,8 @@ public class ZkResourceConfigTest extends BaseTestClass {
     @Test
     public void testTenantAwareResourceConfigInjection() throws Exception {
         prepareTenantAwareConfig();
-        TenantAwareResourceConfig tenantAwareResourceConfig =
-                applicationContext.getBean("tenantAwareResourceConfig", TenantAwareResourceConfig.class);
+        RoutingAwareResourceConfig tenantAwareResourceConfig =
+                applicationContext.getBean("tenantAwareResourceConfig", RoutingAwareResourceConfig.class);
         assertThat(tenantAwareResourceConfig, notNullValue());
         assertThat(tenantAwareResourceConfig.size(), is(2));
 

@@ -10,12 +10,12 @@ import java.util.Set;
 /**
  * Created by kailianghe on 9/10/15.
  */
-public class TenantAwareResourceConfig extends CloudResourceConfig implements Map<String, Object>, RoutingSupport<Object> {
+public class RoutingAwareResourceConfig extends CloudResourceConfig implements Map<String, Object>, RoutingSupport<Object> {
 
     @NotEmpty
     private Map<String, Object> configHolder;
 
-    public TenantAwareResourceConfig(Map<String, Object> configHolder) {
+    public RoutingAwareResourceConfig(Map<String, Object> configHolder) {
         this.configHolder = Collections.unmodifiableMap(configHolder);
     }
 

@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Created by kailianghe on 11/9/15.
  */
-public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
+public class RoutingAwareResourceConfigFactoryBeanTest extends BaseTestClass {
 
     @Override
     protected void prepare() throws Exception {
@@ -45,8 +45,8 @@ public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/tenants/ebao", ebaoConfig.getBytes());
     }
 
-    private TenantAwareResourceConfig createBean(String path) throws Exception {
-        TenantAwareResourceConfigFactoryBean factoryBean = new TenantAwareResourceConfigFactoryBean();
+    private RoutingAwareResourceConfig createBean(String path) throws Exception {
+        RoutingAwareResourceConfigFactoryBean factoryBean = new RoutingAwareResourceConfigFactoryBean();
         factoryBean.setClient(zkRootClient);
         factoryBean.setPath(path);
         factoryBean.setResourceType(TenantConfig.class);
@@ -60,13 +60,13 @@ public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
         return factoryBean.getObject();
     }
 
-    private TenantAwareResourceConfig createBean() throws Exception {
+    private RoutingAwareResourceConfig createBean() throws Exception {
         return createBean("/tenants");
     }
 
     @Test
     public void testCreateTenantAwareConfig() throws Exception {
-        TenantAwareResourceConfig result = createBean();
+        RoutingAwareResourceConfig result = createBean();
         assertThat(result.size(), is(2));
         assertThat(result.get("axatp"), notNullValue());
         assertThat(result.get("axatp"), is(TenantConfig.class));
@@ -79,7 +79,7 @@ public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
 
     @Test(timeout = 10000L)
     public void testUpdateTenantAwareConfig() throws Exception {
-        TenantAwareResourceConfig result = createBean();
+        RoutingAwareResourceConfig result = createBean();
         final AtomicBoolean reloadInvoked = new AtomicBoolean(false);
         final CountDownLatch latch = new CountDownLatch(1);
         ((TenantConfig) result.get("ebao")).setReloadCallback(new ReloadCallback() {
@@ -110,7 +110,7 @@ public class TenantAwareResourceConfigFactoryBeanTest extends BaseTestClass {
 
     @Test
     public void testAddNewTenantAwareConfig() throws Exception {
-        TenantAwareResourceConfig result = createBean();
+        RoutingAwareResourceConfig result = createBean();
         assertThat(result.size(), is(2));
 
         String ciccConfig = "{\n" +

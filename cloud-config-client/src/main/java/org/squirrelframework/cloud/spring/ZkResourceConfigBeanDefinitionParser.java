@@ -5,7 +5,7 @@ import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.squirrelframework.cloud.resource.SimpleResourceConfigFactoryBean;
-import org.squirrelframework.cloud.resource.TenantAwareResourceConfigFactoryBean;
+import org.squirrelframework.cloud.resource.RoutingAwareResourceConfigFactoryBean;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 import org.w3c.dom.Element;
 import static org.squirrelframework.cloud.utils.CloudConfigCommon.getSafeBoolean;
@@ -18,7 +18,7 @@ public class ZkResourceConfigBeanDefinitionParser extends AbstractSingleBeanDefi
     @Override
     protected Class<?> getBeanClass(Element element) {
         Boolean routingSupport = getSafeBoolean(element.getAttribute("routing-support"));
-        return routingSupport ? TenantAwareResourceConfigFactoryBean.class : SimpleResourceConfigFactoryBean.class;
+        return routingSupport ? RoutingAwareResourceConfigFactoryBean.class : SimpleResourceConfigFactoryBean.class;
     }
 
     @Override
