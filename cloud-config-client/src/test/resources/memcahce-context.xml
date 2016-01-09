@@ -2,6 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:cc="http://www.squirrelframework.org/schema/config"
+       xmlns:p="http://www.springframework.org/schema/p"
        xmlns:cache="http://www.springframework.org/schema/cache"
        xsi:schemaLocation="
             http://www.springframework.org/schema/beans
@@ -22,16 +23,8 @@
     <bean name="cacheManager" class="com.google.code.ssm.spring.ExtendedSSMCacheManager">
         <property name="caches">
             <set>
-                <bean class="com.google.code.ssm.spring.SSMCache">
-                    <constructor-arg name="cache" index="0" ref="defaultCache" />
-                    <constructor-arg name="expiration" index="1" value="300" />
-                    <constructor-arg name="allowClear" index="2" value="true" />
-                </bean>
-                <bean class="com.google.code.ssm.spring.SSMCache">
-                    <constructor-arg name="cache" index="0" ref="routingCache" />
-                    <constructor-arg name="expiration" index="1" value="300" />
-                    <constructor-arg name="allowClear" index="2" value="true" />
-                </bean>
+                <bean class="org.squirrelframework.cloud.resource.cache.SSMCacheFactoryBean" p:cache-ref="defaultCache"/>
+                <bean class="org.squirrelframework.cloud.resource.cache.SSMCacheFactoryBean" p:cache-ref="routingCache"/>
             </set>
         </property>
     </bean>
