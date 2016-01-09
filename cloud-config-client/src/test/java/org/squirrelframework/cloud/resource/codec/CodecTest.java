@@ -35,19 +35,19 @@ public class CodecTest extends BaseTestClass {
     @Override
     protected void prepare() throws Exception {
         String ccConfig1 = "{\n" +
-                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.RSAPrivateKeyConfig\", \n"+
+                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.rsa.RSAPrivateKeyConfig\", \n"+
                 "    \"privateKey\" : \""+test_private_key+"\"\n"+
                 "}";
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/codec/rsa/private", ccConfig1.getBytes());
 
         String ccConfig2 = "{\n" +
-                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.RSAPublicKeyConfig\", \n"+
+                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.rsa.RSAPublicKeyConfig\", \n"+
                 "    \"publicKey\" : \""+test_public_key+"\"\n"+
                 "}";
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/codec/rsa/public", ccConfig2.getBytes());
 
         String ccConfig3 = "{\n" +
-                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.Md5SignatureConfig\", \n"+
+                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.md5.Md5SignatureConfig\", \n"+
                 "    \"secretKey\" : \""+RandomStringUtils.randomAlphabetic(32)+"\"\n"+
                 "}";
         zkConfigClient.create().creatingParentsIfNeeded().forPath("/codec/md5", ccConfig3.getBytes());

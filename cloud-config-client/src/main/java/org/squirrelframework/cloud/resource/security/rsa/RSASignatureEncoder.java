@@ -1,7 +1,9 @@
-package org.squirrelframework.cloud.resource.security;
+package org.squirrelframework.cloud.resource.security.rsa;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.codec.binary.Base64;
+import org.squirrelframework.cloud.resource.security.AbstractEncoder;
+import org.squirrelframework.cloud.resource.security.SignatureEncoder;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.security.Key;

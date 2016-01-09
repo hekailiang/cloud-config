@@ -1,6 +1,7 @@
 package org.squirrelframework.cloud.resource.security;
 
 import com.google.common.base.Preconditions;
+import org.squirrelframework.cloud.resource.codec.Encoder;
 import org.squirrelframework.cloud.resource.AbstractRoutingResourceFactoryBean;
 import org.squirrelframework.cloud.resource.RoutingSupport;
 import org.squirrelframework.cloud.utils.BeanIdGenerator;

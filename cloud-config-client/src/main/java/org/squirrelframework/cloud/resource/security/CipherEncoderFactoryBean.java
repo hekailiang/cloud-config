@@ -1,5 +1,7 @@
 package org.squirrelframework.cloud.resource.security;
 
+import org.squirrelframework.cloud.resource.codec.Encoder;
+
 import java.security.Key;
 
 /**

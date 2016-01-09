@@ -27,7 +27,7 @@ public class CipherCodecTest extends AbstractCipherCodecTest {
     protected void prepare() throws Exception {
         keyStoreFile = createKeyStoreFileForTest(KEY1, "test", KEY_PASSWORD, STORE_PASSWORD);
         String ccConfig = "{\n" +
-                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.KeyStoreConfig\", \n"+
+                "    \"__type__\" : \"org.squirrelframework.cloud.resource.security.keystore.KeyStoreConfig\", \n"+
                 "    \"keyStoreLocation\" : \""+keyStoreFile.getAbsolutePath()+"\",\n" +
                 "    \"keyStorePassword\" : \""+STORE_PASSWORD+"\",\n" +
                 "    \"keyAlias\" : \"test\", \n"+

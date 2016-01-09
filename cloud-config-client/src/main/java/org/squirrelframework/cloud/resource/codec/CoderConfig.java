@@ -1,4 +1,4 @@
-package org.squirrelframework.cloud.resource.security;
+package org.squirrelframework.cloud.resource.codec;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;

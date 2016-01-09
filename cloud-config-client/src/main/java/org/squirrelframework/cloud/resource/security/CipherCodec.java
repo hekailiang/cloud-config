@@ -1,5 +1,9 @@
 package org.squirrelframework.cloud.resource.security;
 
+import org.squirrelframework.cloud.resource.codec.Codec;
+import org.squirrelframework.cloud.resource.codec.Decoder;
+import org.squirrelframework.cloud.resource.codec.Encoder;
+
 /**
  * Created by kailianghe on 15/12/19.
  */

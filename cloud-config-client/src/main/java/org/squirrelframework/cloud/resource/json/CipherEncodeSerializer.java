@@ -7,7 +7,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.squirrelframework.cloud.resource.security.Encoder;
+import org.squirrelframework.cloud.resource.codec.Encoder;
 import org.squirrelframework.cloud.utils.CloudConfigCommon;
 
 import java.io.IOException;

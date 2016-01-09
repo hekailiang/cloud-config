@@ -1,6 +1,8 @@
-package org.squirrelframework.cloud.resource.security;
+package org.squirrelframework.cloud.resource.security.md5;
 
 import org.apache.commons.codec.binary.Hex;
+import org.squirrelframework.cloud.resource.security.AbstractEncoder;
+import org.squirrelframework.cloud.resource.security.SignatureEncoder;
 
 import java.security.MessageDigest;
 

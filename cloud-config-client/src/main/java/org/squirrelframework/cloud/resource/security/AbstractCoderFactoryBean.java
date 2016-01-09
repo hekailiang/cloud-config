@@ -3,8 +3,12 @@ package org.squirrelframework.cloud.resource.security;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.squirrelframework.cloud.resource.codec.CoderConfig;
 import org.squirrelframework.cloud.resource.AbstractResourceFactoryBean;
 import org.squirrelframework.cloud.resource.CloudResourceConfig;
+import org.squirrelframework.cloud.resource.security.keystore.KeyStoreConfig;
+import org.squirrelframework.cloud.resource.security.rsa.RSAPrivateKeyConfig;
+import org.squirrelframework.cloud.resource.security.rsa.RSAPublicKeyConfig;
 
 import java.io.File;
 import java.io.FileInputStream;

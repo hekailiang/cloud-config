@@ -1,5 +1,7 @@
 package org.squirrelframework.cloud.resource.security;
 
+import org.squirrelframework.cloud.resource.codec.Decoder;
+
 /**
  * Created by kailianghe on 16/1/6.
  */

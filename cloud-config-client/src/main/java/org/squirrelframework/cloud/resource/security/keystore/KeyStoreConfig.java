@@ -1,4 +1,6 @@
-package org.squirrelframework.cloud.resource.security;
+package org.squirrelframework.cloud.resource.security.keystore;
+
+import org.squirrelframework.cloud.resource.codec.CoderConfig;
 
 /**
  * Created by kailianghe on 16/1/6.
