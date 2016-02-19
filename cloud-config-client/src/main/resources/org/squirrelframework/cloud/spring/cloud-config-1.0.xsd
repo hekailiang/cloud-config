@@ -19,6 +19,7 @@
             <xsd:attribute type="xsd:integer" name="base-sleep-time"/>
             <xsd:attribute type="xsd:boolean" name="read-only" default="true"/>
             <xsd:attribute type="xsd:string" name="connection-string"/>
+            <xsd:attribute type="xsd:string" name="credential-string"/>
         </xsd:complexType>
     </xsd:element>
 

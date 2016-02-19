@@ -18,6 +18,8 @@ public abstract class CloudConfigCommon {
 
     public static final String ZK_CONNECT_STRING_KEY = "config.center.url";
 
+    public static final String ZK_CREDENTIAL_STRING_KEY = "config.center.acl";
+
     public static final String NAMESPACE = getConfProperty("namespace", "root");
 
     public static final String PROPERTY_ROOT = NAMESPACE + "/properties";
