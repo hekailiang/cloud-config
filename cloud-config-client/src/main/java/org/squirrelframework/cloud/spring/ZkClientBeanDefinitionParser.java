@@ -28,6 +28,11 @@ public class ZkClientBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
         if(StringUtils.hasLength(connectionString)) {
             builder.addPropertyValue("connectionString", connectionString);
         }
+        
+        String credentialString = element.getAttribute("credential-string");
+        if(StringUtils.hasLength(credentialString)) {
+            builder.addPropertyValue("credentialString", credentialString);
+        }
 
         Integer maxRetries = getSafeInteger(element.getAttribute("max-retries"));
         if(maxRetries!=null) {
