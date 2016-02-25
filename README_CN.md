@@ -68,8 +68,8 @@ mail.password=dev1234
             http://www.squirrelframework.org/schema/config
             http://www.squirrelframework.org/schema/config/cloud-config.xsd">
 
-    <!--配置用于读取配置信息的zookeeper client，connection string在系统启动时，可通过指定-Dconfig.center.url覆盖-->    
-    <cc:zk-client connection-string="127.0.0.1:1234"/>
+    <!--配置用于读取配置信息的zookeeper client，connection string在系统启动时，可通过指定-Dconfig.center.url覆盖; credential string用于指定读取zookeeper node所需的认证信息(可指定多个用户名密码对)，可通过指定-Dconfig.center.acl覆盖-->    
+    <cc:zk-client connection-string="127.0.0.1:1234" credential-string="user:passwd"/>
 
     <!--zk-property-placeholder中可以在path属性上同时指定多个配置路径（相对于{namesapce}/properties)，路径在前者优先-->
     <!--zk-property-placeholder中可以在location中引入本地配置文件，local-override为true时本地配置将覆盖zk中的配置-->    
