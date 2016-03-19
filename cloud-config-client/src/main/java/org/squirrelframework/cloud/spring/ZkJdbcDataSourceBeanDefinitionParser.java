@@ -55,7 +55,7 @@ public class ZkJdbcDataSourceBeanDefinitionParser extends AbstractSingleBeanDefi
                 builder.addPropertyValue("resourceFactoryBeanClass", BoneCPDataSourceFactoryBean.class.getName());
             } else if ("C3P0".equals(resourceType)) {
                 builder.addPropertyValue("resourceFactoryBeanClass", C3P0DataSourceFactoryBean.class.getName());
-            } else if ("C3P0".equals(resourceType)) {
+            } else if ("Druid".equals(resourceType)) {
                 builder.addPropertyValue("resourceFactoryBeanClass", DruidDataSourceFactoryBean.class.getName());
             } else {
                 throw new UnsupportedOperationException("Unsupported resource type "+resourceType);
