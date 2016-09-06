@@ -2,6 +2,7 @@ package org.squirrelframework.cloud.utils;
 
 import com.google.common.cache.CacheLoader;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.utils.ThreadUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
