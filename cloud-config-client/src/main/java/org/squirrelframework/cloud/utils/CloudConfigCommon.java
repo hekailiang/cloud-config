@@ -48,7 +48,7 @@ public abstract class CloudConfigCommon {
 
     public static final String SEQUENCE_VALUE_KEY = "sequenceValue";
 
-    public static final ExecutorService EVENT_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+    public static final ExecutorService EVENT_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor(ThreadUtils.newThreadFactory("zk-event"));
 
     public static final String STRING_ARRAY_SEPARATOR = " ,;|";
 
