@@ -2,6 +2,7 @@ package org.squirrelframework.cloud.utils;
 
 import com.google.common.cache.CacheLoader;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.utils.ThreadUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -48,7 +49,7 @@ public abstract class CloudConfigCommon {
 
     public static final String SEQUENCE_VALUE_KEY = "sequenceValue";
 
-    public static final ExecutorService EVENT_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+    public static final ExecutorService EVENT_EXECUTOR_SERVICE = Executors.newSingleThreadExecutor(ThreadUtils.newThreadFactory("zk-event"));
 
     public static final String STRING_ARRAY_SEPARATOR = " ,;|";
 
